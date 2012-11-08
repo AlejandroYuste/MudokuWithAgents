@@ -37,7 +37,7 @@ public class AgentNetworkController {
 	Agent agent;
 	Thread readerThread;
 	
-	public int clientId = -1;
+	public int agentId = 1;
 	
     AgentGameController gameController;
     
@@ -70,6 +70,11 @@ public class AgentNetworkController {
 		return gameController.getActualGrid();
 	}
 	
+	void stopExecuting()
+	{
+		agent.execute = false;
+	}
+	
 	public void Connect(String host_, int port_, int numAgents_, int typeAgents_) throws UnknownHostException, IOException
 	{
 		host = host_;
@@ -85,13 +90,14 @@ public class AgentNetworkController {
 		for (int i=0; i<numAgents; i++)
 		{
 			socket = new Socket(host, port);
-	        agent = new Agent(socket.getInputStream(), this, typeAgents, clientId);
-	        clientId++;
+	        agent = new Agent(socket.getInputStream(), this, typeAgents, agentId);
+	        gameController.panelAgentsConnected.add("Agent " + agentId);
+	        agentId++;
 	        
 	        readerThread = new Thread(agent);        
 	        readerThread.start();
 	        
-	        writer = new PrintStream(socket.getOutputStream());		//Aqui pot haver-hi errors.
+	        writer = new PrintStream(socket.getOutputStream());
 		}
     }
 	

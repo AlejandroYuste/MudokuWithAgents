@@ -21,12 +21,16 @@ public class AgentGameController extends GameController implements ActionListene
 	Label Title;
 	Label NumAgentsLabel;
 	Label TypeAgentsLabel;
+	Label AgentsConnected;
 	Label AddNewAgents;
 	TextField NumAgentsField;
 	Choice TypeAgentsField;
+	List panelAgentsConnected;
+	Panel listPanel;
 
 	Button connectButton;
 	Button clearButton;
+	Button disconnectButton;
 	//Button yesButton;
 	//Button noButton;
 	//Label conflictLabel;
@@ -75,6 +79,12 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		// Components from Here:
 		
+		listPanel = new Panel();
+		listPanel.setLocation(gridEndX + 75, 40);
+		listPanel.setSize(130, 160);
+		add(listPanel);
+		listPanel.setVisible(false);
+		
 		NumAgentsField = new TextField(20);
 		NumAgentsField.setSize(150,20);
 		NumAgentsField.setLocation(gridXOffset, 100);
@@ -82,9 +92,18 @@ public class AgentGameController extends GameController implements ActionListene
 		add(NumAgentsField);
 		
 		TypeAgentsField = new Choice();
+		TypeAgentsField.setSize(250, 260);
 		TypeAgentsField.add("Type 1");
 		TypeAgentsField.add("Type 2");
 		TypeAgentsField.add("Type 3");
+		
+		panelAgentsConnected = new List(10, false);
+		panelAgentsConnected.setLocation(gridEndX + 75, 40);
+		//panelAgentsConnected.add("Johnny");
+		//panelAgentsConnected.setVisible(true);
+		//panelAgentsConnected.addActionListener(this);
+		listPanel.add(panelAgentsConnected);
+
 		
 		TypeAgentsField.setSize(100,20);
 		TypeAgentsField.setLocation(gridXOffset + 150 + 20, 100);
@@ -98,6 +117,16 @@ public class AgentGameController extends GameController implements ActionListene
 		connectButton.setActionCommand("connect");
 		connectButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectButton);
+		
+		disconnectButton = new Button("Disconnect Agent");
+		disconnectButton.setSize(120,20);
+		disconnectButton.setLocation(gridEndX + 80, 210);
+		disconnectButton.setActionCommand("disconnect");
+		disconnectButton.addActionListener(this);				//Afegim el Listener al button "Connect"
+		add(disconnectButton);
+		disconnectButton.setVisible(false);
+		
+		
 		
 		/*yesButton = new Button("Yes");
 		yesButton.setLocation(gridEndX + 20, gridYOffset + 30);
@@ -127,6 +156,12 @@ public class AgentGameController extends GameController implements ActionListene
 		AddNewAgents.setLocation(gridXOffset, 475);
 		add(AddNewAgents);
 		AddNewAgents.setVisible(false);
+		
+		AgentsConnected = new Label("Agents Connected:");
+		AgentsConnected.setSize(250,20);
+		AgentsConnected.setLocation(gridEndX + 80, 20);
+		add(AgentsConnected);
+		AgentsConnected.setVisible(false);
 		
 		NumAgentsLabel = new Label("Number of Agents:");
 		NumAgentsLabel.setSize(150,20);
@@ -237,7 +272,10 @@ public class AgentGameController extends GameController implements ActionListene
 			lineY = (int) tempLineY;
 		}
 
-		gr.drawLine(20, 460, 470, 460);		//Linia Entre el Sudoku i Connectar mes Agents
+		gr.drawLine(0, 10, 0, 460);			//Separador Grid Vertical-Dreta
+		gr.drawLine(0, 460, 470, 460);		//Separador Grid Horizintal
+		gr.drawLine(0, 470, 470, 470);		//Separador Grid Horizintal
+		gr.drawLine(470, 10, 470, 460);		//Separador Grid Vertical-Esquerra
 		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -289,14 +327,13 @@ public class AgentGameController extends GameController implements ActionListene
 			tempLineX = lineX;
 		}
 		
-		gr.setColor(Color.pink);
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 
 		switch(networkState)
 		{
 		case idle:
-			cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex);		//Aqui pintem els Possibles Valors Abaix del Sudoku
+			cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex, activeX, activeY);		
 			break;
 		case waitingConfirm:
 			gr.drawString("Waiting response from server", gridXOffset, gridEndY + 20);
@@ -351,6 +388,13 @@ public class AgentGameController extends GameController implements ActionListene
 				{
 					System.out.println("Check --> IP & port incorrect");
 				}
+				break;
+			case "disconnect":
+				int index = panelAgentsConnected.getSelectedIndex();
+				String AgentName = panelAgentsConnected.getSelectedItem();
+				networkController.SendMessage("disconnect#" + AgentName);				//TODO: Afegit Aquest Missatge als Protocols del Server per borrar al client al servidor
+				networkController.stopExecuting();
+				panelAgentsConnected.remove(index);
 				break;
 			case "voteEnd":
 				conflictExists = false;
@@ -537,7 +581,11 @@ public class AgentGameController extends GameController implements ActionListene
 	public void StartGame()
 	{
 		Title.setVisible(false);
+		
 		AddNewAgents.setVisible(true);
+		AgentsConnected.setVisible(true);
+		listPanel.setVisible(true);
+		disconnectButton.setVisible(true);
 		
 		NumAgentsLabel.setLocation(gridXOffset, 500);
 		//NumAgentsLabel.setForeground(Color.green);			//Podem Canviar el Colors dels Menus
@@ -555,14 +603,14 @@ public class AgentGameController extends GameController implements ActionListene
 		activeX = x;
 		activeY = y;
 		
-		if(instantiator[x][y] > -1)
+		/*if(instantiator[x][y] > -1)
 		{
 			//clearButton.setVisible(true);
 		}
 		else
 		{
 			clearButton.setVisible(false);
-		}
+		}*/
 		
 		repaint();
 	}

@@ -22,7 +22,7 @@ class ServerReader implements Runnable
 			// TODO Auto-generated method stub
 			try {
 				while((message = reader.readLine()) != null && !message.equals(".")) {
-					System.out.println("Server received message: " + message + " from client " + handler.getAgentId());
+					System.out.println("Server received message: " + message);
 					handler.MessageReceived(message);
 				}
 			} catch (IOException e) {

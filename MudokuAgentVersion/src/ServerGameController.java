@@ -152,19 +152,31 @@ public class ServerGameController extends GameController implements ActionListen
 					break;
 				}
 				break;
+			case "connect":
+				vars2 = vars[1].split(",");
+				int agentId = Integer.parseInt(vars2[0]);
+				int agentType = Integer.parseInt(vars2[1]);
+				networkController.addClient(agentId, agentType);
+				
+				Print("Agent Connected");
+				break;
+			case "disconnect":
+				String response = "disconnect#accepted";
+				clientHandler.SendMessage(response);
+				break;
 			case "instantiate":						//"instantiate#" + agentId + "," typeAgent + "," + activeX + "," + activeY + "," + val
 				vars2 = vars[1].split(",");
-				clientHandler.setAgentId(Integer.parseInt(vars2[0]));
-				clientHandler.setAgentType(Integer.parseInt(vars2[1]));
+				agentId = Integer.parseInt(vars2[0]);
+				agentType = Integer.parseInt(vars2[1]);
 				int x =Integer.parseInt(vars2[2]);
 				int y = Integer.parseInt(vars2[3]);
 				int val = Integer.parseInt(vars2[4]);
-				Print("Client " + clientHandler.getAgentId() + " asked to instantiate [" + x + "," + y + "] : " + val );
+				Print("Agent " + agentId + " asked to instantiate [" + x + "," + y + "] : " + val );
 				
 				if(TryInstantiate(x,y,val))
 				{
 					Print("Instantiation succeeded");
-					instantiator[x][y] = clientHandler.getAgentType();
+					instantiator[x][y] = AgentHandler.getAgentId();
 					networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + instantiator[x][y]);	
 				}
 				else
@@ -180,8 +192,8 @@ public class ServerGameController extends GameController implements ActionListen
 					conflictX =Integer.parseInt(vars2[0]);
 					conflictY = Integer.parseInt(vars2[1]);
 
-					Print("Client " + clientHandler.agentId + " asked to clear " + conflictX + "," + conflictY);
-					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.agentId);
+					Print("Client " + AgentHandler.agentId + " asked to clear " + conflictX + "," + conflictY);
+					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + AgentHandler.agentId);
 					votes.clear();
 					votingExists = true;
 					voteCountTimer = new Timer(voteCountDelay, this);
@@ -202,7 +214,7 @@ public class ServerGameController extends GameController implements ActionListen
 					Print("Unexpected vote");
 				}
 				Integer voteVal = Integer.parseInt(vars2[2]);
-				Print("vote received from client " + clientHandler.agentId + " : " + voteVal);
+				Print("vote received from client " + AgentHandler.agentId + " : " + voteVal);
 				votes.add(voteVal);
 				if(votes.size() == networkController.GetClientCount())
 				{

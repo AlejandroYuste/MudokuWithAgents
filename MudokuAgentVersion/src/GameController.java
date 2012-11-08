@@ -262,7 +262,7 @@ public class GameController extends Applet implements ActionListener {
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 
-		cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex);
+		cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex, activeX, activeY);
 
 		if (mouseOverGrid) {
 			gr.setColor(mouseOverColor);

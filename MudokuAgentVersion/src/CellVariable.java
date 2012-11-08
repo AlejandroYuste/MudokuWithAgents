@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.solver.variables.integer.IntDomain;
@@ -28,23 +29,46 @@ public class CellVariable {
 		y = y_;
 	}
 	
-	public void DrawDomain(Graphics gr, int mouseOverIndex)
+	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y)
 	{
 		float tempDrawX = domainXOffset;
 		int drawX = (int) tempDrawX;
+		float tempDrawY = 0;
+		int drawY = (int) tempDrawY;
+		
+		for(int i = 0; i<GameController.sudokuSize;i++)
+		{
+			gr.setColor(Color.black);
+			if(i==x) gr.setColor(Color.blue);
+			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
+			gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+			tempDrawX += deltaX;
+			drawX = (int) tempDrawX;
+			
+			gr.setColor(Color.black);
+			if(i==y) gr.setColor(Color.blue);
+			gr.drawRect(domainYOffset + 10, 10 + drawY, (int)deltaX, (int)deltaY);
+			gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 5, (int)(drawY + deltaY / 2) + 15);
+			tempDrawY += deltaY;
+			drawY = (int) tempDrawY;
+		}
+		
+		/*if(mouseOverIndex != -1)
+		{
+			gr.setColor(AgentGameController.mouseOverColor);
+			gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
+			gr.drawRect((int)(domainYOffset + mouseOverIndex * deltaY), domainXOffset, (int)deltaY, (int)deltaX);
+		}
+		
 		IntDomainVar intvar = GameController.cpController.GetCPVariable(x, y);
+		gr.setColor(Color.blue);
 		for(DisposableIntIterator i = intvar.getDomain().getIterator(); i.hasNext();)
 		{
 			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
 			gr.drawString(String.valueOf(i.next()), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
 			tempDrawX += deltaX;
 			drawX = (int) tempDrawX;
-		}
-		if(mouseOverIndex != -1)
-		{
-			gr.setColor(AgentGameController.mouseOverColor);
-			gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
-		}
+		}*/
 	}
 	
 	public int EvaluateClick(int mouseX, int mouseY)

@@ -7,11 +7,14 @@ import java.io.InputStreamReader;
 	class Agent implements Runnable
 	{
 		
-		int clientId;
+		int agentId;
+		int typeAgent;
+		
 		BufferedReader reader;
 		AgentNetworkController controller;
 		String message;
-		int typeAgent;
+		
+		boolean execute = true;
 		
 		int[][] actualGrid;
 		
@@ -24,25 +27,30 @@ import java.io.InputStreamReader;
 			controller = controller_;
 			typeAgent = typeAgent_;
 			
-			clientId = clientId_;
+			agentId = clientId_;
 			agentState = AgentState.waiting;
 		}
 		
 		int getAgentId()
 		{
-			return clientId;
+			return agentId;
+		}
+		
+		public void stopExecuting()
+		{
+			execute = false;
 		}
 		
 		public void SendMessage(String message)
 		{
 			controller.SendMessage(message);
-			System.out.println("Agent --> SendMessage. Client " + clientId  + ": Sending message to server '" + message + "'");
+			System.out.println("Agent --> SendMessage. Agent " + agentId  + ": Sending message to server '" + message + "'");
 		}
 		
 		public void MessageReceived(String message)
 		{
 			controller.MessageReceived(message);
-			System.out.println("Agent --> MessageReceived. Client " + clientId  + ": Received message from server '" + message + "'");
+			System.out.println("Agent --> MessageReceived. Agent " + agentId  + ": Received message from server '" + message + "'");
 		}
 
 		@Override
@@ -50,23 +58,34 @@ import java.io.InputStreamReader;
 		{
 			try 
 			{	
-				if (clientId == 1)		//"instantiate#client" + clientId + "," + activeX + "," + activeY + "," + val
+				System.out.println("Agent --> Es comença a Executar l'agent: " + agentId);
+				Thread.sleep(5000);				//Si no afegueixo aixo envia el misstge abans d'establir connexio
+				SendMessage("connect#" + agentId + "," + typeAgent);
+				
+				if (agentId == 1)		//"instantiate#client" + clientId + "," + activeX + "," + activeY + "," + val
 				{
 					Thread.sleep(2000);
-					SendMessage("instantiate#" + clientId + "," + typeAgent + "," + 2 + "," + 3 + "," + 2);
+					SendMessage("instantiate#" + agentId + "," + typeAgent + "," + 2 + "," + 3 + "," + 2);
 				}
-				else if (clientId == 4)		//"instantiate#client" + clientId + "," + activeX + "," + activeY + "," + val
+				else if (agentId == 4)		//"instantiate#client" + clientId + "," + activeX + "," + activeY + "," + val
 				{
 					Thread.sleep(2000);
-					SendMessage("instantiate#" + clientId + "," + typeAgent + "," + 6 + "," + 7 + "," + 12);
+					SendMessage("instantiate#" + agentId + "," + typeAgent + "," + 6 + "," + 7 + "," + 12);
 				}
-
 
 				
-				while((message = reader.readLine()) != null && !message.equals(".")) 
+				
+				while(execute)
 				{
-					MessageReceived(message);
+					System.out.println("Agent --> Executant el Thread del Agent: " + agentId);
+					
+					if((message = reader.readLine()) != null && !message.equals(".")) 
+					{
+						MessageReceived(message);
+					}
 				}
+				
+				System.out.println("Agent --> Disconected Agent: " + agentId);
 				
 			} catch (IOException | InterruptedException e) {
 			//} catch (IOException e) {
