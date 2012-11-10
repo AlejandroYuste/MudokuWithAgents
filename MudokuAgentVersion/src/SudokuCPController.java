@@ -80,6 +80,7 @@ public class SudokuCPController {
 	{
 		return solver.getVar(cellVars[x][y]);
 	}
+	
 	public void InstantiateVar(int x, int y, int val) throws ContradictionException
 	{
 		if(solver.getVar(cellVars[x][y]) == null)

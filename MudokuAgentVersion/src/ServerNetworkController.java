@@ -8,7 +8,6 @@ public class ServerNetworkController implements Runnable {
 	int port = 4433;
 	
 	ArrayList<ClientHandler> clientFramework;
-	ArrayList<AgentHandler> listAgentsConnected;
 	ServerGameController gameController;
 	
 	public ServerNetworkController(ServerGameController gameController_)
@@ -34,10 +33,12 @@ public class ServerNetworkController implements Runnable {
 			
 			while((i++ < maxConnections) || (maxConnections == 0)){
 
-				gameController.Print("Server: Waiting for connection");
+				gameController.Print("Server: Waiting for Clients");
 				server = listener.accept();
+				gameController.Print("Server: Client " + NextClientId()  + " Connected.");
 				
 				clientFramework.add(new ClientHandler(this, server, NextClientId()));
+				
 			}
 			
 		} catch (IOException ioe) {
@@ -46,11 +47,14 @@ public class ServerNetworkController implements Runnable {
 		}
 	}
 	
-	void addClient(int clientId, int typeAgent)
+	void addAgent(int clientId, int typeAgent)
 	{
-		listAgentsConnected.add(new AgentHandler(clientId, typeAgent));
 		gameController.Print("Server: Agent " + clientId + " Connected to server");
-		gameController.Print("Server: Hi ha connectats: " + GetAgentCount() + "Agents");
+	}
+	
+	void removeAgent(int clientId)
+	{
+		gameController.Print("Server: Agent " + clientId + " Disconnected to server");
 	}
 	
 	
@@ -58,6 +62,7 @@ public class ServerNetworkController implements Runnable {
 	{
 		for(ClientHandler client : clientFramework)
 		{
+			gameController.Print("Enviat un Missatge Broadcast al client: " + client);
 			client.SendMessage(message);
 		}
 	}
@@ -73,7 +78,6 @@ public class ServerNetworkController implements Runnable {
 			}
 		}
 	}
-	
 	
 	int NextClientId()
 	{
@@ -95,10 +99,5 @@ public class ServerNetworkController implements Runnable {
 	public int GetClientCount()
 	{
 		return clientFramework.size();
-	}
-	
-	public int GetAgentCount()
-	{
-		return listAgentsConnected.size();
 	}
 }

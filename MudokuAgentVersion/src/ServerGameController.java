@@ -156,13 +156,12 @@ public class ServerGameController extends GameController implements ActionListen
 				vars2 = vars[1].split(",");
 				int agentId = Integer.parseInt(vars2[0]);
 				int agentType = Integer.parseInt(vars2[1]);
-				networkController.addClient(agentId, agentType);
-				
-				Print("Agent Connected");
+				networkController.addAgent(agentId, agentType);
 				break;
 			case "disconnect":
-				String response = "disconnect#accepted";
-				clientHandler.SendMessage(response);
+				vars2 = vars[1].split(",");
+				agentId = Integer.parseInt(vars2[0]);
+				networkController.removeAgent(agentId);
 				break;
 			case "instantiate":						//"instantiate#" + agentId + "," typeAgent + "," + activeX + "," + activeY + "," + val
 				vars2 = vars[1].split(",");
@@ -176,7 +175,7 @@ public class ServerGameController extends GameController implements ActionListen
 				if(TryInstantiate(x,y,val))
 				{
 					Print("Instantiation succeeded");
-					instantiator[x][y] = AgentHandler.getAgentId();
+					instantiator[x][y] = agentType;
 					networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + instantiator[x][y]);	
 				}
 				else
@@ -192,8 +191,8 @@ public class ServerGameController extends GameController implements ActionListen
 					conflictX =Integer.parseInt(vars2[0]);
 					conflictY = Integer.parseInt(vars2[1]);
 
-					Print("Client " + AgentHandler.agentId + " asked to clear " + conflictX + "," + conflictY);
-					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + AgentHandler.agentId);
+					//Print("Client " + AgentHandler.agentId + " asked to clear " + conflictX + "," + conflictY);
+					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId);
 					votes.clear();
 					votingExists = true;
 					voteCountTimer = new Timer(voteCountDelay, this);
@@ -214,7 +213,7 @@ public class ServerGameController extends GameController implements ActionListen
 					Print("Unexpected vote");
 				}
 				Integer voteVal = Integer.parseInt(vars2[2]);
-				Print("vote received from client " + AgentHandler.agentId + " : " + voteVal);
+				//Print("vote received from client " + AgentHandler.agentId + " : " + voteVal);
 				votes.add(voteVal);
 				if(votes.size() == networkController.GetClientCount())
 				{

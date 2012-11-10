@@ -122,7 +122,7 @@ public class GameController extends Applet implements ActionListener {
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
-			System.out.println(x + " , " + y);
+			//System.out.println(x + " , " + y);
 			if (cells[x][y].current == -1) {
 				val = cpController.GetCPVariable(x, y).getRandomDomainValue();
 				if (TryInstantiate(x, y, val)) {
@@ -309,6 +309,7 @@ public class GameController extends Applet implements ActionListener {
 		}
 		repaint();
 	}
+	
 	public void Sweep() {
 		for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
@@ -350,8 +351,7 @@ public class GameController extends Applet implements ActionListener {
 				cpController.Propagate();
 			} catch (ContradictionException e) {
 				// TODO Auto-generated catch block
-				System.out.println("propagation failed : "
-						+ e.getLocalizedMessage().toString());
+				System.out.println("propagation failed : " + e.getLocalizedMessage().toString());
 				DomainWipeOut();
 				success = false;
 				cpController.solver.worldPop();
@@ -422,7 +422,8 @@ public class GameController extends Applet implements ActionListener {
 		repaint();
 	}
 
-	public void DomainWipeOut() {
+	public void DomainWipeOut() 
+	{
 		for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
 				if (cells[i][k].current == -1) {

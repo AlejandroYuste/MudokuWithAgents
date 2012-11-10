@@ -1,28 +1,7 @@
-
-
-/*************************************************************************
- *  Compilation:  javac EchoClient.java In.java Out.java
- *  Execution:    java EchoClient name host
- *
- *  Connects to host server on port 4444, sends text, and prints out
- *  whatever the server sends back.
- *
- *  
- *  % java EchoClient wayne localhost
- *  Connected to localhost on port 4444
- *  this is a test
- *  [wayne]: this is a test
- *  it works
- *  [wayne]: it works
- *  <Ctrl-d>                 
- *  Closing connection to localhost
- *
- *  Windows users: replace <Ctrl-d> with <Ctrl-z>
- *  
- *************************************************************************/
-
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.*;
 
 public class AgentNetworkController {
@@ -30,14 +9,19 @@ public class AgentNetworkController {
 	String host;
 	int port;
 	int numAgents;
-	int typeAgents;
+	int typeAgent;
+	
+	ThreadsInformation threadInfo;
+	List<ThreadsInformation> ThreadsAgent = new ArrayList<ThreadsInformation>();
 	
 	Socket socket;
 	
+	AgentReader reader;
 	Agent agent;
+	Thread agentThread;
 	Thread readerThread;
 	
-	public int agentId = 1;
+	private int agentId = 1;
 	
     AgentGameController gameController;
     
@@ -70,35 +54,59 @@ public class AgentNetworkController {
 		return gameController.getActualGrid();
 	}
 	
-	void stopExecuting()
+	@SuppressWarnings("deprecation")
+	void stopExecuting(int agentId_)
 	{
-		agent.execute = false;
+		for(int i=0; i<ThreadsAgent.size();i++)
+		{
+			threadInfo = (ThreadsInformation) ThreadsAgent.get(i);
+			if(threadInfo.getAgentId() == agentId_)
+			{
+				Thread thrInf = threadInfo.getThread();
+				thrInf.stop();
+				ThreadsAgent.remove(threadInfo);
+			}
+		}
+		System.out.println("Agent --> Acabant el Thread del Agent: " + agentId_);
 	}
 	
-	public void Connect(String host_, int port_, int numAgents_, int typeAgents_) throws UnknownHostException, IOException
+	int getSudokuSize()
+	{
+		return gameController.sudokuSize;
+	}
+	
+	public void Connect(String host_, int port_) throws UnknownHostException, IOException
 	{
 		host = host_;
 		port = port_;
-		numAgents = numAgents_;
-		typeAgents = typeAgents_;
+
+		socket = new Socket(host, port);
+		reader = new AgentReader(socket.getInputStream(), this);
+
+        readerThread = new Thread(reader);        
+        readerThread.start();		
 		
-		//System.out.println("ClientNetworkController --> Connect, host: " + host);
-		//System.out.println("ClientNetworkController --> Connect, port: " + port);
-		//System.out.println("ClientNetworkController --> Connect, numAgents: " + numAgents);
-		//System.out.println("ClientNetworkController --> Connect, typeAgents: " + typeAgents);
-				
+		writer = new PrintStream(socket.getOutputStream());
+    }
+	
+	public void Connect(int numAgents_, int typeAgents_)
+	{
+		numAgents = numAgents_;
+		typeAgent = typeAgents_;
+						
+
 		for (int i=0; i<numAgents; i++)
-		{
-			socket = new Socket(host, port);
-	        agent = new Agent(socket.getInputStream(), this, typeAgents, agentId);
+        {
 	        gameController.panelAgentsConnected.add("Agent " + agentId);
+	        
+	        agent = new Agent(this, agentId, typeAgent);
+	        agentThread = new Thread(agent);        
+	        agentThread.start();
+	        
+	        ThreadsAgent.add(new ThreadsInformation(agentThread, agentId));
+	        
 	        agentId++;
-	        
-	        readerThread = new Thread(agent);        
-	        readerThread.start();
-	        
-	        writer = new PrintStream(socket.getOutputStream());
-		}
+        }
     }
 	
 }

@@ -35,7 +35,7 @@ class ClientHandler {
 		
 		public void ReaderStopped()
 		{
-			//networkController.ClientDisconnected(agentId);
+			networkController.ClientDisconnected(clientId);
 		}
 		
 		@Override
