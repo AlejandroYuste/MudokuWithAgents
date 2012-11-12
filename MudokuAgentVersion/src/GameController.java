@@ -59,7 +59,8 @@ public class GameController extends Applet implements ActionListener {
 		state = GameState.start;
 	}
 
-	public void Initialize() {
+	public void Initialize() 
+	{
 		deltaX = (float) gridWidth / sudokuSize;
 		deltaY = (float) gridHeight / sudokuSize;
 		CellVariable.deltaX = deltaX;
@@ -117,15 +118,18 @@ public class GameController extends Applet implements ActionListener {
 		int x = 0;
 		int y = 0;
 		int val = 0;
+		
 		Random random = new Random(System.nanoTime());
 		while (count > 0) {
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
 			//System.out.println(x + " , " + y);
-			if (cells[x][y].current == -1) {
-				val = cpController.GetCPVariable(x, y).getRandomDomainValue();
-				if (TryInstantiate(x, y, val)) {
+			if (cells[x][y].current == -1) 
+			{
+				val = cpController.GetCPVariable(x, y).getRandomDomainValue();			//Utilitzem per inicialitzar
+				if (TryInstantiate(x, y, val)) 
+				{
 					count--;
 					cells[x][y].SetConstant();
 				}
@@ -310,7 +314,8 @@ public class GameController extends Applet implements ActionListener {
 		repaint();
 	}
 	
-	public void Sweep() {
+	public void Sweep() 
+	{
 		for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
 				if (cells[i][k].current == -1) {
@@ -323,19 +328,7 @@ public class GameController extends Applet implements ActionListener {
 		}
 	}
 
-	//Instantiates active cell with given value
-	public void SetValue(int value) {
-		cells[activeX][activeY].current = value;
-		try {
-			cpController.InstantiateVar(activeX, activeY, value);// setVal(selectedValue);
-			cpController.Propagate();
-		} catch (ContradictionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public boolean TryInstantiate(int x, int y, int value) {
+	/*public boolean TryInstantiate(int x, int y, int value) {
 		boolean success = true;
 		cpController.solver.worldPush();
 
@@ -368,15 +361,68 @@ public class GameController extends Applet implements ActionListener {
 			cells[x][y].current = -1;
 		}
 		return success;
-	}
+	}*/
+	
+	public boolean TryInstantiate(int x, int y, int value) {
+		boolean success = true;
+		cpController.solver.worldPush();
 
-	public void SetValue(int x, int y, int value) {
-		cells[x][y].current = value;
 		try {
-			cpController.InstantiateVar(x, y, value);// setVal(selectedValue);
-			// cpController.Propagate();
+			cpController.InstantiateVar(x, y, value);
+		} catch (ContradictionException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("instantiation failed : " + e1.toString());
+			//success = false;
+		}
+		if (success) {
+			try {
+				cpController.Propagate();
+			} catch (ContradictionException e) {
+				// TODO Auto-generated catch block
+				System.out.println("propagation failed : " + e.getLocalizedMessage().toString());
+				DomainWipeOut();
+				success = false;
+				cpController.solver.worldPop();
+			}
+		}
+		
+		if (success) {
+			cells[x][y].current = value;
+			cells[x][y].contradicting = false;
+		}
+		else
+		{
+			System.out.println("contradicted");
+			cells[x][y].contradicting = true;
+			cells[x][y].current = -1;
+		}
+		
+		return success;
+	}
+	
+	
+	//Instantiates active cell with given value
+	public void SetValue(int value) {
+		cells[activeX][activeY].current = value;
+		
+		try {
+			cpController.InstantiateVar(activeX, activeY, value);// setVal(selectedValue);
+			cpController.Propagate();
 		} catch (ContradictionException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void SetValue(int x, int y, int value) {
+		cells[x][y].current = value;
+		
+		try {
+			cpController.InstantiateVar(x, y, value);		// setVal(selectedValue);
+		    cpController.Propagate();
+		} catch (ContradictionException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Es prudueix un error a setValue del GameController: " + e);
 			e.printStackTrace();
 		}
 	}

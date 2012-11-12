@@ -50,10 +50,10 @@ public class ServerGameController extends GameController implements ActionListen
 		super.init();
 		Initialize();
 		InitializeRandomProblem(40);
+		
 		networkController = new ServerNetworkController(this);
 		serverThread = new Thread(networkController);
 		serverThread.start();
-
 
 		instantiator = new int[sudokuSize][sudokuSize];
 
@@ -62,17 +62,6 @@ public class ServerGameController extends GameController implements ActionListen
 				instantiator[i][j] = -1;
 			}
 		}
-
-		/*try {
-			networkController.Connect("127.0.0.1", 4433);
-			networkController.SendMessage("Hello from Mudoku!");
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 	}
 	@Override
 	public void paint ( Graphics gr )
@@ -81,16 +70,6 @@ public class ServerGameController extends GameController implements ActionListen
 		{
 			case game:
 				DrawGrid(gr);
-				break;
-			case conflictResolution:
-				break;
-			case initGame:
-				break;
-			case pregame:
-				break;
-			case start:
-				break;
-			default:
 				break;
 		}
 	}
@@ -105,6 +84,7 @@ public class ServerGameController extends GameController implements ActionListen
 			break;
 		}
 	}
+	
 	public void ConcludeVoting()
 	{
 		votingExists = false;
@@ -115,6 +95,7 @@ public class ServerGameController extends GameController implements ActionListen
 			ClearCell(conflictX, conflictY);
 		}
 	}
+	
 	String EncodeCurrentStatus()
 	{
 		String code = "";
@@ -130,6 +111,7 @@ public class ServerGameController extends GameController implements ActionListen
 		}
 		return code.substring(0, code.length() - 1);
 	}
+	
 	public synchronized void MessageReceived(ClientHandler clientHandler, String message)
 	{
 		String[] vars = message.split("#");
@@ -170,9 +152,9 @@ public class ServerGameController extends GameController implements ActionListen
 				int x =Integer.parseInt(vars2[2]);
 				int y = Integer.parseInt(vars2[3]);
 				int val = Integer.parseInt(vars2[4]);
-				Print("Agent " + agentId + " asked to instantiate [" + x + "," + y + "] : " + val );
-				
-				if(TryInstantiate(x,y,val))
+
+
+				/*if(TryInstantiate(x,y,val))
 				{
 					Print("Instantiation succeeded");
 					instantiator[x][y] = agentType;
@@ -182,8 +164,16 @@ public class ServerGameController extends GameController implements ActionListen
 				{
 					Print("Instantiation failed");
 					clientHandler.SendMessage("instantiate_failed");
-				}
+				}*/
+				
+				Print("Client [" + clientHandler.clientId + "].Agent[" + agentId + "] Intantaited the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
+
+				cells[x][y].current = val;
+				instantiator[x][y] = agentType;				//Seleccionem el color
+				
+				networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + instantiator[x][y]);	
 				break;
+				
 			case "clear":
 				if(!votingExists)
 				{

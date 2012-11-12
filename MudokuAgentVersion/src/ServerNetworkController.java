@@ -62,7 +62,7 @@ public class ServerNetworkController implements Runnable {
 	{
 		for(ClientHandler client : clientFramework)
 		{
-			gameController.Print("Enviat un Missatge Broadcast al client: " + client);
+			//gameController.Print("Enviat un Missatge Broadcast al client: " + client);
 			client.SendMessage(message);
 		}
 	}

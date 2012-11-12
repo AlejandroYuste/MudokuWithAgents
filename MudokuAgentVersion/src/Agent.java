@@ -8,6 +8,8 @@ class Agent implements Runnable{
 	int agentType;
 	AgentNetworkController controller;
 	
+	Random random;
+	
 	int[][] actualGrid;
 	
 	static boolean modifyGrid = false;
@@ -18,6 +20,7 @@ class Agent implements Runnable{
 		agentType = agentType_;
 		controller = controller_;
 
+		random = new Random(System.nanoTime());
 	}
 	
 	void sendMessage(String message)
@@ -34,57 +37,47 @@ class Agent implements Runnable{
 	public void run() {
 		//System.out.println("Agent --> Executant el Thread del Agent: " + agentId);
 		
-		if (agentId == 1) modifyGrid = true;
+		//if (agentId == 1) modifyGrid = true;
+		int putValue;
 		while(true)
 		{
-			instatiateValue();
+			try {
+				putValue = random.nextInt(controller.getNumAgentsConnected()) + 1;
+				Thread.sleep(putValue*1000);
+				
+				
+				/*if (controller.getConflictExists())
+				{
+					System.out.println("Hi ha un conflicte");
+					voteConfict();
+				}
+				else
+					AgentNetworkController.checkGrid(agentId, agentType);*/
+				
+				//System.out.println("Agent --> putValue: " + putValue);
+				if (agentId == putValue)
+					AgentNetworkController.setValue(agentId, agentType);
+				
+				
+			} catch (InterruptedException e) {
+				System.out.println("Error Produit al Run del Thread del Agent: " + agentId);
+				e.printStackTrace();
+			}
+			
 		}
 	}	
 	
-	synchronized void instatiateValue()
-	{
-        try 
-        {
-        	/*synchronized(this)
-        	{
-	        	while (modifyGrid == false) {
-	        		 System.out.println("Agent --> Eseprant l'Agent: " + agentId);
-	        		 wait();
-	        		 modifyGrid = true;
-	        		 System.out.println("Agent --> Desperta l'Agent: " + agentId);
-	        	}
-	        	
-	            System.out.println("Agent --> Afegueix Valor l'Agent: " + agentId);
-	
-	        	setValue();
-	        	Thread.sleep(2000);
-	        	
-	            System.out.println("Agent --> Fa el notify l'agent: " + agentId);
-	            modifyGrid = false;
-	            notify();
-	            System.out.println("Agent --> Fet el notify per l'agent: " + agentId);
-        	}*/
-        	
-        	setValue();
-        	Thread.sleep(500);
-        } 
-        catch (InterruptedException e) 
-        {
-        	e.printStackTrace();
-        }
-	}
-	
-	void setValue()
+	void voteConfict()
 	{
 		actualGrid = controller.getActualGrid();
 		int i, j, val;
 		ArrayList<Integer> options = new ArrayList<Integer>();
 		ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
 		
-		int[] emptyPosition;
-		ArrayList<int[]> emptyPositionList = new ArrayList<int[]>();
+		int xConflict = controller.getPositionXConflict();
+		int yConflict = controller.getPositionYConflict();
 		
-		Random random = new Random(System.nanoTime());
+		int vote = -1;
 		
 		switch(agentType)
 		{
@@ -96,34 +89,22 @@ class Agent implements Runnable{
 				{
 					for(j=0;j<controller.getSudokuSize();j++)
 					{
-						if(actualGrid[i][j] != -1)
+						if(actualGrid[i][j] != -1 && i != xConflict && j != yConflict)
 							options.add(actualGrid[i][j]);
-						else
-						{
-							emptyPosition = new int[2];
-							emptyPosition[0] = i;
-							emptyPosition[1] = j;
-							emptyPositionList.add(emptyPosition);
-						}
 					}
 					listOptions.add(options);
 					options = new ArrayList<Integer>();
 				}
 			
-				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-				i = emptyPosition[0];
-				j = emptyPosition[1];
-				
-				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
-				
-				val = random.nextInt(controller.getSudokuSize());
-				while(options.contains(val))
+				options = listOptions.get(xConflict);	//Obtenim les opcions que tenim per aquella fila
+				if (options.contains(actualGrid[xConflict][yConflict]))
 				{
-					val = random.nextInt(controller.getSudokuSize());
+					vote = 1;
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
-				sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+				//sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+				sendMessage("voted#" + xConflict + "," + yConflict + "," + vote);
 				break;
 				
 			case(1):		//Agent que nomes treballa per Columnes
@@ -136,33 +117,20 @@ class Agent implements Runnable{
 					{
 						if(actualGrid[j][i] != -1)
 							options.add(actualGrid[j][i]);
-						else
-						{
-							emptyPosition = new int[2];
-							emptyPosition[0] = j;
-							emptyPosition[1] = i;
-							emptyPositionList.add(emptyPosition);
-						}
 					}
 					listOptions.add(options);
 					options = new ArrayList<Integer>();
 				}
-			
-			
-				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-				i = emptyPosition[0];
-				j = emptyPosition[1];
 				
-				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
-				
-				val = random.nextInt(controller.getSudokuSize());
-				while(options.contains(val))
+				options = listOptions.get(xConflict);	//Obtenim les opcions que tenim per aquella fila
+				if (options.contains(actualGrid[xConflict][yConflict]))
 				{
-					val = random.nextInt(controller.getSudokuSize());
+					vote = 1;
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
-				sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+				//sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+				sendMessage("voted#" + xConflict + "," + yConflict + "," + vote);
 				break;
 				
 			case(2):		////Agent que nomes treballa per Quadrats
@@ -181,25 +149,14 @@ class Agent implements Runnable{
 							{
 								if(actualGrid[i + row][j + column] != -1)
 									options.add(actualGrid[i + row][j + column]);
-								else
-								{
-									emptyPosition = new int[2];
-									emptyPosition[0] = i + row;
-									emptyPosition[1] = j + column;
-									emptyPositionList.add(emptyPosition);
-								}
 							}
 						}
 						listOptions.add(options);
 						options = new ArrayList<Integer>();
 					}
-				}
-							
-				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-				i = emptyPosition[0];
-				j = emptyPosition[1];
+				}				
 				
-				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
+				//options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
 				
 				val = random.nextInt(controller.getSudokuSize());
 				while(options.contains(val))
@@ -208,8 +165,9 @@ class Agent implements Runnable{
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
-				sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+				//sendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
 				break;
 		}
 	}
 }
+

@@ -207,14 +207,15 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		if(conflictExists)
 		{
-			gr.setColor(Color.LIGHT_GRAY);
+			gr.setColor(Color.ORANGE);
 			int conX = (int) (gridXOffset + conflictX * deltaX);
 			int conY = (int) (gridYOffset + conflictY * deltaY);
 			gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
 			gr.setColor(agentColors[clearRequester]);
-			gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
+			//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
 		}
 
+		
 		gr.setColor(Color.black);
 		Stroke stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -388,12 +389,13 @@ public class AgentGameController extends GameController implements ActionListene
 				networkController.stopExecuting(agentId);
 				panelAgentsConnected.remove(index);
 				break;
+				
 			case "voteEnd":
 				conflictExists = false;
 				HideVote();
 				voteTimer.stop();
 				break;
-			case "yes":
+			/*case "yes":
 				if(conflictExists)
 				{
 					networkController.SendMessage("voted#" + conflictX + "," + conflictY + "," + "1");
@@ -411,8 +413,13 @@ public class AgentGameController extends GameController implements ActionListene
 				break;
 			case "askToClear":
 				networkController.SendMessage("clear#" + activeX + "," + activeY);
-				break;
+				break;*/
 		}
+	}
+	
+	public boolean getConflictExists()
+	{
+		return conflictExists;
 	}
 	
 	public void ShowVote()
@@ -529,7 +536,10 @@ public class AgentGameController extends GameController implements ActionListene
 					conflictX = Integer.parseInt(coordinates[0]);
 					conflictY = Integer.parseInt(coordinates[1]);
 					clearRequester = Integer.parseInt(coordinates[2]);
+					
+					networkController.setPositionConflic(conflictX, conflictY);
 					conflictExists = true;
+					
 					voteTimer = new Timer(voteDelay, this);
 					voteTimer.setActionCommand("voteEnd");
 					voteTimer.start();
@@ -565,6 +575,7 @@ public class AgentGameController extends GameController implements ActionListene
 		try {
 			cpController.Propagate();
 		} catch (ContradictionException e) {
+			System.out.println("Es prudueix un error a la propagacio: " + e);
 			e.printStackTrace();
 		}
 	}

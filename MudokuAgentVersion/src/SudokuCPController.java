@@ -83,14 +83,18 @@ public class SudokuCPController {
 	
 	public void InstantiateVar(int x, int y, int val) throws ContradictionException
 	{
-		if(solver.getVar(cellVars[x][y]) == null)
+		/*if(solver.getVar(cellVars[x][y]) == null)
 		{
 			System.out.println("unexpected null");
 		}
 		else
 		{
 			solver.getVar(cellVars[x][y]).setVal(val);
-		}
+		}*/
+		
+		System.out.println("InstantiateVar: [" + x + "][" + y + "] --> " + val);
+		System.out.println("InstantiateVar: cellVars[x][y] --> " + cellVars[x][y]);
+		solver.getVar(cellVars[x][y]).setVal(val);
 	}
 	
 	public void Propagate() throws ContradictionException
