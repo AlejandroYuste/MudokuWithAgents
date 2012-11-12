@@ -276,15 +276,16 @@ public class AgentGameController extends GameController implements ActionListene
 		tempLineX = lineX;
 		
 		// Draw Values
-		for (int y = 0; y < sudokuSize; y++) {
+		for (int y = 0; y < sudokuSize; y++) 
+		{
 			for (int x = 0; x < sudokuSize; x++) {
 				if (cells[x][y].current == -1) {
 					gr.setColor(Color.black);
-					if(cpController.GetCPVariable(x, y).getDomainSize() == 1)
+					/*if(cpController.GetCPVariable(x, y).getDomainSize() == 1)	//Quan nomes podem tenir una posicio a una casella
 					{
 						gr.drawString("*", (int) (lineX + deltaX / 2) - 5,
-								(int) (lineY + deltaY) - 10);
-					}
+								(int) (lineY + deltaY) - 10);					//sa puta merda de asterisc esta aqui
+					}*/
 					tempLineX += deltaX;
 					lineX = (int) tempLineX;
 					continue;
@@ -304,9 +305,10 @@ public class AgentGameController extends GameController implements ActionListene
 						gr.setColor(agentColors[instantiator[x][y]]);
 					}
 				}
-				
-				gr.drawString(
-						String.valueOf(cpController.GetCPVariable(x, y).getVal()), (int) (lineX + deltaX / 2) - 5,
+					
+				//Pintem els numeros al Grid
+				gr.drawString(	
+						String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5,
 						(int) (lineY + deltaY) - 10);
 				tempLineX += deltaX;
 				lineX = (int) tempLineX;

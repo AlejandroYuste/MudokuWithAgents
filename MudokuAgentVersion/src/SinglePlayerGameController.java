@@ -56,7 +56,8 @@ public class SinglePlayerGameController extends GameController implements Action
 		state = GameState.game;
 	}
 	@Override
-	public boolean TryInstantiate(int x, int y, int value) {
+	/*public boolean TryInstantiate(int x, int y, int value) 
+	{
 		boolean success = true;
 		cpController.solver.worldPush();
 
@@ -89,8 +90,8 @@ public class SinglePlayerGameController extends GameController implements Action
 			cells[x][y].current = 0;
 		}
 		return success;
-	}
-	@Override
+	}*/
+	
 	public void paint ( Graphics gr )
 	{
 		//initDraw(gr);

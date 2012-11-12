@@ -165,18 +165,19 @@ public class AgentNetworkController {
 		
 		switch(agentType)
 		{
-			case(0):		//Agent que nomes treballa per files				
-				for(i=0;i<getSudokuSize();i++)
+			case(0):		//Agent que nomes treballa per files		
+				
+				for(j=0;j<getSudokuSize();j++)
 				{
-					for(j=0;j<getSudokuSize();j++)
+					for(i=0;i<getSudokuSize();i++)
 					{
-						if(actualGrid[j][i] != -1)
-							options.add(actualGrid[j][i]);
+						if(actualGrid[i][j] != -1)
+							options.add(actualGrid[i][j]);
 						else
 						{
 							emptyPosition = new int[2];
-							emptyPosition[0] = j;
-							emptyPosition[1] = i;
+							emptyPosition[0] = i;
+							emptyPosition[1] = j;
 							emptyPositionList.add(emptyPosition);
 						}
 					}
@@ -184,18 +185,17 @@ public class AgentNetworkController {
 					options = new ArrayList<Integer>();
 				}
 			
-				System.out.println("SetValue. listOptions: " + listOptions);
-			
 				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
 				i = emptyPosition[0];
 				j = emptyPosition[1];
 				
-				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
 				
-				val = random.nextInt(getSudokuSize() + 1);
+				options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+				val = random.nextInt(getSudokuSize()) + 1;
+				
 				while(options.contains(val))
 				{
-					val = random.nextInt(getSudokuSize() + 1);
+					val = random.nextInt(getSudokuSize()) + 1;
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -222,17 +222,17 @@ public class AgentNetworkController {
 					options = new ArrayList<Integer>();
 				}
 			
-			
 				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
 				i = emptyPosition[0];
 				j = emptyPosition[1];
 				
 				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
 				
-				val = random.nextInt(getSudokuSize() + 1);
+				val = random.nextInt(getSudokuSize()) + 1;
+				
 				while(options.contains(val))
 				{
-					val = random.nextInt(getSudokuSize() + 1);
+					val = random.nextInt(getSudokuSize()) + 1;
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -240,7 +240,7 @@ public class AgentNetworkController {
 				break;
 				
 			case(2):		////Agent que nomes treballa per Quadrats
-							
+				
 				int sizeSquare = (int) Math.sqrt(getSudokuSize());
 				
 				for (int row=0; row<getSudokuSize();row+=sizeSquare)
@@ -266,17 +266,19 @@ public class AgentNetworkController {
 						options = new ArrayList<Integer>();
 					}
 				}
-							
+				
 				emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
 				i = emptyPosition[0];
 				j = emptyPosition[1];
 				
-				options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
+				int region = gameController.getRegion(i, j);
 				
-				val = random.nextInt(getSudokuSize() + 1);
+				options = listOptions.get(region);	//Obtenim les opcions que tenim per aquella fila
+				val = random.nextInt(getSudokuSize()) + 1;
+				
 				while(options.contains(val))
 				{
-					val = random.nextInt(getSudokuSize() + 1);
+					val = random.nextInt(getSudokuSize()) + 1;
 				}
 				
 				//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -397,7 +399,8 @@ public class AgentNetworkController {
 					}
 				}
 				
-				//options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
+				
+				//options = listOptions.get(region);	//Obtenim les opcions que tenim per aquella fila
 				
 				val = random.nextInt(getSudokuSize());
 				while(options.contains(val))

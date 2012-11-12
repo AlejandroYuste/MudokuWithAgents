@@ -1,6 +1,7 @@
 import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Random;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.solver.ContradictionException;
@@ -19,7 +20,7 @@ public class GameController extends Applet implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	static int screenWidth = 650;
 	static int screenHeight = 600;
-	static int sudokuSize = 9;
+	static int sudokuSize;
 
 	static int gridWidth = 400;
 	static int gridHeight = 400;
@@ -89,28 +90,32 @@ public class GameController extends Applet implements ActionListener {
 	}
 
 	// Instantiate "count" number of variables randomly
-	public void RandomAssign(int count) {
-		int x = 0;
+	public void RandomAssign(int count) 
+	{
+		/*int x = 0;
 		int y = 0;
 		int val = 0;
+		
 		Random random = new Random(System.nanoTime());
 		while (count > 0) {
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
 			// System.out.println(x + " , " + y);
-			if (cells[x][y].current == -1) {
+			/*if (cells[x][y].current == -1) {
 				val = cpController.GetCPVariable(x, y).getRandomDomainValue();
-
+				cells[x][y].current = val;
+				count--;
+				
 				if (TryInstantiate(x, y, val)) {
-					count--;
+					
 				}
 				else
 				{
 					return;
 				}
 			}
-		}
+		}*/
 	}
 	
 	//Initializes a new random problem
@@ -120,23 +125,156 @@ public class GameController extends Applet implements ActionListener {
 		int val = 0;
 		
 		Random random = new Random(System.nanoTime());
-		while (count > 0) {
+		
+		while (count > 0) 
+		{
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
 			//System.out.println(x + " , " + y);
 			if (cells[x][y].current == -1) 
 			{
-				val = cpController.GetCPVariable(x, y).getRandomDomainValue();			//Utilitzem per inicialitzar
-				if (TryInstantiate(x, y, val)) 
+				val = random.nextInt(sudokuSize) + 1;			//Utilitzem per inicialitzar
+				
+				if (checkPosition(x, y, val)) 
 				{
 					count--;
-					cells[x][y].SetConstant();
+					cells[x][y].current = val;
 				}
 			}
 		}
 	}
 
+	boolean checkPosition(int x, int y, int val)
+	{
+		int i, j;
+		
+		ArrayList<Integer> number = new ArrayList<Integer>();
+		ArrayList<ArrayList<Integer>> listNumbers = new ArrayList<ArrayList<Integer>>();
+				
+		for(i=0;i<sudokuSize;i++)
+		{
+			for(j=0;j<sudokuSize;j++)
+			{
+				if(cells[i][j].current != -1)
+					number.add(cells[i][j].current);
+			}
+			listNumbers.add(number);
+			number = new ArrayList<Integer>();
+		}
+			
+		number = listNumbers.get(x);
+		if(number.contains(val))
+		{
+			return false;
+		}
+		
+		number = new ArrayList<Integer>();
+		listNumbers = new ArrayList<ArrayList<Integer>>();
+				
+		for(j=0;j<sudokuSize;j++)
+		{
+			for(i=0;i<sudokuSize;i++)
+			{
+				if(cells[i][j].current != -1)
+					number.add(cells[i][j].current);
+			}
+			listNumbers.add(number);
+			number = new ArrayList<Integer>();
+		}
+		
+		number = listNumbers.get(y);
+		if(number.contains(val))
+		{
+			return false;
+		}
+			
+		number = new ArrayList<Integer>();
+		listNumbers = new ArrayList<ArrayList<Integer>>();
+		
+		int sizeSquare = (int) Math.sqrt(sudokuSize);
+		
+		for (int row=0; row<sudokuSize;row+=sizeSquare)
+		{
+			for (int column=0; column<sudokuSize;column+=sizeSquare)
+			{
+				for(i=0;i<sizeSquare;i++)
+				{
+					for(j=0;j<sizeSquare;j++)
+					{
+						if(cells[i + row][j + column].current != -1)
+							number.add(cells[i + row][j + column].current);
+					}
+				}
+				listNumbers.add(number);
+				number = new ArrayList<Integer>();
+			}
+		}
+				
+		int region = getRegion(x, y);
+		number = listNumbers.get(region);
+		
+		if(number.contains(val))
+		{
+			return false;
+		}
+		
+		
+		return true;
+	}
+	
+	int getRegion(int x, int y)
+	{
+		int region = 0;
+		
+		if(x>=0 && x<4)
+		{
+			if (0<=y && y<4)
+				region = 0;
+			if (4<=y && y<8)
+				region = 1;
+			if (8<=y && y<12)
+				region = 2;
+			if (12<=y && y<16)
+				region = 3;
+		}
+		else if (x>=4 && x<8)
+		{
+			if (0<=y && y<4)
+				region = 4;
+			if (4<=y && y<8)
+				region = 5;
+			if (8<=y && y<12)
+				region = 6;
+			if (12<=y && y<16)
+				region = 7;
+		}
+		else if (x>=8 && x<12)
+		{
+			if (0<=y && y<4)
+				region = 8;
+			if (4<=y && y<8)
+				region = 9;
+			if (8<=y && y<12)
+				region = 10;
+			if (12<=y && y<16)
+				region = 11;
+		}
+		else if (x>=12 && x<16)
+		{
+			if (0<=y && y<4)
+				region = 12;
+			if (4<=y && y<8)
+				region = 13;
+			if (8<=y && y<12)
+				region = 14;
+			if (12<=y && y<16)
+				region = 15;
+		}
+		
+		return region;
+	}
+	
 	public void StartGame() {
 		state = GameState.game;
 	}
@@ -316,7 +454,7 @@ public class GameController extends Applet implements ActionListener {
 	
 	public void Sweep() 
 	{
-		for (int i = 0; i < sudokuSize; i++) {
+		/*for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
 				if (cells[i][k].current == -1) {
 					if (cpController.GetCPVariable(i, k).getDomainSize() == 1) {
@@ -325,7 +463,7 @@ public class GameController extends Applet implements ActionListener {
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 	/*public boolean TryInstantiate(int x, int y, int value) {
@@ -363,7 +501,7 @@ public class GameController extends Applet implements ActionListener {
 		return success;
 	}*/
 	
-	public boolean TryInstantiate(int x, int y, int value) {
+	/*public boolean TryInstantiate(int x, int y, int value) {
 		boolean success = true;
 		cpController.solver.worldPush();
 
@@ -398,33 +536,33 @@ public class GameController extends Applet implements ActionListener {
 		}
 		
 		return success;
-	}
+	}*/
 	
 	
 	//Instantiates active cell with given value
 	public void SetValue(int value) {
 		cells[activeX][activeY].current = value;
 		
-		try {
+		/*try {
 			cpController.InstantiateVar(activeX, activeY, value);// setVal(selectedValue);
 			cpController.Propagate();
 		} catch (ContradictionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 	
 	public void SetValue(int x, int y, int value) {
 		cells[x][y].current = value;
 		
-		try {
+		/*try {
 			cpController.InstantiateVar(x, y, value);		// setVal(selectedValue);
 		    cpController.Propagate();
 		} catch (ContradictionException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Es prudueix un error a setValue del GameController: " + e);
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public void MouseOverCell(int x, int y) {
@@ -451,9 +589,9 @@ public class GameController extends Applet implements ActionListener {
 		repaint();
 	}
 
-	public void DomainClick(int index) {
-		IntDomain idom = cpController.GetCPVariable(activeX, activeY)
-				.getDomain();
+	public void DomainClick(int index) 		//Aquest funcio ja no l'uso mai
+	{
+		/*IntDomain idom = cpController.GetCPVariable(activeX, activeY) .getDomain();
 		DisposableIntIterator iter = idom.getIterator();
 		int val = 1;
 		for (; index >= 0 && iter.hasNext(); index--) {
@@ -465,7 +603,7 @@ public class GameController extends Applet implements ActionListener {
 			System.out.println("domain click failed");
 		}
 		
-		repaint();
+		repaint();*/
 	}
 
 	public void DomainWipeOut() 

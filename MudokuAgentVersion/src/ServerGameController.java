@@ -50,6 +50,7 @@ public class ServerGameController extends GameController implements ActionListen
 		super.init();
 		Initialize();
 		InitializeRandomProblem(40);
+		Print("Server: Initialized Random Problem");
 		
 		networkController = new ServerNetworkController(this);
 		serverThread = new Thread(networkController);
@@ -109,6 +110,7 @@ public class ServerGameController extends GameController implements ActionListen
 				}
 			}
 		}
+		
 		return code.substring(0, code.length() - 1);
 	}
 	
