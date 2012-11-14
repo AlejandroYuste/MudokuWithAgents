@@ -34,7 +34,7 @@ public class ServerGameController extends GameController implements ActionListen
 		setLayout(null);
 		GameController.sudokuSize = 16;
 		console = new List();
-		console.setSize(500, 500);
+		console.setSize(775, 500);
 
 		add(console);
 		votingExists = false;
@@ -44,6 +44,7 @@ public class ServerGameController extends GameController implements ActionListen
 	public void Print(String message)
 	{
 		console.add(message);
+		console.makeVisible(console.getItemCount()-1);
 	}
 	public void init()
 	{
@@ -147,7 +148,7 @@ public class ServerGameController extends GameController implements ActionListen
 				agentId = Integer.parseInt(vars2[0]);
 				networkController.removeAgent(agentId);
 				break;
-			case "instantiate":						//"instantiate#" + agentId + "," typeAgent + "," + activeX + "," + activeY + "," + val
+			case "instantiate":			 //"instantiate#" + agentId + "," typeAgent + "," + activeX + "," + activeY + "," + val
 				vars2 = vars[1].split(",");
 				agentId = Integer.parseInt(vars2[0]);
 				agentType = Integer.parseInt(vars2[1]);
@@ -180,11 +181,14 @@ public class ServerGameController extends GameController implements ActionListen
 				if(!votingExists)
 				{
 					vars2 = vars[1].split(",");
-					conflictX =Integer.parseInt(vars2[0]);
-					conflictY = Integer.parseInt(vars2[1]);
+					agentId = Integer.parseInt(vars2[0]);
+					agentType = Integer.parseInt(vars2[1]);
+					conflictX = Integer.parseInt(vars2[2]);
+					conflictY = Integer.parseInt(vars2[3]);
 
-					//Print("Client " + AgentHandler.agentId + " asked to clear " + conflictX + "," + conflictY);
+					Print("Client [" + clientHandler.clientId + "].Agent[" + agentId + "] asked to clear the position [" + conflictX +"][" + conflictY +"]");
 					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId);
+					
 					votes.clear();
 					votingExists = true;
 					voteCountTimer = new Timer(voteCountDelay, this);
@@ -195,22 +199,26 @@ public class ServerGameController extends GameController implements ActionListen
 				{
 					clientHandler.SendMessage("rejected#clear=voting exists");
 				}
+				
 				break;
 			case "voted":
 				vars2 = vars[1].split(",");
-				int conX =Integer.parseInt(vars2[0]);
-				int conY = Integer.parseInt(vars2[1]);
+				agentId = Integer.parseInt(vars2[0]);
+				agentType = Integer.parseInt(vars2[1]);
+				int conX =Integer.parseInt(vars2[2]);
+				int conY = Integer.parseInt(vars2[3]);
+				
 				if(!votingExists || conflictX != conX || conflictY != conY)
 				{
-					Print("Unexpected vote");
+					Print("Unexpected vote --> votingExists: " + votingExists + ", conflictX: " + conX + ", conflictY: " + conY);
 				}
-				Integer voteVal = Integer.parseInt(vars2[2]);
-				//Print("vote received from client " + AgentHandler.agentId + " : " + voteVal);
+				Integer voteVal = Integer.parseInt(vars2[4]);
+				Print("vote received from client[" + clientHandler.clientId + "].agent[" + agentId + "] --> " + voteVal);
 				votes.add(voteVal);
-				if(votes.size() == networkController.GetClientCount())
+				/*if(votes.size() == networkController.GetClientCount())
 				{
 					ConcludeVoting();
-				}
+				}*/
 				break;
 			}
 

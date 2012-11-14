@@ -18,7 +18,7 @@ public class GameController extends Applet implements ActionListener {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	static int screenWidth = 650;
+	static int screenWidth = 800;
 	static int screenHeight = 600;
 	static int sudokuSize;
 
@@ -404,7 +404,7 @@ public class GameController extends Applet implements ActionListener {
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 
-		cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex, activeX, activeY);
+		cells[activeX][activeY].DrawDomainAgent(gr, mouseOverDomainIndex, activeX, activeY);
 
 		if (mouseOverGrid) {
 			gr.setColor(mouseOverColor);

@@ -9,7 +9,7 @@ public class ThreadsInformation {
 		agentId = agentId_;
 	}
 
-Thread getThread()
+	Thread getThread()
 	{
 		return threadInfo;
 	}

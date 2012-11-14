@@ -15,7 +15,6 @@ public class AgentGameController extends GameController implements ActionListene
 	private static final long serialVersionUID = 1L;
 
 	public enum NetworkState {idle, waitingInit, waitingConfirm}
-
 	NetworkState networkState;
 
 	Label Title;
@@ -100,6 +99,7 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		panelAgentsConnected = new List(10, false);
 		panelAgentsConnected.setLocation(gridEndX + 75, 40);
+		panelAgentsConnected.setSize(400, 200);
 		//panelAgentsConnected.add("Johnny");
 		//panelAgentsConnected.setVisible(true);
 		//panelAgentsConnected.addActionListener(this);
@@ -132,20 +132,7 @@ public class AgentGameController extends GameController implements ActionListene
 		disconnectButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(disconnectButton);
 		disconnectButton.setVisible(false);
-		
-		/*yesButton = new Button("Yes");
-		yesButton.setLocation(gridEndX + 20, gridYOffset + 30);
-		yesButton.setSize(70,20);
-		yesButton.setActionCommand("yes");
-		yesButton.addActionListener(this);
-		add(yesButton);
-		
-		noButton = new Button("No");
-		noButton.setLocation(gridEndX + 20, gridYOffset + 60);
-		noButton.setSize(70,20);
-		noButton.setActionCommand("no");
-		noButton.addActionListener(this);
-		add(noButton);*/
+
 		
 		// Labels From here:
 		
@@ -179,13 +166,6 @@ public class AgentGameController extends GameController implements ActionListene
 		add(TypeAgentsLabel);
 		TypeAgentsLabel.setVisible(false);
 		
-		/*conflictLabel = new Label("label");
-		conflictLabel.setLocation(gridEndX + 20, gridYOffset);
-		conflictLabel.setSize(120,20);
-		add(conflictLabel);
-		
-		conflictLabel.setText("Conflict on ");*/
-		
 		networkController = new AgentNetworkController(this);
 		HideVote();					//Ocultem els botons innecessaris
 	}
@@ -204,17 +184,6 @@ public class AgentGameController extends GameController implements ActionListene
 	
 	@Override
 	public void DrawGrid(Graphics gr) {
-		
-		if(conflictExists)
-		{
-			gr.setColor(Color.ORANGE);
-			int conX = (int) (gridXOffset + conflictX * deltaX);
-			int conY = (int) (gridYOffset + conflictY * deltaY);
-			gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
-			gr.setColor(agentColors[clearRequester]);
-			//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
-		}
-
 		
 		gr.setColor(Color.black);
 		Stroke stroke = new BasicStroke(1);
@@ -300,6 +269,16 @@ public class AgentGameController extends GameController implements ActionListene
 					{
 						gr.setColor(Color.black);
 					}
+					else if(conflictExists && x == conflictX && y == conflictY)
+					{
+						gr.setColor(Color.red);
+						
+						/*int conX = (int) (gridXOffset + conflictX * deltaX);
+						int conY = (int) (gridYOffset + conflictY * deltaY);
+						gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
+						gr.setColor(agentColors[clearRequester]);
+						//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);*/
+					}
 					else
 					{
 						gr.setColor(agentColors[instantiator[x][y]]);
@@ -307,9 +286,7 @@ public class AgentGameController extends GameController implements ActionListene
 				}
 					
 				//Pintem els numeros al Grid
-				gr.drawString(	
-						String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5,
-						(int) (lineY + deltaY) - 10);
+				gr.drawString( String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
 				tempLineX += deltaX;
 				lineX = (int) tempLineX;
 			}
@@ -327,7 +304,7 @@ public class AgentGameController extends GameController implements ActionListene
 		switch(networkState)
 		{
 		case idle:
-			cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex, activeX, activeY);		
+			cells[activeX][activeY].DrawDomainAgent(gr, mouseOverDomainIndex, activeX, activeY);		
 			break;
 		case waitingConfirm:
 			gr.drawString("Waiting response from server", gridXOffset, gridEndY + 20);
@@ -624,6 +601,11 @@ public class AgentGameController extends GameController implements ActionListene
 		}*/
 		
 		repaint();
+	}
+	
+	int getRegion(int x, int y)
+	{
+		return getRegion(x, y);
 	}
 	
 	public int[][] getActualGrid()

@@ -1,13 +1,16 @@
 import java.awt.Color;
 import java.awt.Graphics;
+
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.solver.variables.integer.IntDomain;
 import choco.kernel.solver.variables.integer.IntDomainVar;
 
-
 public class CellVariable {
 	int current;
 	boolean contradicting;
+	
+	enum CellState {initializedByServer, contribution, committed, accepted}
+	CellState cellState;
 
 	static int domainXOffset = 350;
 	static int domainYOffset = 400;
@@ -33,6 +36,28 @@ public class CellVariable {
 	{
 		float tempDrawX = domainXOffset;
 		int drawX = (int) tempDrawX;
+		gr.setColor(Color.black);
+		
+		for(int i = 0; i<GameController.sudokuSize;i++)
+		{
+			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
+			gr.drawString(String.valueOf(i+1), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+			tempDrawX += deltaX;
+			drawX = (int) tempDrawX;
+		}
+		if(mouseOverIndex != -1)
+		{
+			gr.setColor(ClientGameController.mouseOverColor);
+			gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
+		}
+	}
+	
+	
+	public void DrawDomainAgent(Graphics gr, int mouseOverIndex, int x, int y)
+	{
+		float tempDrawX = domainXOffset;
+		int drawX = (int) tempDrawX;
+		
 		float tempDrawY = 0;
 		int drawY = (int) tempDrawY;
 		
