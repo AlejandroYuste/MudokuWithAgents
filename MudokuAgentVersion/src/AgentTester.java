@@ -1,7 +1,7 @@
 import java.util.Random;
 
 
-public class AgentContributor implements Runnable{
+public class AgentTester implements Runnable{
 
 	Random random = new Random(System.nanoTime());
 	int agentId;
@@ -10,10 +10,11 @@ public class AgentContributor implements Runnable{
 	Agent agent;
 	
 	
-	AgentContributor(Agent agent_, int agentId_, int agentType_)
+	AgentTester(Agent agent_, int agentId_, int agentType_)
 	{
 		agentId = agentId_;
 		agentType = agentType_;
+		
 		agent = agent_;
 	}
 	
@@ -28,7 +29,7 @@ public class AgentContributor implements Runnable{
 				
 				if (!agent.getConflictExists())
 				{
-					Agent.setValue(agentId, agentType);
+					Agent.checkGrid(agentId, agentType);
 					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 3000);
 				}	
 				

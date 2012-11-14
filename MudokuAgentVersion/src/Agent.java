@@ -10,6 +10,10 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	
 	AgentContributor agentContributor;
 	Thread agentContributorThread;
+	AgentTester agentTester;
+	Thread agentTesterThread;
+	AgentCommitter agentCommitter;
+	Thread agentCommitterThread;
 	
 	ThreadsInformation threadInfo;
 	List<ThreadsInformation> ThreadsAgent = new ArrayList<ThreadsInformation>();
@@ -42,11 +46,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	
 	static void SendMessage(String message)
 	{
-		controller.SendMessage(message);
+		AgentNetworkController.SendMessage(message);
 	}
 	
 	@SuppressWarnings("deprecation")
-	void stopExecuting(int agentId_)
+	void stopExecuting(int agentId_)		//TODO: Aixo no Funciona
 	{
 		for(int i=0; i<ThreadsAgent.size();i++)
 		{
@@ -67,49 +71,32 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		//System.out.println("Agent --> Executant el Thread del Agent: " + agentId);
 		switch(agentType)
 		{
-			case 0:
+			case 0: case 1: case 2:
 				agentContributor = new AgentContributor(this, agentId, agentType);
 				agentContributorThread = new Thread(agentContributor);        
 				agentContributorThread.start();
 				
 				ThreadsAgent.add(new ThreadsInformation(agentContributorThread, agentId)); 
 				break;
-			case 1:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
+			case 3: case 4: case 5:
+				agentTester = new AgentTester(this, agentId, agentType);
+				agentTesterThread = new Thread(agentTester);        
+				agentTesterThread.start();
+				
+				ThreadsAgent.add(new ThreadsInformation(agentTesterThread, agentId)); 
 				break;
-			case 2:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
+			case 6: case 7: case 8:			//TODO: Votacions no Funcionen correctament
+				agentCommitter = new AgentCommitter(this, agentId, agentType);
+				agentCommitterThread = new Thread(agentCommitter);        
+				agentCommitterThread.start();
+				
+				ThreadsAgent.add(new ThreadsInformation(agentCommitterThread, agentId)); 
 				break;
-			case 3:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 4:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 5:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 6:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 7:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 8:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
-			case 9:
-				agentContributorThread = new Thread(agentContributor);        
-				agentContributorThread.start();
-				break;
+
+			/*case 9:
+				agentLeader = new Thread(Leader);        
+				agentLeader.start();
+				break;*/
 		}
 	}	
 	
@@ -126,7 +113,8 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				e.printStackTrace();
 			}
 			
-			int[][] actualGrid = controller.getActualGrid();
+			int[][] actualGrid = AgentNetworkController.getActualGrid();
+			
 			int i, j, val;
 			ArrayList<Integer> options = new ArrayList<Integer>();
 			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
@@ -140,9 +128,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			{
 				case(0):		//Agent que nomes treballa per files		
 					
-					for(j=0;j<controller.getSudokuSize();j++)
+					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 					{
-						for(i=0;i<controller.getSudokuSize();i++)
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
 							if(actualGrid[i][j] != -1)
 								options.add(actualGrid[i][j]);
@@ -164,11 +152,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					
 					options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
-					val = random.nextInt(controller.getSudokuSize()) + 1;
+					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					
 					while(options.contains(val))
 					{
-						val = random.nextInt(controller.getSudokuSize()) + 1;
+						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
 					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -177,9 +165,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(1):		//Agent que nomes treballa per Columnes
 								
-					for(j=0;j<controller.getSudokuSize();j++)
+					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 					{
-						for(i=0;i<controller.getSudokuSize();i++)
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
 							if(actualGrid[j][i] != -1)
 								options.add(actualGrid[j][i]);
@@ -201,11 +189,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
 					
-					val = random.nextInt(controller.getSudokuSize()) + 1;
+					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					
 					while(options.contains(val))
 					{
-						val = random.nextInt(controller.getSudokuSize()) + 1;
+						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
 					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -214,11 +202,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(2):		////Agent que nomes treballa per Quadrats
 					
-					int sizeSquare = (int) Math.sqrt(controller.getSudokuSize());
+					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
-					for (int row=0; row<controller.getSudokuSize();row+=sizeSquare)
+					for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
 					{
-						for (int column=0; column<controller.getSudokuSize();column+=sizeSquare)
+						for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
 						{
 							for(i=0;i<sizeSquare;i++)
 							{
@@ -247,11 +235,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					int region = controller.getRegion(i, j);
 					
 					options = listOptions.get(region);	//Obtenim les opcions que tenim per aquella fila
-					val = random.nextInt(controller.getSudokuSize()) + 1;
+					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					
 					while(options.contains(val))
 					{
-						val = random.nextInt(controller.getSudokuSize()) + 1;
+						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
 					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
@@ -275,7 +263,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			
 			boolean cleanPosition = false;
 			
-			int[][] actualGrid = controller.getActualGrid();
+			int[][] actualGrid = AgentNetworkController.getActualGrid();
 			int i, j, val;
 			ArrayList<Integer> options = new ArrayList<Integer>();
 			ArrayList<Integer> searchingList = new ArrayList<Integer>();
@@ -291,9 +279,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			{
 				case(0):		//Agent que nomes treballa per files
 							
-				for(j=0;j<controller.getSudokuSize();j++)
+				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 				{
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
 						if(actualGrid[i][j] != -1)
 						{
@@ -312,7 +300,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					optionsPosition = new ArrayList<int[]>();
 				}
 								
-				for(i=0;i<controller.getSudokuSize();i++)
+				for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 				{
 					options = new ArrayList<Integer>();
 					optionsPosition = new ArrayList<int[]>();
@@ -350,9 +338,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(1):		//Agent que nomes treballa per Columnes	
 
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
-						for(j=0;j<controller.getSudokuSize();j++)
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
 							if(actualGrid[i][j] != -1)
 							{
@@ -371,7 +359,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						optionsPosition = new ArrayList<int[]>();
 					}
 						
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
 						options = new ArrayList<Integer>();
 						optionsPosition = new ArrayList<int[]>();
@@ -409,11 +397,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(2):		////Agent que nomes treballa per Quadrats
 							
-					int sizeSquare = (int) Math.sqrt(controller.getSudokuSize());
+					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
-					for (int row=0; row<controller.getSudokuSize();row+=sizeSquare)
+					for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
 					{
-						for (int column=0; column<controller.getSudokuSize();column+=sizeSquare)
+						for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
 						{
 							for(i=0;i<sizeSquare;i++)
 							{
@@ -438,7 +426,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						}
 					}
 					
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
 						options = new ArrayList<Integer>();
 						optionsPosition = new ArrayList<int[]>();
@@ -486,7 +474,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			boolean firstTime = false;
 			boolean alreadyVoted = false;
 			
-			int[][] actualGrid = controller.getActualGrid();
+			int[][] actualGrid = AgentNetworkController.getActualGrid();
 			int i, j, val, conflictX, conflictY;
 			ArrayList<Integer> options = new ArrayList<Integer>();
 			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
@@ -499,9 +487,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			{
 				case(0):		//Agent que nomes treballa per files
 							
-				for(j=0;j<controller.getSudokuSize();j++)
+				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 				{
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
 						if(actualGrid[i][j] != -1)
 						{
@@ -520,8 +508,8 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					optionsPosition = new ArrayList<int[]>();
 				}
 								
-				conflictX = controller.getPositionXConflict();
-				conflictY = controller.getPositionYConflict();
+				conflictX = AgentNetworkController.getPositionXConflict();
+				conflictY = AgentNetworkController.getPositionYConflict();
 				
 				options = listOptions.get(conflictY);
 				val = actualGrid[conflictX][conflictY];
@@ -547,9 +535,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(1):		//Agent que nomes treballa per Columnes	
 
-					for(i=0;i<controller.getSudokuSize();i++)
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
-						for(j=0;j<controller.getSudokuSize();j++)
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
 							if(actualGrid[i][j] != -1)
 							{
@@ -568,8 +556,8 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						optionsPosition = new ArrayList<int[]>();
 					}
 						
-					conflictX = controller.getPositionXConflict();
-					conflictY = controller.getPositionYConflict();
+					conflictX = AgentNetworkController.getPositionXConflict();
+					conflictY = AgentNetworkController.getPositionYConflict();
 					
 					options = listOptions.get(conflictX);
 					val = actualGrid[conflictX][conflictY];
@@ -593,11 +581,11 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 				case(2):		////Agent que nomes treballa per Quadrats
 							
-					int sizeSquare = (int) Math.sqrt(controller.getSudokuSize());
+					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
-					for (int row=0; row<controller.getSudokuSize();row+=sizeSquare)
+					for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
 					{
-						for (int column=0; column<controller.getSudokuSize();column+=sizeSquare)
+						for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
 						{
 							for(i=0;i<sizeSquare;i++)
 							{
@@ -622,8 +610,8 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						}
 					}
 					
-					conflictX = controller.getPositionXConflict();
-					conflictY = controller.getPositionYConflict();
+					conflictX = AgentNetworkController.getPositionXConflict();
+					conflictY = AgentNetworkController.getPositionYConflict();
 					
 					val = controller.getRegion(conflictX, conflictY);
 					options = listOptions.get(val);

@@ -9,9 +9,6 @@ import choco.kernel.solver.variables.integer.IntDomain;
 
 public class AgentGameController extends GameController implements ActionListener 
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public enum NetworkState {idle, waitingInit, waitingConfirm}
@@ -22,18 +19,15 @@ public class AgentGameController extends GameController implements ActionListene
 	Label TypeAgentsLabel;
 	Label AgentsConnected;
 	Label AddNewAgents;
+	
 	TextField NumAgentsField;
 	Choice TypeAgentsField;
-	List panelAgentsConnected;
-	Panel listPanel;
+	List listPanel;
 
 	Button connectClientButton;
 	Button connectAgentsButton;
 	Button clearButton;
 	Button disconnectButton;
-	//Button yesButton;
-	//Button noButton;
-	//Label conflictLabel;
 	
 	int[][] instantiator;
 	static AgentNetworkController networkController;
@@ -71,48 +65,43 @@ public class AgentGameController extends GameController implements ActionListene
 		agentColors[6] = new Color(0, 206, 209);
 	}
 
-	public void init()										//Aqui comenÃ§a l'execucio del Applet
+	public void init()										//Aqui comença l'execucio del Applet
 	{
 		super.init();										//Cirdem al init de GameController
 		
 		// Components from Here:
-		
-		listPanel = new Panel();
+		listPanel = new List(10);
 		listPanel.setLocation(gridEndX + 75, 40);
-		listPanel.setSize(130, 160);
-		add(listPanel);
+		listPanel.setSize(240, 160);
 		listPanel.setVisible(false);
+		add(listPanel);
 		
 		NumAgentsField = new TextField(20);
-		NumAgentsField.setSize(150,20);
-		NumAgentsField.setLocation(gridXOffset, 100);
-		NumAgentsField.setText("1");			//127.0.0.1
+		NumAgentsField.setSize(160, 20);
+		NumAgentsField.setLocation(gridXOffset, 520);
+		NumAgentsField.setText("1");
 		add(NumAgentsField);
 		NumAgentsField.setVisible(false);
 		
 		TypeAgentsField = new Choice();
-		TypeAgentsField.setSize(250, 260);
-		TypeAgentsField.add("Row Agent");
-		TypeAgentsField.add("Column Agent");
-		TypeAgentsField.add("Square Agent");
-		TypeAgentsField.setVisible(false);
-		
-		panelAgentsConnected = new List(10, false);
-		panelAgentsConnected.setLocation(gridEndX + 75, 40);
-		panelAgentsConnected.setSize(400, 200);
-		//panelAgentsConnected.add("Johnny");
-		//panelAgentsConnected.setVisible(true);
-		//panelAgentsConnected.addActionListener(this);
-		listPanel.add(panelAgentsConnected);
-		
-		TypeAgentsField.setSize(100,20);
-		TypeAgentsField.setLocation(gridXOffset + 150 + 20, 100);
+		TypeAgentsField.setSize(150, 500);
+		TypeAgentsField.add("Row Contributor");
+		TypeAgentsField.add("Column Contributor");
+		TypeAgentsField.add("Square Contributor");
+		TypeAgentsField.add("Row Tester");
+		TypeAgentsField.add("Column Tester");
+		TypeAgentsField.add("Square Tester");
+		TypeAgentsField.add("Row Committer");
+		TypeAgentsField.add("Column Committer");
+		TypeAgentsField.add("Square Committer");
+		TypeAgentsField.setVisible(false);	
+		TypeAgentsField.setLocation(gridXOffset + 160 + 20, 520);
 		add(TypeAgentsField);
 		
 		//Buttons from here!
 		connectAgentsButton = new Button("Connect Agents");
-		connectAgentsButton.setSize(120,20);
-		connectAgentsButton.setLocation(gridXOffset + 150 + 100 + 80, 100);
+		connectAgentsButton.setSize(160, 40);
+		connectAgentsButton.setLocation(gridXOffset + 180 + 100 + 80, 500);
 		connectAgentsButton.setActionCommand("connectAgents");
 		connectAgentsButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectAgentsButton);
@@ -120,29 +109,29 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		connectClientButton = new Button("Connect to the Server");
 		connectClientButton.setSize(200,150);
-		connectClientButton.setLocation(220, 100);
+		connectClientButton.setLocation(300, 100);
 		connectClientButton.setActionCommand("connect");
 		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectClientButton);
 		
 		disconnectButton = new Button("Disconnect Agent");
 		disconnectButton.setSize(120,20);
-		disconnectButton.setLocation(gridEndX + 80, 210);
+		disconnectButton.setLocation(gridEndX + 140, 210);
 		disconnectButton.setActionCommand("disconnect");
 		disconnectButton.addActionListener(this);				//Afegim el Listener al button "Connect"
-		add(disconnectButton);
 		disconnectButton.setVisible(false);
-
+		add(disconnectButton);
 		
-		// Labels From here:
-		
+		//Labels from Here
 		Title = new Label("Welcome to Mudoku-Agents Version");
+		Font font = new Font("SansSerif", Font.BOLD, 15);
+		Title.setFont(font);
 		Title.setAlignment(Label.CENTER);
-		Title.setSize(250,20);
-		Title.setLocation(200, 20);
+		Title.setSize(400,150);
+		Title.setLocation(200, 0);
 		add(Title);
 		
-		AddNewAgents = new Label("Add New Agents:");
+		AddNewAgents = new Label("Add New Agents to the Community:");
 		AddNewAgents.setSize(250,20);
 		AddNewAgents.setLocation(gridXOffset, 475);
 		add(AddNewAgents);
@@ -150,22 +139,23 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		AgentsConnected = new Label("Agents Connected:");
 		AgentsConnected.setSize(250,20);
-		AgentsConnected.setLocation(gridEndX + 80, 20);
+		AgentsConnected.setLocation(gridEndX + 140, 20);
 		add(AgentsConnected);
 		AgentsConnected.setVisible(false);
 		
-		NumAgentsLabel = new Label("Number of Agents:");
-		NumAgentsLabel.setSize(150,20);
-		NumAgentsLabel.setLocation(gridXOffset, 80);
+		NumAgentsLabel = new Label("Select the Number of Agents:");
+		NumAgentsLabel.setSize(180,20);
+		NumAgentsLabel.setLocation(gridXOffset, 500);
+		//NumAgentsLabel.setForeground(Color.green);			//Podem Canviar el Colors dels Menus
 		add(NumAgentsLabel);
 		NumAgentsLabel.setVisible(false);
 		
-		TypeAgentsLabel = new Label("Select Type Agents:");
-		TypeAgentsLabel.setSize(100,20);
-		TypeAgentsLabel.setLocation(gridXOffset + 150 + 20, 80);
+		TypeAgentsLabel = new Label("Select the Type of Agents:");
+		TypeAgentsLabel.setSize(180,20);
+		TypeAgentsLabel.setLocation(gridXOffset + 160 + 20, 500);
 		add(TypeAgentsLabel);
 		TypeAgentsLabel.setVisible(false);
-		
+	
 		networkController = new AgentNetworkController(this);
 		HideVote();					//Ocultem els botons innecessaris
 	}
@@ -173,11 +163,13 @@ public class AgentGameController extends GameController implements ActionListene
 	@Override
 	public void paint ( Graphics gr )
 	{
-		initDraw(gr);		//S'ha d'inicialitzar cada vegada?
+		initDraw(gr);				//S'ha d'inicialitzar cada vegada?
 		switch(state)
 		{
 		case game:
 			DrawGrid(gr);
+			break;
+		default:
 			break;
 		}
 	}
@@ -232,10 +224,11 @@ public class AgentGameController extends GameController implements ActionListene
 			lineY = (int) tempLineY;
 		}
 
-		gr.drawLine(0, 10, 0, 460);			//Separador Grid Vertical-Dreta
-		gr.drawLine(0, 460, 470, 460);		//Separador Grid Horizintal
-		//gr.drawLine(0, 470, 470, 470);		//Separador Grid Horizintal
-		gr.drawLine(470, 10, 470, 460);		//Separador Grid Vertical-Esquerra
+		//TODO: Milorar interficie grafica separant les seccions del Applet
+		//gr.drawLine(0, 10, 0, 460);			//Separador Grid Vertical-Esquerra
+		gr.drawLine(20, 460, 470, 460);		//Separador Grid Horizintal
+		//gr.drawLine(0, 470, 470, 470);	//Segon Separador Grid Horizintal
+		gr.drawLine(470, 10, 470, 460);		//Separador Grid Vertical-Dreta
 		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -250,7 +243,7 @@ public class AgentGameController extends GameController implements ActionListene
 			for (int x = 0; x < sudokuSize; x++) {
 				if (cells[x][y].current == -1) {
 					gr.setColor(Color.black);
-					/*if(cpController.GetCPVariable(x, y).getDomainSize() == 1)	//Quan nomes podem tenir una posicio a una casella
+					/*if(cpController.GetCPVariable(x, y).getDomainSize() == 1)	//Quan nomes podem tenir un unic valor a una casella
 					{
 						gr.drawString("*", (int) (lineX + deltaX / 2) - 5,
 								(int) (lineY + deltaY) - 10);					//sa puta merda de asterisc esta aqui
@@ -273,11 +266,11 @@ public class AgentGameController extends GameController implements ActionListene
 					{
 						gr.setColor(Color.red);
 						
-						/*int conX = (int) (gridXOffset + conflictX * deltaX);
+						int conX = (int) (gridXOffset + conflictX * deltaX);
 						int conY = (int) (gridYOffset + conflictY * deltaY);
 						gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
 						gr.setColor(agentColors[clearRequester]);
-						//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);*/
+						//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
 					}
 					else
 					{
@@ -357,8 +350,8 @@ public class AgentGameController extends GameController implements ActionListene
 				networkController.Connect(Integer.parseInt(NumAgentsField.getText()), TypeAgentsField.getSelectedIndex());
 				break;
 			case "disconnect":
-				int index = panelAgentsConnected.getSelectedIndex();
-				String AgentName = panelAgentsConnected.getSelectedItem();
+				int index = listPanel.getSelectedIndex();
+				String AgentName = listPanel.getSelectedItem();
 				
 				
 				String[] vars = AgentName.split(" ");
@@ -366,7 +359,7 @@ public class AgentGameController extends GameController implements ActionListene
 				
 				int agentId = Integer.parseInt(vars[1]);
 				networkController.stopExecuting(agentId);
-				panelAgentsConnected.remove(index);
+				listPanel.remove(index);
 				break;
 				
 			case "voteEnd":
@@ -418,7 +411,7 @@ public class AgentGameController extends GameController implements ActionListene
 	
 	public void RequestInit()
 	{
-		networkController.SendMessage("request#type=init");			//Aqui no es important el clientId ja que nomes hi ha un framework
+		AgentNetworkController.SendMessage("request#type=init");			//Aqui no es important el clientId ja que nomes hi ha un framework
 		networkState = NetworkState.waitingInit;
 	}
 	
@@ -427,7 +420,7 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		IntDomain idom = cpController.GetCPVariable(activeX, activeY).getDomain();
 		DisposableIntIterator iter = idom.getIterator();
-		int val = 1;
+		int val;
 		for(;index >= 0 && iter.hasNext(); index--)
 		{
 			val = iter.next();
@@ -565,24 +558,15 @@ public class AgentGameController extends GameController implements ActionListene
 		Title.setVisible(false);
 		connectClientButton.setVisible(false);
 		connectAgentsButton.setVisible(true);
-		
 		AddNewAgents.setVisible(true);
 		AgentsConnected.setVisible(true);
-		listPanel.setVisible(true);
 		disconnectButton.setVisible(true);
+		listPanel.setVisible(true);
 		NumAgentsLabel.setVisible(true);
 		NumAgentsField.setVisible(true);
 		TypeAgentsLabel.setVisible(true);
 		TypeAgentsField.setVisible(true);
-		
-		NumAgentsLabel.setLocation(gridXOffset, 500);
-		//NumAgentsLabel.setForeground(Color.green);			//Podem Canviar el Colors dels Menus
-		NumAgentsField.setLocation(gridXOffset, 520);
-		
-		TypeAgentsLabel.setLocation(gridXOffset + 150 + 20, 500);
-		TypeAgentsField.setLocation(gridXOffset + 150 + 20, 520);
-		
-		connectAgentsButton.setLocation(gridXOffset + 150 + 100 + 80, 520);
+
 		state = GameState.game;
 	}
 	
@@ -605,7 +589,7 @@ public class AgentGameController extends GameController implements ActionListene
 	
 	int getRegion(int x, int y)
 	{
-		return getRegion(x, y);
+		return super.getRegion(x, y);
 	}
 	
 	public int[][] getActualGrid()

@@ -53,12 +53,12 @@ public class AgentNetworkController {
 	
 	static int getSudokuSize()
 	{
-		return gameController.sudokuSize;
+		return GameController.sudokuSize;
 	}
 	
 	int getNumAgentsConnected()
 	{
-		return gameController.panelAgentsConnected.getItemCount();
+		return gameController.listPanel.getItemCount();
 	}
 	
 	public boolean getConflictExists()
@@ -149,7 +149,7 @@ public class AgentNetworkController {
 
 		for (int i=0; i<numAgents; i++)
         {
-	        gameController.panelAgentsConnected.add("Agent [" + agentId + "] --> " + stringAgentType);
+	        gameController.listPanel.add("Agent [" + agentId + "] --> " + stringAgentType);
 	        
 	        agent = new Agent(this, agentId, typeAgent);
 	        agent.executarAgents(agentId, typeAgent);

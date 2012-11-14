@@ -9,7 +9,7 @@ public class CellVariable {
 	int current;
 	boolean contradicting;
 	
-	enum CellState {initializedByServer, contribution, committed, accepted}
+	enum CellState {initializedByServer, waitingValue, contribution, committed, accepted}
 	CellState cellState;
 
 	static int domainXOffset = 350;
@@ -24,12 +24,14 @@ public class CellVariable {
 	
 	boolean isConstant;
 
-	public CellVariable(int x_, int y_)
+	public CellVariable(int x_, int y_)		//TODO: Afeguir lo del estat per cada cel·la segon l'estat de la contribucio
 	{
 		current = -1;
 		contradicting = false;
 		x = x_;
 		y = y_;
+		
+		cellState = cellState.waitingValue;
 	}
 	
 	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y)

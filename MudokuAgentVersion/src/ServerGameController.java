@@ -14,6 +14,8 @@ public class ServerGameController extends GameController implements ActionListen
 
 	static ServerNetworkController networkController;
 	Thread serverThread;
+	
+	Label Title;
 	List console;
 
 	int[][] instantiator;
@@ -33,8 +35,15 @@ public class ServerGameController extends GameController implements ActionListen
 		super();
 		setLayout(null);
 		GameController.sudokuSize = 16;
+		
+		Title = new Label("Server Log:");
+		Title.setSize(250,20);
+		Title.setLocation(20, 10);
+		add(Title);
+		
 		console = new List();
-		console.setSize(775, 500);
+		console.setLocation(10, 40);
+		console.setSize(780, 560);
 
 		add(console);
 		votingExists = false;
@@ -46,12 +55,13 @@ public class ServerGameController extends GameController implements ActionListen
 		console.add(message);
 		console.makeVisible(console.getItemCount()-1);
 	}
+	
 	public void init()
 	{
 		super.init();
 		Initialize();
 		InitializeRandomProblem(40);
-		Print("Server: Initialized Random Problem");
+		Print("Server: Initialized Random Solution.");
 		
 		networkController = new ServerNetworkController(this);
 		serverThread = new Thread(networkController);
@@ -73,6 +83,8 @@ public class ServerGameController extends GameController implements ActionListen
 			case game:
 				DrawGrid(gr);
 				break;
+		default:
+			break;
 		}
 	}
 

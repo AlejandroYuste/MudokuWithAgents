@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import choco.kernel.solver.ContradictionException;
 
 public class SinglePlayerGameController extends GameController implements ActionListener 
 {
