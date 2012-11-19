@@ -3,14 +3,22 @@ import java.awt.Graphics;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.solver.variables.integer.IntDomain;
-import choco.kernel.solver.variables.integer.IntDomainVar;
 
-public class CellVariable {
-	int current;
-	boolean contradicting;
+public class CellVariable 
+{
 	
-	enum CellState {initializedByServer, waitingValue, contribution, committed, accepted}
-	CellState cellState;
+	int x, y, valueState, current;
+	boolean contradicting, isConstant;
+
+	/* cellState = 0 --> waitingValue
+	 * cellState = 1 --> initializedByServer
+	 * cellState = 2 --> contribution By Rows
+	 * cellState = 3 --> contribution By Columns
+	 * cellState = 4 --> contribution By Squares
+	 * cellState = 5 --> contribution By User
+	 * cellState = 6 --> committed
+	 * cellState = 7 --> accepted
+	 */
 
 	static int domainXOffset = 350;
 	static int domainYOffset = 400;
@@ -18,20 +26,16 @@ public class CellVariable {
 	static int domainWidth = 400;
 	static float deltaX;
 	static float deltaY;
-	
-	int x;
-	int y;
-	
-	boolean isConstant;
 
 	public CellVariable(int x_, int y_)		//TODO: Afeguir lo del estat per cada cel·la segon l'estat de la contribucio
 	{
 		current = -1;
+		valueState = 0;
+		
 		contradicting = false;
+		
 		x = x_;
 		y = y_;
-		
-		cellState = cellState.waitingValue;
 	}
 	
 	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y)
@@ -79,23 +83,6 @@ public class CellVariable {
 			tempDrawY += deltaY;
 			drawY = (int) tempDrawY;
 		}
-		
-		/*if(mouseOverIndex != -1)
-		{
-			gr.setColor(AgentGameController.mouseOverColor);
-			gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
-			gr.drawRect((int)(domainYOffset + mouseOverIndex * deltaY), domainXOffset, (int)deltaY, (int)deltaX);
-		}
-		
-		IntDomainVar intvar = GameController.cpController.GetCPVariable(x, y);
-		gr.setColor(Color.blue);
-		for(DisposableIntIterator i = intvar.getDomain().getIterator(); i.hasNext();)
-		{
-			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(i.next()), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
-			tempDrawX += deltaX;
-			drawX = (int) tempDrawX;
-		}*/
 	}
 	
 	public int EvaluateClick(int mouseX, int mouseY)
@@ -110,10 +97,12 @@ public class CellVariable {
 		}
 		return val;
 	}
+	
 	public void SetConstant()
 	{
 		isConstant = true;
 	}
+	
 	public boolean IsConstant()
 	{
 		return isConstant;

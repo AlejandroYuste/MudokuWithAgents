@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
-import choco.kernel.solver.ContradictionException;
 
 public class GameController extends Applet implements ActionListener {
 
@@ -12,9 +11,7 @@ public class GameController extends Applet implements ActionListener {
 	}
 
 	protected GameState state;
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	static int screenWidth = 800;
 	static int screenHeight = 600;
@@ -129,15 +126,16 @@ public class GameController extends Applet implements ActionListener {
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
-			//System.out.println(x + " , " + y);
-			if (cells[x][y].current == -1) 
+			if (cells[x][y].valueState == 0) 
 			{
 				val = random.nextInt(sudokuSize) + 1;			//Utilitzem per inicialitzar
 				
 				if (checkPosition(x, y, val)) 
 				{
 					count--;
-					cells[x][y].current = val;
+					//cells[x][y].valueState = 1;				//Posem l'estat de la cel·la a initilizedByServer
+					//cells[x][y].current = val;
+					SetValueAndState(x, y, val, 1);
 				}
 			}
 		}
@@ -154,7 +152,7 @@ public class GameController extends Applet implements ActionListener {
 		{
 			for(j=0;j<sudokuSize;j++)
 			{
-				if(cells[i][j].current != -1)
+				if(cells[i][j].valueState != 0)
 					number.add(cells[i][j].current);
 			}
 			listNumbers.add(number);
@@ -174,7 +172,7 @@ public class GameController extends Applet implements ActionListener {
 		{
 			for(i=0;i<sudokuSize;i++)
 			{
-				if(cells[i][j].current != -1)
+				if(cells[i][j].valueState != 0)
 					number.add(cells[i][j].current);
 			}
 			listNumbers.add(number);
@@ -200,7 +198,7 @@ public class GameController extends Applet implements ActionListener {
 				{
 					for(j=0;j<sizeSquare;j++)
 					{
-						if(cells[i + row][j + column].current != -1)
+						if(cells[i + row][j + column].valueState != 0)
 							number.add(cells[i + row][j + column].current);
 					}
 				}
@@ -370,10 +368,9 @@ public class GameController extends Applet implements ActionListener {
 		// Draw Values
 		for (int y = 0; y < sudokuSize; y++) {
 			for (int x = 0; x < sudokuSize; x++) {
-				if (cells[x][y].current == -1) {
+				if (cells[x][y].valueState == 0) {
 					if (cpController.GetCPVariable(x, y).getDomainSize() == 1) {
-						gr.drawString("*", (int) (lineX + deltaX / 2) - 5,
-								(int) (lineY + deltaY) - 10);
+						gr.drawString("*", (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
 					}
 					tempLineX += deltaX;
 					lineX = (int) tempLineX;
@@ -440,13 +437,15 @@ public class GameController extends Applet implements ActionListener {
 			return;
 		}
 		cells[x][y].current = -1;
-		try {
+		cells[x][y].valueState = 0;
+				
+		/*try {
 			cpController.Refresh(cells);
 		} catch (ContradictionException e) {
 			// TODO Auto-generated catch block
 			System.out.println("refresh failed");
 			e.printStackTrace();
-		}
+		}*/
 		repaint();
 	}
 	
@@ -538,30 +537,15 @@ public class GameController extends Applet implements ActionListener {
 	
 	
 	//Instantiates active cell with given value
-	public void SetValue(int value) {
+	/*public void SetValue(int value) {
 		cells[activeX][activeY].current = value;
-		
-		/*try {
-			cpController.InstantiateVar(activeX, activeY, value);// setVal(selectedValue);
-			cpController.Propagate();
-		} catch (ContradictionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-	}
+	}*/
 	
-	public void SetValue(int x, int y, int value) {
+	public void SetValueAndState(int x, int y, int value, int state) {
 		cells[x][y].current = value;
-		
-		/*try {
-			cpController.InstantiateVar(x, y, value);		// setVal(selectedValue);
-		    cpController.Propagate();
-		} catch (ContradictionException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Es prudueix un error a setValue del GameController: " + e);
-			e.printStackTrace();
-		}*/
+		cells[x][y].valueState = state;
 	}
+
 
 	public void MouseOverCell(int x, int y) {
 		mouseOverGrid = true;
@@ -608,7 +592,7 @@ public class GameController extends Applet implements ActionListener {
 	{
 		for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
-				if (cells[i][k].current == -1) {
+				if (cells[i][k].valueState == 0) {
 					if (cpController.GetCPVariable(i, k).getDomainSize() == 0) {
 						System.out.println("domain wipe out at " + i + "," + k);
 					}

@@ -29,8 +29,9 @@ public class AgentContributor implements Runnable{
 				if (!agent.getConflictExists())
 				{
 					Agent.setValue(agentId, agentType);
-					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 3000);
-				}	
+					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 2000);
+				}
+				else Thread.sleep(10000);
 				
 			} catch (InterruptedException e) {
 				System.out.println("Error Produit al Run del Thread del Agent: " + agentId);

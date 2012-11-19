@@ -1,9 +1,10 @@
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Random;
 import java.io.*;
 
-public class AgentNetworkController {
-	
+public class AgentNetworkController 
+{
 	String host;
 	int port;
 	int numAgents;
@@ -51,6 +52,11 @@ public class AgentNetworkController {
 		return gameController.getActualGrid();
 	}
 	
+	public static int[][] getActualState()
+	{
+		return gameController.getActualState();
+	}
+	
 	static int getSudokuSize()
 	{
 		return GameController.sudokuSize;
@@ -61,7 +67,7 @@ public class AgentNetworkController {
 		return gameController.listPanel.getItemCount();
 	}
 	
-	public boolean getConflictExists()
+	boolean getConflictExists()
 	{
 		return gameController.getConflictExists();
 	}
@@ -90,6 +96,95 @@ public class AgentNetworkController {
 	static int getPositionXConflict()
 	{
 		return conflictX;
+	}
+	
+	void createRandomCommunity(int numRandomAgents)
+	{
+		if (numRandomAgents >= 10)
+		{
+			int countAgents = numRandomAgents;
+			int[] numAgentsToAdd = new int[10];
+			
+			for(int i=0; i<numAgentsToAdd.length; i++)
+			{
+				numAgentsToAdd[i] = 1;
+				countAgents--;
+			}
+			
+			/*Proportion of Agents:
+			 * Contributors -> 50%
+			 * Testers -> 30%
+			 * Committers -> 20%
+			 */
+			
+			int numContributors = (int) Math.round(countAgents*0.5);
+			countAgents -= numContributors;
+			int numTesters = (int) Math.round(countAgents*0.3);
+			countAgents -= numTesters;
+			//int numCommitters = (int) Math.round(countAgents*0.2);
+			int numCommitters = countAgents;
+			countAgents -= numCommitters;
+			
+			Random random = new Random(System.nanoTime());
+			int index;
+			int typeAgent = -1;
+			
+			for(int i=0; i<numContributors; i++)
+			{
+				index = random.nextInt(3);
+				numAgentsToAdd[index]++;
+			}
+			for(int i=0; i<numTesters; i++)
+			{
+				index = random.nextInt(3) + 3;
+				numAgentsToAdd[index]++;
+			}	
+			for(int i=0; i<numCommitters; i++)
+			{
+				index = random.nextInt(3) + 6;
+				numAgentsToAdd[index]++;
+			}
+			
+			
+			for(int i=0; i<numAgentsToAdd.length; i++)
+			{
+				switch(i)
+				{
+					case 0:
+						typeAgent = 0;
+						break;
+					case 1:
+						typeAgent = 1;
+						break;
+					case 2:
+						typeAgent = 2;
+						break;
+					case 3:
+						typeAgent = 4;
+						break;
+					case 4:
+						typeAgent = 5;
+						break;
+					case 5:
+						typeAgent = 6;
+						break;
+					case 6:
+						typeAgent = 8;
+						break;
+					case 7:
+						typeAgent = 9;
+						break;
+					case 8:
+						typeAgent = 10;
+						break;
+					case 9:
+						typeAgent = 12;
+						break;
+				}
+				
+				Connect(numAgentsToAdd[i], typeAgent);
+			}
+		}
 	}
 	
 	public void Connect(String host_, int port_) throws UnknownHostException, IOException
@@ -124,26 +219,26 @@ public class AgentNetworkController {
 			case 2:
 				stringAgentType = "Contributor by Squares";
 				break;
-			case 3:
+			case 4:
 				stringAgentType = "Tester by Rows";
 				break;
-			case 4:
+			case 5:
 				stringAgentType = "Tester by Columns";
 				break;
-			case 5:
-				stringAgentType = "Terse by Squares";
-				break;
 			case 6:
-				stringAgentType = "Comitter by Rows";
-				break;
-			case 7:
-				stringAgentType = "Comitter by Columns";
+				stringAgentType = "Tester by Squares";
 				break;
 			case 8:
-				stringAgentType = "Comitter by Squares";
+				stringAgentType = "Comitter by Rows";
 				break;
 			case 9:
-				stringAgentType = "Project Manager";
+				stringAgentType = "Comitter by Columns";
+				break;
+			case 10:
+				stringAgentType = "Comitter by Squares";
+				break;
+			case 12:
+				stringAgentType = "Project Leader";
 				break;
 		}
 

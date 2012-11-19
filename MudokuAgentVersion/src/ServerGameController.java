@@ -103,10 +103,16 @@ public class ServerGameController extends GameController implements ActionListen
 	{
 		votingExists = false;
 		voteCountTimer.stop();
+		
 		if(EvaluateVote())
 		{
 			networkController.BroadcastMessage("clear#" + conflictX + "," + conflictY);
 			ClearCell(conflictX, conflictY);
+		}
+		else
+		{
+			networkController.BroadcastMessage("NOclear#" + conflictX + "," + conflictY);
+			SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
 		}
 	}
 	
@@ -117,9 +123,9 @@ public class ServerGameController extends GameController implements ActionListen
 		{
 			for(int k = 0; k < sudokuSize; k++)
 			{
-				if(cells[i][k].current != -1)
+				if(cells[i][k].valueState != 0)
 				{
-					code += i + "," + k + "," + cells[i][k].current + "," + instantiator[i][k] + "&";
+					code += i + "," + k + "," + cells[i][k].current + "," + cells[i][k].valueState + "," + instantiator[i][k] + "&";
 				}
 			}
 		}
@@ -168,25 +174,31 @@ public class ServerGameController extends GameController implements ActionListen
 				int y = Integer.parseInt(vars2[3]);
 				int val = Integer.parseInt(vars2[4]);
 
-
-				/*if(TryInstantiate(x,y,val))
-				{
-					Print("Instantiation succeeded");
-					instantiator[x][y] = agentType;
-					networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + instantiator[x][y]);	
-				}
+				if (agentId == -1)
+					Print("User contributed with the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
 				else
+					Print("Server: Agent " + agentId + " Contributed at the Position [" + x +"][" + y +"] with the Value [" + val + "]");
+				
+				switch(agentType)
 				{
-					Print("Instantiation failed");
-					clientHandler.SendMessage("instantiate_failed");
-				}*/
+					case 0:
+						SetValueAndState(x, y, val, 2);		//cellState = 2 --> contribution By Rows
+						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 2);	
+						break;
+					case 1:
+						SetValueAndState(x, y, val, 3);		//cellState = 3 --> contribution By Columns
+						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 3);	
+						break;
+					case 2:	
+						SetValueAndState(x, y, val, 4);		//cellState = 4 --> contribution By Squares
+						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 4);	
+						break;
+					case -1:	
+						SetValueAndState(x, y, val, 5);		//cellState = 4 --> contribution By Squares
+						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 5);	
+						break;
+				}
 				
-				Print("Client [" + clientHandler.clientId + "].Agent[" + agentId + "] Intantaited the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
-
-				cells[x][y].current = val;
-				instantiator[x][y] = agentType;				//Seleccionem el color
-				
-				networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + instantiator[x][y]);	
 				break;
 				
 			case "clear":
@@ -197,9 +209,9 @@ public class ServerGameController extends GameController implements ActionListen
 					agentType = Integer.parseInt(vars2[1]);
 					conflictX = Integer.parseInt(vars2[2]);
 					conflictY = Integer.parseInt(vars2[3]);
-
-					Print("Client [" + clientHandler.clientId + "].Agent[" + agentId + "] asked to clear the position [" + conflictX +"][" + conflictY +"]");
 					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId);
+					
+					Print("Server: Agent " + agentId + " found a bug at the position [" + conflictX + "][" + conflictY +"]");
 					
 					votes.clear();
 					votingExists = true;
@@ -219,18 +231,24 @@ public class ServerGameController extends GameController implements ActionListen
 				agentType = Integer.parseInt(vars2[1]);
 				int conX =Integer.parseInt(vars2[2]);
 				int conY = Integer.parseInt(vars2[3]);
+				int voteVal = Integer.parseInt(vars2[4]);
 				
 				if(!votingExists || conflictX != conX || conflictY != conY)
 				{
 					Print("Unexpected vote --> votingExists: " + votingExists + ", conflictX: " + conX + ", conflictY: " + conY);
 				}
-				Integer voteVal = Integer.parseInt(vars2[4]);
-				Print("vote received from client[" + clientHandler.clientId + "].agent[" + agentId + "] --> " + voteVal);
-				votes.add(voteVal);
-				/*if(votes.size() == networkController.GetClientCount())
+			
+				switch(voteVal)
 				{
-					ConcludeVoting();
-				}*/
+					case -1:
+						Print("Server: Agent " + agentId + " voted to remove the Value of the position [" + conX + "][" + conY +"]");
+						break;
+					case 1:
+						Print("Server: Agent " + agentId + " voted to keep the Value of the position [" + conX + "][" + conY +"]");
+						break;
+				}
+				
+				votes.add(voteVal);
 				break;
 			}
 

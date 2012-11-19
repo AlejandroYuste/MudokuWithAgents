@@ -388,8 +388,7 @@ public class ClientGameController extends GameController implements ActionListen
 						networkController.clientId = Integer.parseInt(vars2[1]);
 						break;
 					case "iv":// initial values
-
-						AssignFromCode(vars2[1]);
+						addToGrid(vars2[1], 1);
 						break;
 					default:
 						System.out.println(vars2[0]);
@@ -401,7 +400,7 @@ public class ClientGameController extends GameController implements ActionListen
 				repaint();
 				break;
 			case "instantiated":
-				AssignFromCode(vars[1]);
+				addToGrid(vars[1], 2);
 				networkState = NetworkState.idle;
 				CellClick(activeX, activeY);
 				break;
@@ -439,7 +438,7 @@ public class ClientGameController extends GameController implements ActionListen
 		}
 	}
 	
-	public void AssignFromCode(String code)
+	public void addToGrid(String code, int state_)
 	{
 		String[] values = code.split("&");
 		for(String value : values)
@@ -448,7 +447,7 @@ public class ClientGameController extends GameController implements ActionListen
 			int x = Integer.parseInt(component[0]);
 			int y = Integer.parseInt(component[1]);
 			int val = Integer.parseInt(component[2]);
-			SetValue(x, y, val);
+			SetValueAndState(x, y, val, state_);
 			instantiator[x][y] = Integer.parseInt(component[3]);
 		}
 		try {

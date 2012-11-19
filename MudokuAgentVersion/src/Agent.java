@@ -21,9 +21,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	static AgentNetworkController controller;
 	
 	int[][] actualGrid;
-	
-	Random random = new Random(System.nanoTime());
-	
+		
 	static boolean modifyGrid = false;
 	boolean alreadyVoted = false;
 	
@@ -39,7 +37,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		return controller.getNumAgentsConnected();
 	}
 	
-	public boolean getConflictExists()
+	boolean getConflictExists()
 	{
 		return controller.getConflictExists();
 	}
@@ -62,6 +60,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				ThreadsAgent.remove(threadInfo);
 			}
 		}
+		
 		System.out.println("Agent --> Acabant el Thread del Agent: " + agentId_);
 	}
 	
@@ -78,14 +77,14 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				ThreadsAgent.add(new ThreadsInformation(agentContributorThread, agentId)); 
 				break;
-			case 3: case 4: case 5:
+			case 4: case 5: case 6:
 				agentTester = new AgentTester(this, agentId, agentType);
 				agentTesterThread = new Thread(agentTester);        
 				agentTesterThread.start();
 				
 				ThreadsAgent.add(new ThreadsInformation(agentTesterThread, agentId)); 
 				break;
-			case 6: case 7: case 8:			//TODO: Votacions no Funcionen correctament
+			case 8: case 9: case 10:			//TODO: Votacions no Funcionen correctament
 				agentCommitter = new AgentCommitter(this, agentId, agentType);
 				agentCommitterThread = new Thread(agentCommitter);        
 				agentCommitterThread.start();
@@ -105,10 +104,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	
 		static synchronized void setValue(int agentId, int agentType)
 		{
-			System.out.println("Enterm a setValue, Agent: " + agentId);
 			
 			try {		
-				Thread.sleep(1500);			//Donam teps a que s'actualitzi el grid
+				Thread.sleep(500);			//Donam teps a que s'actualitzi el grid
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -159,7 +157,6 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
-					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
 					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
 					break;
 					
@@ -196,7 +193,6 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
-					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
 					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
 					break;
 					
@@ -242,13 +238,12 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 					}
 					
-					//System.out.println("Agent --> triat valor: " + val + "per la posicio " + i + "," + j);
 					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
 					break;
 			}
 			
 			try {		
-				Thread.sleep(1500);			//Donam teps a que s'actualitzi el grid
+				Thread.sleep(500);			//Donam teps a que s'actualitzi el grid
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -258,16 +253,22 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		
 		static synchronized void checkGrid(int agentId, int agentType)
 		{
+			System.out.println("L'agent " + agentId + " Checkeara el Grid");
 			
 			Random random = new Random(System.nanoTime());
 			
+			boolean foundOnce;
 			boolean cleanPosition = false;
 			
 			int[][] actualGrid = AgentNetworkController.getActualGrid();
-			int i, j, val;
-			ArrayList<Integer> options = new ArrayList<Integer>();
-			ArrayList<Integer> searchingList = new ArrayList<Integer>();
-			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
+			int[][] actualState = AgentNetworkController.getActualState();
+			int i, j, k, val, loopSize, loopSizeSearchingList;
+			
+			ArrayList<Integer> optionsToAsk = new ArrayList<Integer>();		
+			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();		//Guardem nomes aquells Valors pels que podem preguntar
+			
+			ArrayList<Integer> optionsToSearch = new ArrayList<Integer>();
+			ArrayList<ArrayList<Integer>> searchingList = new ArrayList<ArrayList<Integer>>();		//Guardem tots els valors del Grid
 			
 			int[] position;
 			ArrayList<int[]> optionsPosition = new ArrayList<int[]>();
@@ -275,114 +276,83 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			
 			ArrayList<int[]> positionsToClean = new ArrayList<int[]>();
 			
+			/* cellState = 0 --> waitingValue
+			 * cellState = 1 --> initializedByServer
+			 * cellState = 2 --> contribution By Rows
+			 * cellState = 3 --> contribution By Columns
+			 * cellState = 4 --> contribution By Squares
+			 * cellState = 5 --> contribution By User
+			 * cellState = 6 --> committed
+			 * cellState = 7 --> accepted
+			 */
+			
 			switch(agentType)
 			{
-				case(0):		//Agent que nomes treballa per files
-							
-				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
-				{
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+				case 4:				//Tester que nomes treballa per files
+					
+					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 					{
-						if(actualGrid[i][j] != -1)
-						{
-							options.add(actualGrid[i][j]);
-							
-							position = new int[2];
-							position[0] = i;
-							position[1] = j;
-							optionsPosition.add(position);
-						}
-					}
-					listOptions.add(options);
-					options = new ArrayList<Integer>();
-					
-					listOptionsPosition.add(optionsPosition);
-					optionsPosition = new ArrayList<int[]>();
-				}
-								
-				for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-				{
-					options = new ArrayList<Integer>();
-					optionsPosition = new ArrayList<int[]>();
-					
-					searchingList = listOptions.get(i);
-					
-					options = listOptions.get(i);
-					optionsPosition = listOptionsPosition.get(i);
-					
-					int loopSize = options.size() - 1;
-					
-					for(j=0; j<loopSize;j++)
-					{
-						val = options.get(0);
-						searchingList.remove(0);
-						
-						if(searchingList.contains(val))
-						{
-							position = new int[2];
-							position[0] = optionsPosition.get(j)[0];
-							position[1] = optionsPosition.get(j)[1];
-							positionsToClean.add(position);
-							cleanPosition = true;
-						}
-					}
-				}
-				
-				if (cleanPosition)
-				{
-					val = random.nextInt(positionsToClean.size());
-					SendMessage("clear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
-				}
-				
-				break;
-					
-				case(1):		//Agent que nomes treballa per Columnes	
-
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-					{
-						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
 							if(actualGrid[i][j] != -1)
 							{
-								options.add(actualGrid[i][j]);
-								
-								position = new int[2];
-								position[0] = i;
-								position[1] = j;
-								optionsPosition.add(position);
+								optionsToSearch.add(actualGrid[i][j]);								
+								if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+								{
+									optionsToAsk.add(actualGrid[i][j]);
+									
+									position = new int[2];
+									position[0] = i;
+									position[1] = j;
+									optionsPosition.add(position);
+								}
 							}
 						}
-						listOptions.add(options);
-						options = new ArrayList<Integer>();
+						
+						listOptions.add(optionsToAsk);
+						optionsToAsk = new ArrayList<Integer>();
+						
+						searchingList.add(optionsToSearch);
+						optionsToSearch = new ArrayList<Integer>();
 						
 						listOptionsPosition.add(optionsPosition);
 						optionsPosition = new ArrayList<int[]>();
 					}
-						
+									
 					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
-						options = new ArrayList<Integer>();
+						optionsToAsk = new ArrayList<Integer>();
+						optionsToSearch = new ArrayList<Integer>();
 						optionsPosition = new ArrayList<int[]>();
 						
-						searchingList = listOptions.get(i);
-						
-						options = listOptions.get(i);
+						optionsToAsk = listOptions.get(i);
+						optionsToSearch = searchingList.get(i);
 						optionsPosition = listOptionsPosition.get(i);
 						
-						int loopSize = options.size() - 1;
-						
+						loopSize = optionsToAsk.size();
 						for(j=0; j<loopSize;j++)
 						{
-							val = options.get(0);
-							searchingList.remove(0);
+							val = optionsToAsk.get(j);
+
+							foundOnce = false;
+							loopSizeSearchingList = optionsToSearch.size();
 							
-							if(searchingList.contains(val))
-							{
-								position = new int[2];
-								position[0] = optionsPosition.get(j)[0];
-								position[1] = optionsPosition.get(j)[1];
-								positionsToClean.add(position);
-								cleanPosition = true;
+							for(k=0; k<loopSizeSearchingList; k++)
+							{	
+								if(optionsToSearch.get(k) == val)
+								{
+									if(foundOnce)
+									{
+										position = new int[2];
+										position[0] = optionsPosition.get(j)[0];
+										position[1] = optionsPosition.get(j)[1];
+										positionsToClean.add(position);
+										
+										cleanPosition = true;
+									}
+									
+									foundOnce = true;
+								}
 							}
 						}
 					}
@@ -395,7 +365,84 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					break;
 					
-				case(2):		////Agent que nomes treballa per Quadrats
+				case 5:		//Agent que nomes treballa per Columnes	
+					
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+					{
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+						{
+							if(actualGrid[i][j] != -1)
+							{
+								optionsToSearch.add(actualGrid[i][j]);								
+								if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+								{
+									optionsToAsk.add(actualGrid[i][j]);
+									
+									position = new int[2];
+									position[0] = i;
+									position[1] = j;
+									optionsPosition.add(position);
+								}
+							}
+						}
+						
+						listOptions.add(optionsToAsk);
+						optionsToAsk = new ArrayList<Integer>();
+						
+						searchingList.add(optionsToSearch);
+						optionsToSearch = new ArrayList<Integer>();
+						
+						listOptionsPosition.add(optionsPosition);
+						optionsPosition = new ArrayList<int[]>();
+					}
+									
+					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+					{
+						optionsToAsk = new ArrayList<Integer>();
+						optionsToSearch = new ArrayList<Integer>();
+						optionsPosition = new ArrayList<int[]>();
+						
+						optionsToAsk = listOptions.get(i);
+						optionsToSearch = searchingList.get(i);
+						optionsPosition = listOptionsPosition.get(i);
+						
+						loopSize = optionsToAsk.size();
+						for(j=0; j<loopSize;j++)
+						{
+							val = optionsToAsk.get(j);
+
+							foundOnce = false;
+							loopSizeSearchingList = optionsToSearch.size();
+							
+							for(k=0; k<loopSizeSearchingList; k++)
+							{	
+								if(optionsToSearch.get(k) == val)
+								{
+									if(foundOnce)
+									{
+										position = new int[2];
+										position[0] = optionsPosition.get(j)[0];
+										position[1] = optionsPosition.get(j)[1];
+										positionsToClean.add(position);
+										
+										cleanPosition = true;
+									}
+									
+									foundOnce = true;
+								}
+							}
+						}
+					}
+					
+					if (cleanPosition)
+					{
+						val = random.nextInt(positionsToClean.size());
+						SendMessage("clear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+					}
+					
+					break;
+					
+				case 6:		////Agent que nomes treballa per Quadrats
 							
 					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
@@ -409,17 +456,25 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 								{
 									if(actualGrid[i + row][j + column] != -1)
 									{
-										options.add(actualGrid[i + row][j + column]);
-										
-										position = new int[2];
-										position[0] = i + row;
-										position[1] = j + column;
-										optionsPosition.add(position);
+										optionsToSearch.add(actualGrid[i][j]);								
+										if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+										{
+											optionsToAsk.add(actualGrid[i][j]);
+											
+											position = new int[2];
+											position[0] = i;
+											position[1] = j;
+											optionsPosition.add(position);
+										}
 									}
 								}
 							}
-							listOptions.add(options);
-							options = new ArrayList<Integer>();
+							
+							listOptions.add(optionsToAsk);
+							optionsToAsk = new ArrayList<Integer>();
+							
+							searchingList.add(optionsToSearch);
+							optionsToSearch = new ArrayList<Integer>();
 							
 							listOptionsPosition.add(optionsPosition);
 							optionsPosition = new ArrayList<int[]>();
@@ -428,28 +483,38 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
-						options = new ArrayList<Integer>();
+						optionsToAsk = new ArrayList<Integer>();
+						optionsToSearch = new ArrayList<Integer>();
 						optionsPosition = new ArrayList<int[]>();
 						
-						searchingList = listOptions.get(i);
-						
-						options = listOptions.get(i);
+						optionsToAsk = listOptions.get(i);
+						optionsToSearch = searchingList.get(i);
 						optionsPosition = listOptionsPosition.get(i);
 						
-						int loopSize = options.size() - 1;
-						
+						loopSize = optionsToAsk.size();
 						for(j=0; j<loopSize;j++)
 						{
-							val = options.get(0);
-							searchingList.remove(0);
+							val = optionsToAsk.get(j);
+
+							foundOnce = false;
+							loopSizeSearchingList = optionsToSearch.size();
 							
-							if(searchingList.contains(val))
-							{
-								position = new int[2];
-								position[0] = optionsPosition.get(j)[0];
-								position[1] = optionsPosition.get(j)[1];
-								positionsToClean.add(position);
-								cleanPosition = true;
+							for(k=0; k<loopSizeSearchingList; k++)
+							{	
+								if(optionsToSearch.get(k) == val)
+								{
+									if(foundOnce)
+									{
+										position = new int[2];
+										position[0] = optionsPosition.get(j)[0];
+										position[1] = optionsPosition.get(j)[1];
+										positionsToClean.add(position);
+										
+										cleanPosition = true;
+									}
+									
+									foundOnce = true;
+								}
 							}
 						}
 					}
@@ -462,16 +527,16 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					break;
 			}
-			
 		}
 		
 		
 		//#######################################    VOTE CONFLICT   ############################################
 		
 		static synchronized void voteConflict(int agentId, int agentType)
-		{
+		{	
+			System.out.println("L'agent " + agentId + " Votara");
 			
-			boolean firstTime = false;
+			boolean firstTime;
 			boolean alreadyVoted = false;
 			
 			int[][] actualGrid = AgentNetworkController.getActualGrid();
@@ -485,7 +550,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 			switch(agentType)
 			{
-				case(0):		//Agent que nomes treballa per files
+				case 8:		//Agent que nomes treballa per files
 							
 				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 				{
@@ -513,27 +578,28 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				options = listOptions.get(conflictY);
 				val = actualGrid[conflictX][conflictY];
-				System.out.println("FILES. Votem pel valor: " + val + " a la posicio [" + conflictX + "][" + conflictY + "] --> options: " + options );
+								
+				firstTime = false;	
 				for(int value : options)
 				{
-					if(firstTime || value == val)
+					if(value == val || firstTime)
 					{
-						if(value == val)
+						if(value == val && firstTime)
 						{
 							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
 							alreadyVoted = true;
 							break;
 						}
+						firstTime = true;
 					}
 				}
 
 				if (!alreadyVoted)
 					SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
 				
-				
 				break;
 					
-				case(1):		//Agent que nomes treballa per Columnes	
+				case 9:		//Agent que nomes treballa per Columnes	
 
 					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
@@ -561,16 +627,19 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					options = listOptions.get(conflictX);
 					val = actualGrid[conflictX][conflictY];
+					
+					firstTime = false;	
 					for(int value : options)
 					{
-						if(firstTime || value == val)
+						if(value == val || firstTime)
 						{
-							if(value == val)
+							if(value == val && firstTime)
 							{
 								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
 								alreadyVoted = true;
 								break;
 							}
+							firstTime = true;
 						}
 					}
 		
@@ -579,7 +648,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					break;
 					
-				case(2):		////Agent que nomes treballa per Quadrats
+				case 10:		////Agent que nomes treballa per Quadrats
 							
 					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
@@ -617,16 +686,18 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					options = listOptions.get(val);
 					val = actualGrid[conflictX][conflictY];
 					
+					firstTime = false;	
 					for(int value : options)
 					{
-						if(firstTime || value == val)
+						if(value == val || firstTime)
 						{
-							if(value == val)
+							if(value == val && firstTime)
 							{
 								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
 								alreadyVoted = true;
 								break;
 							}
+							firstTime = true;
 						}
 					}
 
