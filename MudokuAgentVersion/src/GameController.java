@@ -13,7 +13,7 @@ public class GameController extends Applet implements ActionListener {
 	protected GameState state;
 
 	private static final long serialVersionUID = 1L;
-	static int screenWidth = 800;
+	static int screenWidth = 765;
 	static int screenHeight = 600;
 	static int sudokuSize;
 
@@ -25,8 +25,8 @@ public class GameController extends Applet implements ActionListener {
 	static int gridEndX = gridXOffset + gridWidth;
 	static int gridEndY = gridYOffset + gridHeight;
 
-	static Color mouseOverColor = Color.green;
-	static Color activeCellColor = Color.blue;
+	static Color mouseOverColor = new Color(220, 20, 60);
+	static Color activeCellColor = new Color(0, 0, 0);
 
 	int activeX;
 	int activeY;
@@ -133,9 +133,8 @@ public class GameController extends Applet implements ActionListener {
 				if (checkPosition(x, y, val)) 
 				{
 					count--;
-					//cells[x][y].valueState = 1;				//Posem l'estat de la cel·la a initilizedByServer
-					//cells[x][y].current = val;
 					SetValueAndState(x, y, val, 1);
+					cells[x][y].IsConstant();
 				}
 			}
 		}
@@ -399,7 +398,7 @@ public class GameController extends Applet implements ActionListener {
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 
-		cells[activeX][activeY].DrawDomainAgent(gr, mouseOverDomainIndex, activeX, activeY);
+		cells[activeX][activeY].DrawDomain(gr, mouseOverDomainIndex, activeX, activeY);
 
 		if (mouseOverGrid) {
 			gr.setColor(mouseOverColor);
@@ -436,16 +435,9 @@ public class GameController extends Applet implements ActionListener {
 		{
 			return;
 		}
-		cells[x][y].current = -1;
-		cells[x][y].valueState = 0;
+		
+		SetValueAndState(x, y, -1, 0);	
 				
-		/*try {
-			cpController.Refresh(cells);
-		} catch (ContradictionException e) {
-			// TODO Auto-generated catch block
-			System.out.println("refresh failed");
-			e.printStackTrace();
-		}*/
 		repaint();
 	}
 	
@@ -605,5 +597,10 @@ public class GameController extends Applet implements ActionListener {
 		mouseOverGrid = false;
 		mouseOverDomain = false;
 		mouseOverDomainIndex = -1;
+	}
+	
+	int getCellState(int x, int y)
+	{
+		return cells[x][y].valueState;
 	}
 }

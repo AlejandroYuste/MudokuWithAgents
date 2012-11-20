@@ -26,7 +26,7 @@ public class AgentContributor implements Runnable{
 			{
 				Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 1000);
 				
-				if (!agent.getConflictExists())
+				if (!Agent.getConflictExists())
 				{
 					Agent.setValue(agentId, agentType);
 					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 2000);
@@ -39,5 +39,4 @@ public class AgentContributor implements Runnable{
 			}
 		}
 	}
-
 }

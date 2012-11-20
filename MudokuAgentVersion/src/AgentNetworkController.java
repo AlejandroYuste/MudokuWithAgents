@@ -22,7 +22,6 @@ public class AgentNetworkController
 	private int agentId = 1;
 	
     static AgentGameController gameController;
-    
     static PrintStream writer;
 
 	public AgentNetworkController(AgentGameController gameController_)
@@ -252,5 +251,19 @@ public class AgentNetworkController
 	        agentId++;
         }
     }
-
+	
+	int getCellState(int x, int y)
+	{
+		return gameController.getCellState(x, y);
+	}
+	
+	void pauseExecution()
+	{
+		agent.pauseExecution();
+	}
+	
+	void playExecution()
+	{
+		agent.playExecution();
+	}
 }

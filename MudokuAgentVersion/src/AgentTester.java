@@ -9,6 +9,7 @@ public class AgentTester implements Runnable{
 	
 	Agent agent;
 	
+	int val;
 	
 	AgentTester(Agent agent_, int agentId_, int agentType_)
 	{
@@ -25,12 +26,18 @@ public class AgentTester implements Runnable{
 		{
 			try
 			{
-				//Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 1000);
+				Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 1000);
 				
-				if (!agent.getConflictExists())
+				if (!Agent.getConflictExists())
 				{
-					Agent.checkGrid(agentId, agentType);
-					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 2000);
+					val = random.nextInt(2);
+					if(val == 0)
+						Agent.checkBugs(agentId, agentType);
+					else if(val == 1)
+						Agent.testValues(agentId, agentType);
+					else
+						Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 2000);
+
 				}
 				else Thread.sleep(10000);
 				

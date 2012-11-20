@@ -21,6 +21,15 @@ public class AgentGameController extends GameController implements ActionListene
 	Label RandomCommunity;
 	Label RandomCommunityMember;
 	
+	Label colorServerLabel;
+	Label colorRowContributorLabel;
+	Label colorColumnContributorLabel;
+	Label colorSquareContributorLabel;
+	Label colorCommittedLabel;
+	Label colorAcceptedLabel;
+	Label colorConflictLabel;
+	Label colorUserContributorLabel;
+	
 	TextField NumAgentsField;
 	TextField NumRadomAgentsField;
 	Choice TypeAgentsField;
@@ -59,16 +68,17 @@ public class AgentGameController extends GameController implements ActionListene
 		clearRequester = -1;
 		GameController.sudokuSize = 16;
 		networkState = NetworkState.idle;
-		agentColors = new Color[7];
+		agentColors = new Color[8];
 		conflictExists = false;
 		
-		agentColors[0] = new Color(39, 64, 139);		//Contributed By Rows 		--> royalblue 3
-		agentColors[1] = new Color(0, 139, 63);			//Contributed By Columns 	--> springgreen 3
-		agentColors[2] = new Color(238, 201, 0);		//Contributed By Squares 	--> Gold 2
+		agentColors[0] = new Color(28, 134, 238);		//Contributed By Rows 		--> dodgerblue 2
+		agentColors[1] = new Color(0, 205, 0);			//Contributed By Columns 	--> green 3
+		agentColors[2] = new Color(255, 215, 0);		//Contributed By Squares 	--> Gold
 		agentColors[3] = new Color(255, 0, 0);			//Contributed by User 		--> red
-		agentColors[4] = new Color(142, 142, 46);		//Cell committed			--> sgi olivedrab
+		agentColors[4] = new Color(142, 56, 142);		//Cell committed			--> sgi beet
 		agentColors[5] = new Color(139, 69, 19);		//Cell Accepted				--> Chocolate
 		agentColors[6] = new Color(0, 0, 0);			//Cell from the Server		--> black
+		agentColors[7] = new Color(220, 20, 60);		//Color de la casella de conflicte --> crimson
 	}
 
 	public void init()										//Aqui comença l'execucio del Applet
@@ -149,7 +159,7 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		pauseExecution = new Button("Pause");
 		pauseExecution.setSize(120,40);
-		pauseExecution.setLocation(gridEndX + 135, 350);
+		pauseExecution.setLocation(gridEndX + 135, 330);
 		pauseExecution.setActionCommand("pauseExecution");
 		pauseExecution.addActionListener(this);				//Afegim el Listener al button "Connect"
 		pauseExecution.setVisible(false);
@@ -157,7 +167,7 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		playExecution = new Button("Play");
 		playExecution.setSize(120,40);
-		playExecution.setLocation(gridEndX + 135, 300);
+		playExecution.setLocation(gridEndX + 135, 280);
 		playExecution.setActionCommand("playExecution");
 		playExecution.addActionListener(this);				//Afegim el Listener al button "Connect"
 		playExecution.setVisible(false);
@@ -208,6 +218,55 @@ public class AgentGameController extends GameController implements ActionListene
 		RandomCommunityMember.setLocation(gridXOffset + 245, 560);
 		add(RandomCommunityMember);
 		RandomCommunityMember.setVisible(false);
+		
+		colorServerLabel = new Label("Initialized by Server");
+		colorServerLabel.setSize(140,20);
+		colorServerLabel.setLocation(600, 420);
+		colorServerLabel.setVisible(false);
+		add(colorServerLabel);
+
+		colorRowContributorLabel = new Label("Contributed by Rows");
+		colorRowContributorLabel.setSize(140,20);
+		colorRowContributorLabel.setLocation(600, 440);
+		colorRowContributorLabel.setVisible(false);
+		add(colorRowContributorLabel);
+		
+		colorColumnContributorLabel = new Label("Contributed by Columns");
+		colorColumnContributorLabel.setSize(140,20);
+		colorColumnContributorLabel.setLocation(600, 460);
+		colorColumnContributorLabel.setVisible(false);
+		add(colorColumnContributorLabel);
+		
+		colorSquareContributorLabel = new Label("Contributed by Squares");
+		colorSquareContributorLabel.setSize(140,20);
+		colorSquareContributorLabel.setLocation(600, 480);
+		colorSquareContributorLabel.setVisible(false);
+		add(colorSquareContributorLabel);
+		
+		colorUserContributorLabel = new Label("Contributed by User");
+		colorUserContributorLabel.setSize(140,20);
+		colorUserContributorLabel.setLocation(600, 500);
+		colorUserContributorLabel.setVisible(false);
+		add(colorUserContributorLabel);
+		
+		colorCommittedLabel = new Label("Value Committed");
+		colorCommittedLabel.setSize(140,20);
+		colorCommittedLabel.setLocation(600, 520);
+		colorCommittedLabel.setVisible(false);
+		add(colorCommittedLabel);
+		
+		colorAcceptedLabel = new Label("Value Accepted");
+		colorAcceptedLabel.setSize(140,20);
+		colorAcceptedLabel.setLocation(600, 540);
+		colorAcceptedLabel.setVisible(false);
+		add(colorAcceptedLabel);
+		
+		colorConflictLabel = new Label("Votation ON");
+		colorConflictLabel.setSize(140,20);
+		colorConflictLabel.setLocation(600, 560);
+		colorConflictLabel.setVisible(false);
+		add(colorConflictLabel);		
+		
 	
 		networkController = new AgentNetworkController(this);
 	}
@@ -280,26 +339,55 @@ public class AgentGameController extends GameController implements ActionListene
 		//TODO: Milorar interficie grafica separant les seccions del Applet
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
-		gr.drawLine(20, 460, 470, 460);			//Separador Grid Horizintal
-		gr.drawLine(470, 10, 470, 460);			//Separador Grid Vertical-Dreta
+		gr.drawLine(20, 460, 470, 460);				//Separador Grid Horizintal
+		gr.drawLine(470, 10, 470, 460);				//Separador Grid Vertical-Dreta
 		
 		stroke = new BasicStroke(1);
-		((Graphics2D) gr).setStroke(stroke);	//Separador de la Part d'afegir Agents
+		((Graphics2D) gr).setStroke(stroke);		//Separador de la Part d'afegir Agents
 		gr.drawLine(10, 495, 550, 495);			
 		gr.drawLine(10, 550, 550, 550);			
 		gr.drawLine(10, 590, 550, 590);			
 		gr.drawLine(10, 495, 10, 590);
 		gr.drawLine(550, 495, 550, 590);
 		
-		gr.drawLine(485, 10, 485, 240);			//Separador del Panel d'Agents Connectats	
+		gr.drawLine(485, 10, 485, 240);				//Separador del Panel d'Agents Connectats	
 		gr.drawLine(485, 10, 745, 10);			
 		gr.drawLine(745, 10, 745, 240);			
 		gr.drawLine(485, 240, 745, 240);
 		
-		gr.drawLine(485, 280, 485, 420);			//Separador del Pause-Play	
-		gr.drawLine(485, 280, 745, 280);			
-		gr.drawLine(745, 280, 745, 420);			
-		gr.drawLine(485, 420, 745, 420);
+		gr.drawLine(485, 260, 485, 390);			//Separador del Pause-Play	
+		gr.drawLine(485, 260, 745, 260);			
+		gr.drawLine(745, 260, 745, 390);			
+		gr.drawLine(485, 390, 745, 390);
+				
+		gr.drawLine(565, 410, 565, 590);			//Pintem la llegenda de Colors
+		gr.drawLine(565, 410, 745, 410);			
+		gr.drawLine(745, 410, 745, 590);			
+		gr.drawLine(565, 590, 745, 590);
+		
+		gr.setColor(agentColors[6]);
+		gr.fillRect(582, 425, 10, 10);
+		
+		gr.setColor(agentColors[0]);
+		gr.fillRect(582, 445, 10, 10);
+		
+		gr.setColor(agentColors[1]);
+		gr.fillRect(582, 465, 10, 10);
+		
+		gr.setColor(agentColors[2]);
+		gr.fillRect(582, 485, 10, 10);
+		
+		gr.setColor(agentColors[3]);
+		gr.fillRect(582, 505, 10, 10);
+		
+		gr.setColor(agentColors[4]);
+		gr.fillRect(582, 525, 10, 10);
+		
+		gr.setColor(agentColors[5]);
+		gr.fillRect(582, 545, 10, 10);
+		
+		gr.setColor(agentColors[7]);
+		gr.fillRect(582, 565, 10, 10);
 		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -315,13 +403,6 @@ public class AgentGameController extends GameController implements ActionListene
 			{
 				if (cells[x][y].valueState == 0) 			//Si no hi ha cap valor a la cel·la no feim res, pasem la posicio
 				{
-					gr.setColor(Color.black);
-					/*if(cpController.GetCPVariable(x, y).getDomainSize() == 1)			//Quan nomes podem tenir un unic valor a una casella
-					{
-						gr.drawString("*", (int) (lineX + deltaX / 2) - 5,
-								(int) (lineY + deltaY) - 10);							//sa puta merda de asterisc esta aqui
-					}*/
-					
 					tempLineX += deltaX;
 					lineX = (int) tempLineX;
 					continue;
@@ -332,35 +413,41 @@ public class AgentGameController extends GameController implements ActionListene
 					{
 						case 1:
 							gr.setColor(agentColors[6]);			//Cell from the Server
+							clearRequester = 6;
 							break;
 						case 2:
 							gr.setColor(agentColors[0]);			//Contributed By Rows 
+							clearRequester = 0;
 							break;
 						case 3:
 							gr.setColor(agentColors[1]);			//Contributed By Columns
+							clearRequester = 1;
 							break;
 						case 4:
 							gr.setColor(agentColors[2]);			//Contributed By Squares
+							clearRequester = 2;
 							break;
 						case 5:
 							gr.setColor(agentColors[3]);			//Contributed By User
+							clearRequester = 3;
 							break;
 						case 6:
 							gr.setColor(agentColors[4]);			//Cell committed
+							clearRequester = 4;
 							break;
 						case 7:
 							gr.setColor(agentColors[5]);			//Cell Accepted
+							clearRequester = 5;
 							break;
 					}
 					
 					if(conflictExists && x == conflictX && y == conflictY)
 					{
-						gr.setColor(Color.red);
-						
 						int conX = (int) (gridXOffset + conflictX * deltaX);
 						int conY = (int) (gridYOffset + conflictY * deltaY);
-						gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
-						gr.setColor(agentColors[clearRequester]);
+						
+						setActive(conflictX, conflictY);
+						cells[activeX][activeY].DrawDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
 					}
 				}
 					
@@ -383,7 +470,7 @@ public class AgentGameController extends GameController implements ActionListene
 		switch(networkState)
 		{
 		case idle:
-			cells[activeX][activeY].DrawDomainAgent(gr, mouseOverDomainIndex, activeX, activeY);		
+			cells[activeX][activeY].DrawDomainAgent(gr, activeX, activeY);		
 			break;
 		case waitingConfirm:
 			gr.drawString("Waiting response from server", gridXOffset, gridEndY + 20);
@@ -392,11 +479,10 @@ public class AgentGameController extends GameController implements ActionListene
 			break;
 		}
 
-		if (mouseOverGrid) {
+		if (mouseOverGrid) 
+		{
 			gr.setColor(mouseOverColor);
-			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX),
-					(int) (gridYOffset + mouseOverY * deltaY), (int) deltaX,
-					(int) deltaY);
+			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX), (int) (gridYOffset + mouseOverY * deltaY), (int) deltaX, (int) deltaY);
 		}
 
 		gr.setColor(activeCellColor);
@@ -452,6 +538,12 @@ public class AgentGameController extends GameController implements ActionListene
 			case "voteEnd":
 				conflictExists = false;
 				voteTimer.stop();
+				break;
+			case "pauseExecution":
+				networkController.pauseExecution();
+				break;
+			case "playExecution":
+				networkController.playExecution();
 				break;
 		}
 	}
@@ -538,8 +630,9 @@ public class AgentGameController extends GameController implements ActionListene
 				switch(vars2[0])
 				{
 					case "clear":
-						//conflictExists = true;
+						conflictExists = true;
 						
+						repaint();
 						coordinates = vars2[1].split(",");
 						conflictX = Integer.parseInt(coordinates[0]);
 						conflictY = Integer.parseInt(coordinates[1]);
@@ -559,9 +652,9 @@ public class AgentGameController extends GameController implements ActionListene
 				conflictY = Integer.parseInt(vars2[1]);
 				ClearCell(conflictX, conflictY);
 				break;
-			case "NOclear":
-				conflictExists = false;
-				voteTimer.stop();
+			case "committed":
+				//conflictExists = false;
+				//voteTimer.stop();
 				
 				vars2 = vars[1].split(",");
 				
@@ -569,9 +662,15 @@ public class AgentGameController extends GameController implements ActionListene
 				conflictY = Integer.parseInt(vars2[1]);
 				
 				SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
+				break;	
+			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
+		
+				vars2 = vars[1].split(",");
+				int x = Integer.parseInt(vars2[0]);
+				int y = Integer.parseInt(vars2[1]);
+				SetValueAndState(x, y, cells[x][y].current, 7);				
 				break;
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -613,6 +712,14 @@ public class AgentGameController extends GameController implements ActionListene
 		connectRandomAgentsButton.setVisible(true);
 		playExecution.setVisible(true);
 		pauseExecution.setVisible(true);
+		colorServerLabel.setVisible(true);
+		colorRowContributorLabel.setVisible(true);
+		colorColumnContributorLabel.setVisible(true);
+		colorSquareContributorLabel.setVisible(true);
+		colorUserContributorLabel.setVisible(true);
+		colorCommittedLabel.setVisible(true);
+		colorAcceptedLabel.setVisible(true);
+		colorConflictLabel.setVisible(true);
 
 		state = GameState.game;
 	}
@@ -623,6 +730,11 @@ public class AgentGameController extends GameController implements ActionListene
 		activeY = y;
 	
 		repaint();
+	}
+	
+	public void setActive(int x, int y) {
+		activeX = x;
+		activeY = y;
 	}
 	
 	int getRegion(int x, int y)
@@ -654,5 +766,10 @@ public class AgentGameController extends GameController implements ActionListene
 		}
 		
 		return gridState;
+	}
+	
+	int getCellState(int x, int y)
+	{
+		return super.getCellState(x, y);
 	}
 }

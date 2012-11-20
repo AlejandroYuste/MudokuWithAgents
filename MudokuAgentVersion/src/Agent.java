@@ -14,6 +14,8 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	Thread agentTesterThread;
 	AgentCommitter agentCommitter;
 	Thread agentCommitterThread;
+	AgentLeader agentLeader;
+	Thread agentLeaderThread;
 	
 	ThreadsInformation threadInfo;
 	List<ThreadsInformation> ThreadsAgent = new ArrayList<ThreadsInformation>();
@@ -37,7 +39,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		return controller.getNumAgentsConnected();
 	}
 	
-	boolean getConflictExists()
+	static boolean getConflictExists()
 	{
 		return controller.getConflictExists();
 	}
@@ -45,6 +47,24 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	static void SendMessage(String message)
 	{
 		AgentNetworkController.SendMessage(message);
+	}
+	
+	@SuppressWarnings("deprecation")
+	void pauseExecution()
+	{
+		for(ThreadsInformation threadInfo : ThreadsAgent)
+		{
+			threadInfo.threadInfo.suspend();
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	void playExecution()
+	{
+		for(ThreadsInformation threadInfo : ThreadsAgent)
+		{
+			threadInfo.threadInfo.resume();
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -91,11 +111,13 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				ThreadsAgent.add(new ThreadsInformation(agentCommitterThread, agentId)); 
 				break;
-
-			/*case 9:
-				agentLeader = new Thread(Leader);        
-				agentLeader.start();
-				break;*/
+			case 12:
+				agentLeader = new AgentLeader(this, agentId, agentType);
+				agentLeaderThread = new Thread(agentLeader);        
+				agentLeaderThread.start();
+				
+				ThreadsAgent.add(new ThreadsInformation(agentLeaderThread, agentId)); 
+				break;
 		}
 	}	
 	
@@ -111,361 +133,200 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				e.printStackTrace();
 			}
 			
-			int[][] actualGrid = AgentNetworkController.getActualGrid();
-			
-			int i, j, val;
-			ArrayList<Integer> options = new ArrayList<Integer>();
-			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
-			
-			int[] emptyPosition;
-			ArrayList<int[]> emptyPositionList = new ArrayList<int[]>();
-			
-			Random random = new Random(System.nanoTime());
-			
-			switch(agentType)
+			if(!getConflictExists())
 			{
-				case(0):		//Agent que nomes treballa per files		
-					
-					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
-					{
-						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-						{
-							if(actualGrid[i][j] != -1)
-								options.add(actualGrid[i][j]);
-							else
-							{
-								emptyPosition = new int[2];
-								emptyPosition[0] = i;
-								emptyPosition[1] = j;
-								emptyPositionList.add(emptyPosition);
-							}
-						}
-						listOptions.add(options);
-						options = new ArrayList<Integer>();
-					}
 				
-					emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-					i = emptyPosition[0];
-					j = emptyPosition[1];
-					
-					
-					options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
-					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					
-					while(options.contains(val))
-					{
-						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					}
-					
-					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
-					break;
-					
-				case(1):		//Agent que nomes treballa per Columnes
-								
-					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
-					{
-						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-						{
-							if(actualGrid[j][i] != -1)
-								options.add(actualGrid[j][i]);
-							else
-							{
-								emptyPosition = new int[2];
-								emptyPosition[0] = j;
-								emptyPosition[1] = i;
-								emptyPositionList.add(emptyPosition);
-							}
-						}
-						listOptions.add(options);
-						options = new ArrayList<Integer>();
-					}
+				int[][] actualGrid = AgentNetworkController.getActualGrid();
 				
-					emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-					i = emptyPosition[0];
-					j = emptyPosition[1];
-					
-					options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
-					
-					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					
-					while(options.contains(val))
-					{
-						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					}
-					
-					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
-					break;
-					
-				case(2):		////Agent que nomes treballa per Quadrats
-					
-					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
-					
-					for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
-					{
-						for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
+				int i, j, val;
+				ArrayList<Integer> options = new ArrayList<Integer>();
+				ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
+				
+				int[] emptyPosition;
+				ArrayList<int[]> emptyPositionList = new ArrayList<int[]>();
+				
+				Random random = new Random(System.nanoTime());
+				
+				switch(agentType)
+				{
+					case(0):		//Agent que nomes treballa per files		
+						
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
-							for(i=0;i<sizeSquare;i++)
+							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 							{
-								for(j=0;j<sizeSquare;j++)
+								if(actualGrid[i][j] != -1)
+									options.add(actualGrid[i][j]);
+								else
 								{
-									if(actualGrid[i + row][j + column] != -1)
-										options.add(actualGrid[i + row][j + column]);
-									else
-									{
-										emptyPosition = new int[2];
-										emptyPosition[0] = i + row;
-										emptyPosition[1] = j + column;
-										emptyPositionList.add(emptyPosition);
-									}
+									emptyPosition = new int[2];
+									emptyPosition[0] = i;
+									emptyPosition[1] = j;
+									emptyPositionList.add(emptyPosition);
 								}
 							}
 							listOptions.add(options);
 							options = new ArrayList<Integer>();
 						}
-					}
 					
-					emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
-					i = emptyPosition[0];
-					j = emptyPosition[1];
+						if(!emptyPositionList.isEmpty())
+						{
+							emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
+							i = emptyPosition[0];
+							j = emptyPosition[1];
+													
+							options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							
+							while(options.contains(val))
+							{
+								val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							}
+							
+							SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+						}
+						
+						break;
+						
+					case(1):		//Agent que nomes treballa per Columnes
+									
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+						{
+							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+							{
+								if(actualGrid[j][i] != -1)
+									options.add(actualGrid[j][i]);
+								else
+								{
+									emptyPosition = new int[2];
+									emptyPosition[0] = j;
+									emptyPosition[1] = i;
+									emptyPositionList.add(emptyPosition);
+								}
+							}
+							listOptions.add(options);
+							options = new ArrayList<Integer>();
+						}
 					
-					int region = controller.getRegion(i, j);
-					
-					options = listOptions.get(region);	//Obtenim les opcions que tenim per aquella fila
-					val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					
-					while(options.contains(val))
-					{
-						val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
-					}
-					
-					SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
-					break;
-			}
-			
-			try {		
-				Thread.sleep(500);			//Donam teps a que s'actualitzi el grid
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+						if(!emptyPositionList.isEmpty())
+						{
+							emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
+							i = emptyPosition[0];
+							j = emptyPosition[1];
+													
+							options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							
+							while(options.contains(val))
+							{
+								val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							}
+							
+							SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+						}
+						break;
+						
+					case(2):		////Agent que nomes treballa per Quadrats
+						
+						int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
+						
+						for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
+						{
+							for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
+							{
+								for(i=0;i<sizeSquare;i++)
+								{
+									for(j=0;j<sizeSquare;j++)
+									{
+										if(actualGrid[i + row][j + column] != -1)
+											options.add(actualGrid[i + row][j + column]);
+										else
+										{
+											emptyPosition = new int[2];
+											emptyPosition[0] = i + row;
+											emptyPosition[1] = j + column;
+											emptyPositionList.add(emptyPosition);
+										}
+									}
+								}
+								listOptions.add(options);
+								options = new ArrayList<Integer>();
+							}
+						}
+						
+						if(!emptyPositionList.isEmpty())
+						{
+							emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
+							i = emptyPosition[0];
+							j = emptyPosition[1];
+													
+							options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							
+							while(options.contains(val))
+							{
+								val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
+							}
+							
+							SendMessage("instantiate#" + agentId + "," + agentType + "," + i + "," + j + "," + val);
+						}
+						break;
+				}
+				
+				try {		
+					Thread.sleep(500);			//Donam teps a que s'actualitzi el grid
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		//#######################################    Check Grid    ############################################
 		
-		static synchronized void checkGrid(int agentId, int agentType)
-		{
-			System.out.println("L'agent " + agentId + " Checkeara el Grid");
-			
-			Random random = new Random(System.nanoTime());
-			
-			boolean foundOnce;
-			boolean cleanPosition = false;
-			
-			int[][] actualGrid = AgentNetworkController.getActualGrid();
-			int[][] actualState = AgentNetworkController.getActualState();
-			int i, j, k, val, loopSize, loopSizeSearchingList;
-			
-			ArrayList<Integer> optionsToAsk = new ArrayList<Integer>();		
-			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();		//Guardem nomes aquells Valors pels que podem preguntar
-			
-			ArrayList<Integer> optionsToSearch = new ArrayList<Integer>();
-			ArrayList<ArrayList<Integer>> searchingList = new ArrayList<ArrayList<Integer>>();		//Guardem tots els valors del Grid
-			
-			int[] position;
-			ArrayList<int[]> optionsPosition = new ArrayList<int[]>();
-			ArrayList<ArrayList<int[]>> listOptionsPosition = new ArrayList<ArrayList<int[]>>();
-			
-			ArrayList<int[]> positionsToClean = new ArrayList<int[]>();
-			
-			/* cellState = 0 --> waitingValue
-			 * cellState = 1 --> initializedByServer
-			 * cellState = 2 --> contribution By Rows
-			 * cellState = 3 --> contribution By Columns
-			 * cellState = 4 --> contribution By Squares
-			 * cellState = 5 --> contribution By User
-			 * cellState = 6 --> committed
-			 * cellState = 7 --> accepted
-			 */
-			
-			switch(agentType)
+		static synchronized void checkBugs(int agentId, int agentType)
+		{			
+			if(!getConflictExists())
 			{
-				case 4:				//Tester que nomes treballa per files
-					
-					for(j=0;j<AgentNetworkController.getSudokuSize();j++)
-					{
-						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-						{
-							if(actualGrid[i][j] != -1)
-							{
-								optionsToSearch.add(actualGrid[i][j]);								
-								if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
-								{
-									optionsToAsk.add(actualGrid[i][j]);
-									
-									position = new int[2];
-									position[0] = i;
-									position[1] = j;
-									optionsPosition.add(position);
-								}
-							}
-						}
+				Random random = new Random(System.nanoTime());
+				
+				boolean foundOnce;
+				boolean cleanPosition = false;
+				
+				int[][] actualGrid = AgentNetworkController.getActualGrid();
+				int[][] actualState = AgentNetworkController.getActualState();
+				int i, j, k, val, loopSize, loopSizeSearchingList;
+				
+				ArrayList<Integer> optionsToAsk = new ArrayList<Integer>();		
+				ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();		//Guardem nomes aquells Valors pels que podem preguntar
+				
+				ArrayList<Integer> optionsToSearch = new ArrayList<Integer>();
+				ArrayList<ArrayList<Integer>> searchingList = new ArrayList<ArrayList<Integer>>();		//Guardem tots els valors del Grid
+				
+				int[] position;
+				ArrayList<int[]> optionsPosition = new ArrayList<int[]>();
+				ArrayList<ArrayList<int[]>> listOptionsPosition = new ArrayList<ArrayList<int[]>>();
+				
+				ArrayList<int[]> positionsToClean = new ArrayList<int[]>();
+				
+				switch(agentType)
+				{
+					case 4:				//Tester que nomes treballa per files
 						
-						listOptions.add(optionsToAsk);
-						optionsToAsk = new ArrayList<Integer>();
-						
-						searchingList.add(optionsToSearch);
-						optionsToSearch = new ArrayList<Integer>();
-						
-						listOptionsPosition.add(optionsPosition);
-						optionsPosition = new ArrayList<int[]>();
-					}
-									
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-					{
-						optionsToAsk = new ArrayList<Integer>();
-						optionsToSearch = new ArrayList<Integer>();
-						optionsPosition = new ArrayList<int[]>();
-						
-						optionsToAsk = listOptions.get(i);
-						optionsToSearch = searchingList.get(i);
-						optionsPosition = listOptionsPosition.get(i);
-						
-						loopSize = optionsToAsk.size();
-						for(j=0; j<loopSize;j++)
-						{
-							val = optionsToAsk.get(j);
-
-							foundOnce = false;
-							loopSizeSearchingList = optionsToSearch.size();
-							
-							for(k=0; k<loopSizeSearchingList; k++)
-							{	
-								if(optionsToSearch.get(k) == val)
-								{
-									if(foundOnce)
-									{
-										position = new int[2];
-										position[0] = optionsPosition.get(j)[0];
-										position[1] = optionsPosition.get(j)[1];
-										positionsToClean.add(position);
-										
-										cleanPosition = true;
-									}
-									
-									foundOnce = true;
-								}
-							}
-						}
-					}
-					
-					if (cleanPosition)
-					{
-						val = random.nextInt(positionsToClean.size());
-						SendMessage("clear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
-					}
-					
-					break;
-					
-				case 5:		//Agent que nomes treballa per Columnes	
-					
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-					{
 						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
-							if(actualGrid[i][j] != -1)
+							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 							{
-								optionsToSearch.add(actualGrid[i][j]);								
-								if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+								if(actualGrid[i][j] != -1)
 								{
-									optionsToAsk.add(actualGrid[i][j]);
-									
-									position = new int[2];
-									position[0] = i;
-									position[1] = j;
-									optionsPosition.add(position);
-								}
-							}
-						}
-						
-						listOptions.add(optionsToAsk);
-						optionsToAsk = new ArrayList<Integer>();
-						
-						searchingList.add(optionsToSearch);
-						optionsToSearch = new ArrayList<Integer>();
-						
-						listOptionsPosition.add(optionsPosition);
-						optionsPosition = new ArrayList<int[]>();
-					}
-									
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-					{
-						optionsToAsk = new ArrayList<Integer>();
-						optionsToSearch = new ArrayList<Integer>();
-						optionsPosition = new ArrayList<int[]>();
-						
-						optionsToAsk = listOptions.get(i);
-						optionsToSearch = searchingList.get(i);
-						optionsPosition = listOptionsPosition.get(i);
-						
-						loopSize = optionsToAsk.size();
-						for(j=0; j<loopSize;j++)
-						{
-							val = optionsToAsk.get(j);
-
-							foundOnce = false;
-							loopSizeSearchingList = optionsToSearch.size();
-							
-							for(k=0; k<loopSizeSearchingList; k++)
-							{	
-								if(optionsToSearch.get(k) == val)
-								{
-									if(foundOnce)
+									optionsToSearch.add(actualGrid[i][j]);								
+									if(actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
 									{
-										position = new int[2];
-										position[0] = optionsPosition.get(j)[0];
-										position[1] = optionsPosition.get(j)[1];
-										positionsToClean.add(position);
+										optionsToAsk.add(actualGrid[i][j]);
 										
-										cleanPosition = true;
-									}
-									
-									foundOnce = true;
-								}
-							}
-						}
-					}
-					
-					if (cleanPosition)
-					{
-						val = random.nextInt(positionsToClean.size());
-						SendMessage("clear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
-					}
-					
-					break;
-					
-				case 6:		////Agent que nomes treballa per Quadrats
-							
-					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
-					
-					for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
-					{
-						for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
-						{
-							for(i=0;i<sizeSquare;i++)
-							{
-								for(j=0;j<sizeSquare;j++)
-								{
-									if(actualGrid[i + row][j + column] != -1)
-									{
-										optionsToSearch.add(actualGrid[i][j]);								
-										if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
-										{
-											optionsToAsk.add(actualGrid[i][j]);
-											
-											position = new int[2];
-											position[0] = i;
-											position[1] = j;
-											optionsPosition.add(position);
-										}
+										position = new int[2];
+										position[0] = i;
+										position[1] = j;
+										optionsPosition.add(position);
 									}
 								}
 							}
@@ -479,53 +340,503 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							listOptionsPosition.add(optionsPosition);
 							optionsPosition = new ArrayList<int[]>();
 						}
-					}
-					
-					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-					{
-						optionsToAsk = new ArrayList<Integer>();
-						optionsToSearch = new ArrayList<Integer>();
-						optionsPosition = new ArrayList<int[]>();
-						
-						optionsToAsk = listOptions.get(i);
-						optionsToSearch = searchingList.get(i);
-						optionsPosition = listOptionsPosition.get(i);
-						
-						loopSize = optionsToAsk.size();
-						for(j=0; j<loopSize;j++)
+										
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
-							val = optionsToAsk.get(j);
-
-							foundOnce = false;
-							loopSizeSearchingList = optionsToSearch.size();
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
 							
-							for(k=0; k<loopSizeSearchingList; k++)
-							{	
-								if(optionsToSearch.get(k) == val)
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+										{
+											position = new int[2];
+											position[0] = optionsPosition.get(j)[0];
+											position[1] = optionsPosition.get(j)[1];
+											positionsToClean.add(position);
+											
+											cleanPosition = true;
+										}
+										
+										foundOnce = true;
+									}
+								}
+								
+							}
+						}
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsToClean.size());
+							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+						}
+						
+						break;
+						
+					case 5:		//Agent que nomes treballa per Columnes	
+						
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+							{
+								if(actualGrid[i][j] != -1)
 								{
-									if(foundOnce)
+									optionsToSearch.add(actualGrid[i][j]);								
+									if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									{
+										optionsToAsk.add(actualGrid[i][j]);
+										
+										position = new int[2];
+										position[0] = i;
+										position[1] = j;
+										optionsPosition.add(position);
+									}
+								}
+							}
+							
+							listOptions.add(optionsToAsk);
+							optionsToAsk = new ArrayList<Integer>();
+							
+							searchingList.add(optionsToSearch);
+							optionsToSearch = new ArrayList<Integer>();
+							
+							listOptionsPosition.add(optionsPosition);
+							optionsPosition = new ArrayList<int[]>();
+						}
+										
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
+							
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+										{
+											position = new int[2];
+											position[0] = optionsPosition.get(j)[0];
+											position[1] = optionsPosition.get(j)[1];
+											positionsToClean.add(position);
+											
+											cleanPosition = true;
+										}
+										
+										foundOnce = true;
+									}
+								}
+							}
+						}
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsToClean.size());
+							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+						}
+						
+						break;
+						
+					case 6:		////Agent que nomes treballa per Quadrats
+								
+						int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
+						
+						for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
+						{
+							for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
+							{
+								for(i=0;i<sizeSquare;i++)
+								{
+									for(j=0;j<sizeSquare;j++)
+									{
+										if(actualGrid[i + row][j + column] != -1)
+										{
+											optionsToSearch.add(actualGrid[i][j]);								
+											if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+											{
+												optionsToAsk.add(actualGrid[i][j]);
+												
+												position = new int[2];
+												position[0] = i;
+												position[1] = j;
+												optionsPosition.add(position);
+											}
+										}
+									}
+								}
+								
+								listOptions.add(optionsToAsk);
+								optionsToAsk = new ArrayList<Integer>();
+								
+								searchingList.add(optionsToSearch);
+								optionsToSearch = new ArrayList<Integer>();
+								
+								listOptionsPosition.add(optionsPosition);
+								optionsPosition = new ArrayList<int[]>();
+							}
+						}
+						
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
+							
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+										{
+											position = new int[2];
+											position[0] = optionsPosition.get(j)[0];
+											position[1] = optionsPosition.get(j)[1];
+											positionsToClean.add(position);
+											
+											cleanPosition = true;
+										}
+										
+										foundOnce = true;
+									}
+								}
+							}
+						}
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsToClean.size());
+							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+						}
+						
+						break;
+				}
+			}
+		}
+		
+		
+		//#######################################    TEST VALUES    ############################################
+		
+		static synchronized void testValues(int agentId, int agentType)
+		{						
+			if(!getConflictExists())
+			{
+				Random random = new Random(System.nanoTime());
+				
+				boolean foundOnce, foundTwice;
+				boolean cleanPosition = false;
+				
+				int[][] actualGrid = AgentNetworkController.getActualGrid();
+				int[][] actualState = AgentNetworkController.getActualState();
+				int i, j, k, val, loopSize, loopSizeSearchingList;
+				
+				ArrayList<Integer> optionsToAsk = new ArrayList<Integer>();		
+				ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();		//Guardem nomes aquells Valors pels que podem preguntar
+				
+				ArrayList<Integer> optionsToSearch = new ArrayList<Integer>();
+				ArrayList<ArrayList<Integer>> searchingList = new ArrayList<ArrayList<Integer>>();		//Guardem tots els valors del Grid
+				
+				int[] position;
+				ArrayList<int[]> optionsPosition = new ArrayList<int[]>();
+				ArrayList<ArrayList<int[]>> listOptionsPosition = new ArrayList<ArrayList<int[]>>();
+				
+				ArrayList<int[]> positionsTested = new ArrayList<int[]>();
+				
+				switch(agentType)
+				{
+					case 4:				//Tester que nomes treballa per files
+						
+						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+						{
+							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+							{
+								if(actualGrid[i][j] != -1)
+								{
+									optionsToSearch.add(actualGrid[i][j]);								
+									if(actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									{
+										optionsToAsk.add(actualGrid[i][j]);
+										
+										position = new int[2];
+										position[0] = i;
+										position[1] = j;
+										optionsPosition.add(position);
+									}
+								}
+							}
+							
+							listOptions.add(optionsToAsk);
+							optionsToAsk = new ArrayList<Integer>();
+							
+							searchingList.add(optionsToSearch);
+							optionsToSearch = new ArrayList<Integer>();
+							
+							listOptionsPosition.add(optionsPosition);
+							optionsPosition = new ArrayList<int[]>();
+						}
+										
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
+							
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								foundTwice = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+											foundTwice = true;
+										
+										foundOnce = true;
+									}
+									
+									if(k == loopSizeSearchingList-1 && !foundTwice)
 									{
 										position = new int[2];
 										position[0] = optionsPosition.get(j)[0];
 										position[1] = optionsPosition.get(j)[1];
-										positionsToClean.add(position);
+										positionsTested.add(position);
 										
 										cleanPosition = true;
 									}
-									
-									foundOnce = true;
 								}
+								
 							}
 						}
-					}
-					
-					if (cleanPosition)
-					{
-						val = random.nextInt(positionsToClean.size());
-						SendMessage("clear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
-					}
-					
-					break;
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsTested.size());
+							SendMessage("clear#" + agentId + "," + agentType + "," + positionsTested.get(val)[0] + "," + positionsTested.get(val)[1]);
+						}
+						
+						break;
+						
+					case 5:		//Agent que nomes treballa per Columnes	
+						
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+							{
+								if(actualGrid[i][j] != -1)
+								{
+									optionsToSearch.add(actualGrid[i][j]);								
+									if(actualState[i][j] == 2 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									{
+										optionsToAsk.add(actualGrid[i][j]);
+										
+										position = new int[2];
+										position[0] = i;
+										position[1] = j;
+										optionsPosition.add(position);
+									}
+								}
+							}
+							
+							listOptions.add(optionsToAsk);
+							optionsToAsk = new ArrayList<Integer>();
+							
+							searchingList.add(optionsToSearch);
+							optionsToSearch = new ArrayList<Integer>();
+							
+							listOptionsPosition.add(optionsPosition);
+							optionsPosition = new ArrayList<int[]>();
+						}
+										
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
+							
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								foundTwice = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+											foundTwice = true;
+										
+										foundOnce = true;
+									}
+									
+									if(k == loopSizeSearchingList-1 && !foundTwice)
+									{
+										position = new int[2];
+										position[0] = optionsPosition.get(j)[0];
+										position[1] = optionsPosition.get(j)[1];
+										positionsTested.add(position);
+										
+										cleanPosition = true;
+									}
+								}
+								
+							}
+						}
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsTested.size());
+							SendMessage("clear#" + agentId + "," + agentType + "," + positionsTested.get(val)[0] + "," + positionsTested.get(val)[1]);
+						}
+						
+						break;
+						
+					case 6:		////Agent que nomes treballa per Quadrats
+								
+						int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
+						
+						for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
+						{
+							for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
+							{
+								for(i=0;i<sizeSquare;i++)
+								{
+									for(j=0;j<sizeSquare;j++)
+									{
+										if(actualGrid[i + row][j + column] != -1)
+										{
+											optionsToSearch.add(actualGrid[i][j]);								
+											if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 5)
+											{
+												optionsToAsk.add(actualGrid[i][j]);
+												
+												position = new int[2];
+												position[0] = i;
+												position[1] = j;
+												optionsPosition.add(position);
+											}
+										}
+									}
+								}
+								
+								listOptions.add(optionsToAsk);
+								optionsToAsk = new ArrayList<Integer>();
+								
+								searchingList.add(optionsToSearch);
+								optionsToSearch = new ArrayList<Integer>();
+								
+								listOptionsPosition.add(optionsPosition);
+								optionsPosition = new ArrayList<int[]>();
+							}
+						}
+						
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+						{
+							optionsToAsk = new ArrayList<Integer>();
+							optionsToSearch = new ArrayList<Integer>();
+							optionsPosition = new ArrayList<int[]>();
+							
+							optionsToAsk = listOptions.get(i);
+							optionsToSearch = searchingList.get(i);
+							optionsPosition = listOptionsPosition.get(i);
+							
+							loopSize = optionsToAsk.size();
+							for(j=0; j<loopSize;j++)
+							{
+								val = optionsToAsk.get(j);
+	
+								foundOnce = false;
+								foundTwice = false;
+								loopSizeSearchingList = optionsToSearch.size();
+								
+								for(k=0; k<loopSizeSearchingList; k++)
+								{	
+									if(optionsToSearch.get(k) == val)
+									{
+										if(foundOnce)
+											foundTwice = true;
+										
+										foundOnce = true;
+									}
+									
+									if(k == loopSizeSearchingList-1 && !foundTwice)
+									{
+										position = new int[2];
+										position[0] = optionsPosition.get(j)[0];
+										position[1] = optionsPosition.get(j)[1];
+										positionsTested.add(position);
+										
+										cleanPosition = true;
+									}
+								}
+								
+							}
+						}
+						
+						if (cleanPosition)
+						{
+							val = random.nextInt(positionsTested.size());
+							SendMessage("clear#" + agentId + "," + agentType + "," + positionsTested.get(val)[0] + "," + positionsTested.get(val)[1]);
+						}
+						
+						break;
+				}
 			}
 		}
 		
@@ -533,9 +844,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		//#######################################    VOTE CONFLICT   ############################################
 		
 		static synchronized void voteConflict(int agentId, int agentType)
-		{	
-			System.out.println("L'agent " + agentId + " Votara");
-			
+		{				
 			boolean firstTime;
 			boolean alreadyVoted = false;
 			
@@ -706,6 +1015,212 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 					break;
 			}
+		}
+		
+		
+		//#######################################    LEADER   ############################################
+		
+		static synchronized void Leader(int agentId, int agentType)
+		{	
+			int[][] actualGrid = AgentNetworkController.getActualGrid();
+			int i, j, val, x, y;
+						
+			int[] emptyPosition;
+			ArrayList<int[]> emptyPositionList = new ArrayList<int[]>();
+			
+			Random random = new Random(System.nanoTime());
+			
+			for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+			{
+				for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+				{
+					if(controller.getCellState(i, j) == 6)
+					{
+						emptyPosition = new int[2];
+						emptyPosition[0] = i;
+						emptyPosition[1] = j;
+						emptyPositionList.add(emptyPosition);
+					}
+				}
+			}
+			
+			if(!emptyPositionList.isEmpty())
+			{
+				val = random.nextInt(emptyPositionList.size());
+				x = emptyPositionList.get(val)[0];
+				y = emptyPositionList.get(val)[1];
+				
+				boolean correct = checkPosition(x, y, actualGrid[x][y]);
+				
+				if(correct)
+					SendMessage("accepted#"+ x + "," + y);
+				else
+					SendMessage("rejected#"+ x + "," + y);
+				
+			}
+			else
+			{
+				try {		
+					Thread.sleep(2500);			//Donam temps a que s'actualitzi el grid
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		static boolean checkPosition(int x, int y, int val)
+		{
+			
+			int i, j;
+			int[][] actualGrid = AgentNetworkController.getActualGrid();
+			
+			ArrayList<Integer> number = new ArrayList<Integer>();
+			
+			for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+			{
+				if(actualGrid[i][y] != -1 && x != i)
+					number.add(actualGrid[i][y]);
+			}
+				
+			if(number.contains(val))
+			{
+				return false;
+			}
+			
+			number = new ArrayList<Integer>();
+					
+			for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+			{
+				if(actualGrid[x][i] != -1 && y != i)
+					number.add(actualGrid[x][i]);
+			}
+			
+			if(number.contains(val))
+			{
+				return false;
+			}
+				
+			number = new ArrayList<Integer>();
+			
+			int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
+			int[] region = getRegion(x, y);
+			
+			for(i=0;i<sizeSquare;i++)
+			{
+				for(j=0;j<sizeSquare;j++)
+				{
+					if(actualGrid[i + region[0]][j + region[1]] != -1 && x != (i + region[0]) && y != (j + region[1]))
+						number.add(actualGrid[i + region[0]][j + region[1]]);
+				}
+			}
+			
+			if(number.contains(val))
+			{
+				return false;
+			}
+			
+			return true;
+		}
+		
+		
+		static int[] getRegion(int x, int y)
+		{
+			int[] region = new int[2];
+			
+			if(x>=0 && x<4)
+			{
+				if (0<=y && y<4)
+				{
+					region[0] = 0;
+					region[1] = 0;
+				}
+				if (4<=y && y<8)
+				{
+					region[0] = 0;
+					region[1] = 4;
+				}
+				if (8<=y && y<12)
+				{
+					region[0] = 0;
+					region[1] = 8;
+				}
+				if (12<=y && y<16)
+				{
+					region[0] = 0;
+					region[1] = 12;
+				}
+			}
+			else if (x>=4 && x<8)
+			{
+				if (0<=y && y<4)
+				{
+					region[0] = 4;
+					region[1] = 0;
+				}
+				if (4<=y && y<8)
+				{
+					region[0] = 4;
+					region[1] = 4;
+				}
+				if (8<=y && y<12)
+				{
+					region[0] = 4;
+					region[1] = 8;
+				}
+				if (12<=y && y<16)
+				{
+					region[0] = 4;
+					region[1] = 12;
+				}
+			}
+			else if (x>=8 && x<12)
+			{
+				if (0<=y && y<4)
+				{
+					region[0] = 8;
+					region[1] = 0;
+				}
+				if (4<=y && y<8)
+				{
+					region[0] = 8;
+					region[1] = 4;
+				}
+				if (8<=y && y<12)
+				{
+					region[0] = 8;
+					region[1] = 8;
+				}
+				if (12<=y && y<16)
+				{
+					region[0] = 8;
+					region[1] = 12;
+				}
+			}
+			else if (x>=12 && x<16)
+			{
+				if (0<=y && y<4)
+				{
+					region[0] = 12;
+					region[1] = 0;
+				}
+				if (4<=y && y<8)
+				{
+					region[0] = 12;
+					region[1] = 4;
+				}
+				if (8<=y && y<12)
+				{
+					region[0] = 12;
+					region[1] = 8;
+				}
+				if (12<=y && y<16)
+				{
+					region[0] = 12;
+					region[1] = 12;
+				}
+			}
+			
+			return region;
 		}
 }
 

@@ -43,7 +43,7 @@ public class ServerGameController extends GameController implements ActionListen
 		
 		console = new List();
 		console.setLocation(10, 40);
-		console.setSize(780, 560);
+		console.setSize(745, 560);
 
 		add(console);
 		votingExists = false;
@@ -111,7 +111,7 @@ public class ServerGameController extends GameController implements ActionListen
 		}
 		else
 		{
-			networkController.BroadcastMessage("NOclear#" + conflictX + "," + conflictY);
+			networkController.BroadcastMessage("committed#" + conflictX + "," + conflictY);
 			SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
 		}
 	}
@@ -211,7 +211,7 @@ public class ServerGameController extends GameController implements ActionListen
 					conflictY = Integer.parseInt(vars2[3]);
 					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId);
 					
-					Print("Server: Agent " + agentId + " found a bug at the position [" + conflictX + "][" + conflictY +"]");
+					Print("Server: Agent " + agentId + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");
 					
 					votes.clear();
 					votingExists = true;
@@ -225,6 +225,19 @@ public class ServerGameController extends GameController implements ActionListen
 				}
 				
 				break;
+			case "testerClear":
+				vars2 = vars[1].split(",");
+				agentId = Integer.parseInt(vars2[0]);
+				agentType = Integer.parseInt(vars2[1]);
+				int cleanX = Integer.parseInt(vars2[2]);
+				int cleanY = Integer.parseInt(vars2[3]);
+				
+				Print("Server: Agent " + agentId + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");
+				
+				networkController.BroadcastMessage("clear#" + cleanX + "," + cleanY);
+				ClearCell(cleanX, cleanY);
+				
+				break;
 			case "voted":
 				vars2 = vars[1].split(",");
 				agentId = Integer.parseInt(vars2[0]);
@@ -234,21 +247,43 @@ public class ServerGameController extends GameController implements ActionListen
 				int voteVal = Integer.parseInt(vars2[4]);
 				
 				if(!votingExists || conflictX != conX || conflictY != conY)
-				{
-					Print("Unexpected vote --> votingExists: " + votingExists + ", conflictX: " + conX + ", conflictY: " + conY);
-				}
-			
-				switch(voteVal)
-				{
-					case -1:
-						Print("Server: Agent " + agentId + " voted to remove the Value of the position [" + conX + "][" + conY +"]");
-						break;
-					case 1:
-						Print("Server: Agent " + agentId + " voted to keep the Value of the position [" + conX + "][" + conY +"]");
-						break;
+					Print("Server: Received an Unexpected vote from Agent " + agentId + " for the position [" + conX + "][" + conY +"]");
+				else
+				{				
+					switch(voteVal)
+					{
+						case -1:
+							Print("Server: Agent " + agentId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
+							break;
+						case 1:
+							Print("Server: Agent " + agentId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
+							break;
+					}
 				}
 				
 				votes.add(voteVal);
+				break;
+			case "accepted":
+				vars2 = vars[1].split(",");
+				x = Integer.parseInt(vars2[0]);
+				y = Integer.parseInt(vars2[1]);
+				
+				Print("Server: Project Leader has accepted the value " + cells[x][y].current + " for the position [" + x + "][" + y +"]");
+				SetValueAndState(x, y, cells[x][y].current, 7);		//cellState = 4 --> contribution By Squares
+				networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
+				
+				//cells[x][y].IsConstant();		//Potser s'ha d'eliminar si en algun moment s'ha de fer backtracking
+				break;
+			case "rejected":
+				vars2 = vars[1].split(",");
+				x = Integer.parseInt(vars2[0]);
+				y = Integer.parseInt(vars2[1]);
+				
+				Print("Server: Project Leader has rejected the value " + cells[x][y].current + " for the position [" + x + "][" + y +"]");
+				
+				networkController.BroadcastMessage("clear#" + x + "," + y);
+				ClearCell(x, y);
+				
 				break;
 			}
 
@@ -265,8 +300,14 @@ public class ServerGameController extends GameController implements ActionListen
 		{
 			sum += i;
 		}
-		Print("Votes evaluated to " + String.valueOf(sum > 0));
-		return sum > 0;
+		boolean resultVotation = sum > 0;
+		
+		if (resultVotation)
+			Print("Server: The committers have decided to remove the value by votation.");
+		else
+			Print("Server: The committers have decided to keep the value by votation.");
+		
+		return resultVotation;
 	}
 
 }
