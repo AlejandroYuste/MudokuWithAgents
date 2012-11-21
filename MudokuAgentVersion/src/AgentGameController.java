@@ -30,6 +30,16 @@ public class AgentGameController extends GameController implements ActionListene
 	Label colorConflictLabel;
 	Label colorUserContributorLabel;
 	
+	Label valuesContributedLabel;
+	Label valuesCommittedLabel;
+	Label contributedLabel;
+	Label committedLabel;
+	Label countContributedLabel;
+	Label countCommittedLabel;
+	Label correctLabel;
+	Label valuesLabel;
+	Label countLabel;
+	
 	TextField NumAgentsField;
 	TextField NumRadomAgentsField;
 	Choice TypeAgentsField;
@@ -144,7 +154,7 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		connectClientButton = new Button("Connect to the Server");
 		connectClientButton.setSize(200,150);
-		connectClientButton.setLocation(300, 100);
+		connectClientButton.setLocation(275, 100);
 		connectClientButton.setActionCommand("connect");
 		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectClientButton);
@@ -157,17 +167,17 @@ public class AgentGameController extends GameController implements ActionListene
 		disconnectButton.setVisible(false);
 		add(disconnectButton);
 		
-		pauseExecution = new Button("Pause");
+		pauseExecution = new Button("Pause Agents");
 		pauseExecution.setSize(120,40);
-		pauseExecution.setLocation(gridEndX + 135, 330);
+		pauseExecution.setLocation(gridEndX + 185, 330);
 		pauseExecution.setActionCommand("pauseExecution");
 		pauseExecution.addActionListener(this);				//Afegim el Listener al button "Connect"
 		pauseExecution.setVisible(false);
 		add(pauseExecution);
 		
-		playExecution = new Button("Play");
+		playExecution = new Button("Resume Agents");
 		playExecution.setSize(120,40);
-		playExecution.setLocation(gridEndX + 135, 280);
+		playExecution.setLocation(gridEndX + 185, 280);
 		playExecution.setActionCommand("playExecution");
 		playExecution.addActionListener(this);				//Afegim el Listener al button "Connect"
 		playExecution.setVisible(false);
@@ -179,8 +189,10 @@ public class AgentGameController extends GameController implements ActionListene
 		Title.setFont(font);
 		Title.setAlignment(Label.CENTER);
 		Title.setSize(400,150);
-		Title.setLocation(200, 0);
+		Title.setLocation(175, 0);
 		add(Title);
+		
+		//------------------------------------------------------------------------------------------
 		
 		AddNewAgents = new Label("Add New Agents to the Community:");
 		AddNewAgents.setSize(250,20);
@@ -219,6 +231,8 @@ public class AgentGameController extends GameController implements ActionListene
 		add(RandomCommunityMember);
 		RandomCommunityMember.setVisible(false);
 		
+		//------------------------------------------------------------------------------------------
+		
 		colorServerLabel = new Label("Initialized by Server");
 		colorServerLabel.setSize(140,20);
 		colorServerLabel.setLocation(600, 420);
@@ -249,25 +263,86 @@ public class AgentGameController extends GameController implements ActionListene
 		colorUserContributorLabel.setVisible(false);
 		add(colorUserContributorLabel);
 		
-		colorCommittedLabel = new Label("Value Committed");
+		colorCommittedLabel = new Label("Contribution Committed");
 		colorCommittedLabel.setSize(140,20);
 		colorCommittedLabel.setLocation(600, 520);
 		colorCommittedLabel.setVisible(false);
 		add(colorCommittedLabel);
 		
-		colorAcceptedLabel = new Label("Value Accepted");
+		colorAcceptedLabel = new Label("Contribution Accepted");
 		colorAcceptedLabel.setSize(140,20);
 		colorAcceptedLabel.setLocation(600, 540);
 		colorAcceptedLabel.setVisible(false);
 		add(colorAcceptedLabel);
 		
-		colorConflictLabel = new Label("Votation ON");
+		colorConflictLabel = new Label("Votation Active");
 		colorConflictLabel.setSize(140,20);
 		colorConflictLabel.setLocation(600, 560);
 		colorConflictLabel.setVisible(false);
 		add(colorConflictLabel);		
 		
-	
+		//------------------------------------------------------------------------------------------
+		
+		valuesContributedLabel = new Label("Values");
+		valuesContributedLabel.setSize(50, 10);
+		valuesContributedLabel.setLocation(505, 270);
+		valuesContributedLabel.setVisible(false);
+		add(valuesContributedLabel);	
+		
+		contributedLabel = new Label("Contributed");
+		contributedLabel.setSize(70, 10);
+		contributedLabel.setLocation(492, 285);
+		contributedLabel.setVisible(false);
+		add(contributedLabel);	
+		
+		countContributedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countContributedLabel.setSize(50, 10);
+		countContributedLabel.setLocation(505, 302);
+		countContributedLabel.setVisible(false);
+		add(countContributedLabel);	
+		
+		//------------------------------------------------------------------------------------------
+		
+		valuesCommittedLabel = new Label("Values");
+		valuesCommittedLabel.setSize(50, 10);
+		valuesCommittedLabel.setLocation(505, 340);
+		valuesCommittedLabel.setVisible(false);
+		add(valuesCommittedLabel);	
+		
+		committedLabel = new Label("Committed");
+		committedLabel.setSize(70, 10);
+		committedLabel.setLocation(493, 355);
+		committedLabel.setVisible(false);
+		add(committedLabel);	
+		
+		countCommittedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countCommittedLabel.setSize(50, 10);
+		countCommittedLabel.setLocation(505, 370);
+		countCommittedLabel.setVisible(false);
+		add(countCommittedLabel);	
+		
+		//------------------------------------------------------------------------------------------
+		
+		correctLabel = new Label("Correct");
+		correctLabel.setSize(50, 10);
+		correctLabel.setLocation(495, 420);
+		correctLabel.setVisible(false);
+		add(correctLabel);
+		
+		valuesLabel = new Label("Values");
+		valuesLabel.setSize(50, 10);
+		valuesLabel.setLocation(497, 435);
+		valuesLabel.setVisible(false);
+		add(valuesLabel);	
+		
+		countLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countLabel.setSize(50, 10);
+		countLabel.setLocation(500, 455);
+		countLabel.setVisible(false);
+		add(countLabel);
+		
+		//------------------------------------------------------------------------------------------
+		
 		networkController = new AgentNetworkController(this);
 	}
 
@@ -355,15 +430,30 @@ public class AgentGameController extends GameController implements ActionListene
 		gr.drawLine(745, 10, 745, 240);			
 		gr.drawLine(485, 240, 745, 240);
 		
-		gr.drawLine(485, 260, 485, 390);			//Separador del Pause-Play	
-		gr.drawLine(485, 260, 745, 260);			
+		gr.drawLine(585, 260, 585, 390);			//Separador del Pause-Play	
+		gr.drawLine(585, 260, 745, 260);			
 		gr.drawLine(745, 260, 745, 390);			
-		gr.drawLine(485, 390, 745, 390);
+		gr.drawLine(585, 390, 745, 390);
 				
 		gr.drawLine(565, 410, 565, 590);			//Pintem la llegenda de Colors
 		gr.drawLine(565, 410, 745, 410);			
 		gr.drawLine(745, 410, 745, 590);			
 		gr.drawLine(565, 590, 745, 590);
+		
+		gr.drawLine(485, 260, 485, 320);			//Caixa valors contributed
+		gr.drawLine(485, 260, 565, 260);			
+		gr.drawLine(565, 260, 565, 320);			
+		gr.drawLine(485, 320, 565, 320);
+		
+		gr.drawLine(485, 330, 485, 390);			//Caixa valors committed
+		gr.drawLine(485, 330, 565, 330);			
+		gr.drawLine(565, 330, 565, 390);			
+		gr.drawLine(485, 390, 565, 390);
+		
+		gr.drawLine(485, 410, 485, 475);			//Caixa de la Puntuacio
+		gr.drawLine(485, 410, 550, 410);			
+		gr.drawLine(550, 410, 550, 475);			
+		gr.drawLine(485, 475, 550, 475);
 		
 		gr.setColor(agentColors[6]);
 		gr.fillRect(582, 425, 10, 10);
@@ -388,6 +478,31 @@ public class AgentGameController extends GameController implements ActionListene
 		
 		gr.setColor(agentColors[7]);
 		gr.fillRect(582, 565, 10, 10);
+		
+		int val = getCountCorrect();
+		if (val>0 && val<100)
+			countLabel.setLocation(497, 455);
+		else if (val>=100)
+			countLabel.setLocation(495, 455);
+		countLabel.setText(val + "/" + sudokuSize*sudokuSize);
+		
+		val = getCountContributed();
+		if (val < 10)
+			countContributedLabel.setLocation(508, 302);
+		else if (val>0 && val<100)
+			countContributedLabel.setLocation(505, 302);
+		else if (val>=100)
+			countContributedLabel.setLocation(502, 302);		
+		countContributedLabel.setText(val + "/" + sudokuSize*sudokuSize);
+		
+		val = getCountCommitted();
+		if (val < 10)
+			countCommittedLabel.setLocation(508, 370);
+		else if (val>9 && val<100)
+			countCommittedLabel.setLocation(505, 370);
+		else if (val>=100)
+			countCommittedLabel.setLocation(502, 370);
+		countCommittedLabel.setText(val + "/" + sudokuSize*sudokuSize);
 		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -452,7 +567,9 @@ public class AgentGameController extends GameController implements ActionListene
 				}
 					
 				//Pintem els numeros al Grid
-				gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
+				if(cells[x][y].current != -1)
+					gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
+				
 				tempLineX += deltaX;
 				lineX = (int) tempLineX;
 			}
@@ -525,12 +642,12 @@ public class AgentGameController extends GameController implements ActionListene
 				break;
 			case "disconnect":
 				int index = listPanel.getSelectedIndex();
+				
 				String AgentName = listPanel.getSelectedItem();
-				
-				String[] vars = AgentName.split(" ");
-				//System.out.println("AgentGameController --> Volem para el Client: " + AgentName + " amb id: " + vars[1]);
-				
-				int agentId = Integer.parseInt(vars[1]);
+				String[] vars = AgentName.split("\\[");
+				String[] vars1 = vars[1].split("\\]");
+				int agentId = Integer.parseInt(vars1[0]);
+								
 				networkController.stopExecuting(agentId);
 				listPanel.remove(index);
 				break;
@@ -720,6 +837,15 @@ public class AgentGameController extends GameController implements ActionListene
 		colorCommittedLabel.setVisible(true);
 		colorAcceptedLabel.setVisible(true);
 		colorConflictLabel.setVisible(true);
+		correctLabel.setVisible(true);
+		valuesLabel.setVisible(true);
+		countLabel.setVisible(true);
+		valuesContributedLabel.setVisible(true);
+		valuesCommittedLabel.setVisible(true);
+		contributedLabel.setVisible(true);
+		committedLabel.setVisible(true);
+		countContributedLabel.setVisible(true);
+		countCommittedLabel.setVisible(true);
 
 		state = GameState.game;
 	}
@@ -771,5 +897,56 @@ public class AgentGameController extends GameController implements ActionListene
 	int getCellState(int x, int y)
 	{
 		return super.getCellState(x, y);
+	}
+	
+	int getCountContributed()
+	{
+		int count = 0;
+		
+		for(int i=0;i<sudokuSize;i++)
+		{
+			for(int j=0;j<sudokuSize;j++)
+			{
+				if(cells[i][j].valueState == 2 || cells[i][j].valueState == 3 || cells[i][j].valueState == 4 || cells[i][j].valueState == 5)
+					count++;
+			}
+				
+		}
+		
+		return count;
+	}
+	
+	int getCountCommitted()
+	{
+		int count = 0;
+		
+		for(int i=0;i<sudokuSize;i++)
+		{
+			for(int j=0;j<sudokuSize;j++)
+			{
+				if(cells[i][j].valueState == 6)
+					count++;
+			}
+				
+		}
+		
+		return count;
+	}
+	
+	int getCountCorrect()
+	{
+		int count = 0;
+		
+		for(int i=0;i<sudokuSize;i++)
+		{
+			for(int j=0;j<sudokuSize;j++)
+			{
+				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
+					count++;
+			}
+				
+		}
+		
+		return count;
 	}
 }

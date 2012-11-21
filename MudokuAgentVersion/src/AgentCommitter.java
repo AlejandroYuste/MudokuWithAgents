@@ -25,7 +25,7 @@ public class AgentCommitter implements Runnable{
 		{
 			try
 			{
-				Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 1000);
+				Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 750);
 
 				if (Agent.getConflictExists())
 				{

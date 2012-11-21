@@ -5,8 +5,10 @@ import java.util.ArrayList;
 
 import javax.swing.Timer;
 
-public class ServerGameController extends GameController implements ActionListener 
+public class ServerGameController extends GameController implements ActionListener 		
 {
+	// TODO: Quan hi ha votacions i s'elimina un valor aquest no s'elimina correctament!
+	
 	/**
 	 * 
 	 */
@@ -175,7 +177,7 @@ public class ServerGameController extends GameController implements ActionListen
 				int val = Integer.parseInt(vars2[4]);
 
 				if (agentId == -1)
-					Print("User contributed with the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
+					Print("Server: User contributed with the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
 				else
 					Print("Server: Agent " + agentId + " Contributed at the Position [" + x +"][" + y +"] with the Value [" + val + "]");
 				
@@ -202,6 +204,7 @@ public class ServerGameController extends GameController implements ActionListen
 				break;
 				
 			case "clear":
+				
 				if(!votingExists)
 				{
 					vars2 = vars[1].split(",");
@@ -220,9 +223,7 @@ public class ServerGameController extends GameController implements ActionListen
 					voteCountTimer.start();
 				}
 				else
-				{
 					clientHandler.SendMessage("rejected#clear=voting exists");
-				}
 				
 				break;
 			case "testerClear":
@@ -250,15 +251,10 @@ public class ServerGameController extends GameController implements ActionListen
 					Print("Server: Received an Unexpected vote from Agent " + agentId + " for the position [" + conX + "][" + conY +"]");
 				else
 				{				
-					switch(voteVal)
-					{
-						case -1:
-							Print("Server: Agent " + agentId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
-							break;
-						case 1:
-							Print("Server: Agent " + agentId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
-							break;
-					}
+					if(voteVal == -1)
+						Print("Server: Agent " + agentId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
+					else if (voteVal == 1)
+						Print("Server: Agent " + agentId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
 				}
 				
 				votes.add(voteVal);
@@ -300,7 +296,8 @@ public class ServerGameController extends GameController implements ActionListen
 		{
 			sum += i;
 		}
-		boolean resultVotation = sum > 0;
+		
+		boolean resultVotation = sum >= 0;
 		
 		if (resultVotation)
 			Print("Server: The committers have decided to remove the value by votation.");

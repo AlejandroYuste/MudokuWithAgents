@@ -30,14 +30,14 @@ public class AgentTester implements Runnable{
 				
 				if (!Agent.getConflictExists())
 				{
-					val = random.nextInt(2);
-					if(val == 0)
-						Agent.checkBugs(agentId, agentType);
-					else if(val == 1)
+					val = random.nextInt(3);
+					
+					if (val == 0 || val == 1)
 						Agent.testValues(agentId, agentType);
+					else if (val == 2)
+						Agent.checkBugs(agentId, agentType);
 					else
 						Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 2000);
-
 				}
 				else Thread.sleep(10000);
 				

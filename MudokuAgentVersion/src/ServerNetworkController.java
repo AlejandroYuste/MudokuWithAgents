@@ -69,7 +69,7 @@ public class ServerNetworkController implements Runnable {
 	
 	public void ClientDisconnected(int clientId)
 	{
-		gameController.Print("client " + clientId + " disconnected");
+		gameController.Print("Server: Client " + clientId + " has been Disconnected.");
 		for(int i = 0; i < clientFramework.size(); i++)
 		{
 			if(clientFramework.get(i).clientId == clientId)

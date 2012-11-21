@@ -68,20 +68,15 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 	}
 	
 	@SuppressWarnings("deprecation")
-	void stopExecuting(int agentId_)		//TODO: Aixo no Funciona
+	void stopExecuting(int agentId_)
 	{
-		for(int i=0; i<ThreadsAgent.size();i++)
+		for(ThreadsInformation threadInfo : ThreadsAgent)
 		{
-			threadInfo = (ThreadsInformation) ThreadsAgent.get(i);
-			if(threadInfo.getAgentId() == agentId_)
+			if(threadInfo.agentId == agentId_)
 			{
-				Thread thrInf = threadInfo.getThread();
-				thrInf.stop();
-				ThreadsAgent.remove(threadInfo);
+				threadInfo.threadInfo.stop();
 			}
 		}
-		
-		System.out.println("Agent --> Acabant el Thread del Agent: " + agentId_);
 	}
 	
 	
@@ -214,7 +209,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							i = emptyPosition[0];
 							j = emptyPosition[1];
 													
-							options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+							options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
 							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 							
 							while(options.contains(val))
@@ -259,8 +254,9 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							emptyPosition = emptyPositionList.get(random.nextInt(emptyPositionList.size()));
 							i = emptyPosition[0];
 							j = emptyPosition[1];
-													
-							options = listOptions.get(j);	//Obtenim les opcions que tenim per aquella fila
+							
+							options = listOptions.get(controller.getRegion(i, j));	//Obtenim les opcions que tenim per aquella fila
+							System.out.println("Opciones possibles: " + options);
 							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 							
 							while(options.contains(val))

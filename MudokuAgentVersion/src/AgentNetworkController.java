@@ -104,6 +104,8 @@ public class AgentNetworkController
 			int countAgents = numRandomAgents;
 			int[] numAgentsToAdd = new int[10];
 			
+			Random random = new Random(System.nanoTime());
+			
 			for(int i=0; i<numAgentsToAdd.length; i++)
 			{
 				numAgentsToAdd[i] = 1;
@@ -116,18 +118,21 @@ public class AgentNetworkController
 			 * Committers -> 20%
 			 */
 			
-			int numContributors = (int) Math.round(countAgents*0.5);
-			countAgents -= numContributors;
-			int numTesters = (int) Math.round(countAgents*0.3);
-			countAgents -= numTesters;
-			//int numCommitters = (int) Math.round(countAgents*0.2);
-			int numCommitters = countAgents;
-			countAgents -= numCommitters;
-			
-			Random random = new Random(System.nanoTime());
-			int index;
-			int typeAgent = -1;
-			
+			int numContributors = 0, numTesters = 0, numCommitters = 0, val, index, typeAgent = -1;
+			while (countAgents>0)
+			{
+				val = random.nextInt(10);
+				
+				if(val >= 5)
+					numContributors++;
+				else if (1 < val && val < 5)
+					numTesters++;
+				else if (1 >= val)
+					numCommitters++;
+					
+				countAgents--;
+			}
+						
 			for(int i=0; i<numContributors; i++)
 			{
 				index = random.nextInt(3);

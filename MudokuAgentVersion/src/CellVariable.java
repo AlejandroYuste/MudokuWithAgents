@@ -8,8 +8,7 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.solver.variables.integer.IntDomain;
 
 public class CellVariable 
-{
-	
+{	
 	int x, y, valueState, current;
 	boolean contradicting, isConstant;
 
@@ -41,23 +40,62 @@ public class CellVariable
 		y = y_;
 	}
 	
-	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y)
+	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y, ClientGameController.ActualRol actualRol)
 	{
 		float tempDrawX = domainXOffset;
 		int drawX = (int) tempDrawX;
-		gr.setColor(Color.black);
 		
-		for(int i = 0; i<GameController.sudokuSize;i++)
+		if (actualRol == ClientGameController.ActualRol.Observer)
 		{
-			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(i+1), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
-			tempDrawX += deltaX;
-			drawX = (int) tempDrawX;
+			int activeDrawX = 0;
+			int activeDrawY = 0;
+	
+			
+			float tempDrawY = 0;
+			int drawY = (int) tempDrawY;
+			
+			for(int i = 0; i<GameController.sudokuSize;i++)
+			{
+				gr.setColor(Color.black);
+				if(i==x)
+					activeDrawX = drawX;
+		
+				gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
+				gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+				tempDrawX += deltaX;
+				drawX = (int) tempDrawX;
+				
+				if(i==y) 
+					activeDrawY = drawY;
+	
+				gr.drawRect(domainYOffset + 10, 10 + drawY, (int)deltaX, (int)deltaY);
+				gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 5, (int)(drawY + deltaY / 2) + 15);
+				tempDrawY += deltaY;
+				drawY = (int) tempDrawY;
+			}
+			
+			gr.setColor(new Color(220, 20, 60));
+			gr.drawRect(activeDrawX, domainYOffset, (int)deltaX, (int)deltaY);
+			gr.drawString(String.valueOf(x), (int)(activeDrawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+			gr.drawRect(domainYOffset + 10, 10 + activeDrawY, (int)deltaX, (int)deltaY);
+			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
 		}
-		if(mouseOverIndex != -1)
+		else
 		{
-			gr.setColor(ClientGameController.mouseOverColor);
-			gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
+			gr.setColor(Color.black);
+			
+			for(int i = 0; i<GameController.sudokuSize;i++)
+			{
+				gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
+				gr.drawString(String.valueOf(i+1), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+				tempDrawX += deltaX;
+				drawX = (int) tempDrawX;
+			}
+			if(mouseOverIndex != -1)
+			{
+				gr.setColor(ClientGameController.mouseOverColor);
+				gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
+			}
 		}
 	}
 	
