@@ -127,9 +127,7 @@ public class ServerGameController extends GameController implements ActionListen
 			for(int k = 0; k < sudokuSize; k++)
 			{
 				if(cells[i][k].valueState != 0)
-				{
 					code += i + "," + k + "," + cells[i][k].current + "," + cells[i][k].valueState + "," + instantiator[i][k] + "&";
-				}
 			}
 		}
 		
@@ -221,13 +219,22 @@ public class ServerGameController extends GameController implements ActionListen
 				if(!votingExists)
 				{
 					vars2 = vars[1].split(",");
-					agentId = Integer.parseInt(vars2[0]);
 					agentType = Integer.parseInt(vars2[1]);
 					conflictX = Integer.parseInt(vars2[2]);
 					conflictY = Integer.parseInt(vars2[3]);
 					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId);
 					
-					Print("Server: Agent " + agentId + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");
+					if (agentType == -1)
+					{
+						String userName = vars2[0];
+						Print("Server: " + userName + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");		//Acceptem totes les instanciacions		
+					}
+					else
+					{
+						agentId = Integer.parseInt(vars2[0]);
+						Print("Server: Agent " + agentId + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");
+					}
+					
 					
 					votes.clear();
 					votingExists = true;
@@ -241,12 +248,20 @@ public class ServerGameController extends GameController implements ActionListen
 				break;
 			case "testerClear":
 				vars2 = vars[1].split(",");
-				agentId = Integer.parseInt(vars2[0]);
 				agentType = Integer.parseInt(vars2[1]);
 				int cleanX = Integer.parseInt(vars2[2]);
 				int cleanY = Integer.parseInt(vars2[3]);
 				
-				Print("Server: Agent " + agentId + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");
+				if (agentType == -1)
+				{
+					String userName = vars2[0];
+					Print("Server: " + userName + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");		//Acceptem totes les instanciacions		
+				}
+				else
+				{
+					agentId = Integer.parseInt(vars2[0]);
+					Print("Server: Agent " + agentId + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");
+				}
 				
 				networkController.BroadcastMessage("clear#" + cleanX + "," + cleanY);
 				ClearCell(cleanX, cleanY);
@@ -254,20 +269,36 @@ public class ServerGameController extends GameController implements ActionListen
 				break;
 			case "voted":
 				vars2 = vars[1].split(",");
-				agentId = Integer.parseInt(vars2[0]);
 				agentType = Integer.parseInt(vars2[1]);
 				int conX =Integer.parseInt(vars2[2]);
 				int conY = Integer.parseInt(vars2[3]);
 				int voteVal = Integer.parseInt(vars2[4]);
 				
-				if(!votingExists || conflictX != conX || conflictY != conY)
-					Print("Server: Received an Unexpected vote from Agent " + agentId + " for the position [" + conX + "][" + conY +"]");
+				if (agentType == -1)
+				{
+					String userName = vars2[0];
+					if(!votingExists || conflictX != conX || conflictY != conY)
+						Print("Server: Received an Unexpected vote from User " + userName + " for the position [" + conX + "][" + conY +"]");
+					else
+					{				
+						if(voteVal == -1)
+							Print("Server: User " + userName + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
+						else if (voteVal == 1)
+							Print("Server: User " + userName + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
+					}
+				}
 				else
-				{				
-					if(voteVal == -1)
-						Print("Server: Agent " + agentId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
-					else if (voteVal == 1)
-						Print("Server: Agent " + agentId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
+				{
+					agentId = Integer.parseInt(vars2[0]);
+					if(!votingExists || conflictX != conX || conflictY != conY)
+						Print("Server: Received an Unexpected vote from Agent " + agentId + " for the position [" + conX + "][" + conY +"]");
+					else
+					{				
+						if(voteVal == -1)
+							Print("Server: Agent " + agentId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
+						else if (voteVal == 1)
+							Print("Server: Agent " + agentId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
+					}
 				}
 				
 				votes.add(voteVal);

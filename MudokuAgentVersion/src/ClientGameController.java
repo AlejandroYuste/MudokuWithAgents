@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import javax.swing.Timer;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.solver.ContradictionException;
 import choco.kernel.solver.variables.integer.IntDomain;
 
 public class ClientGameController extends GameController implements ActionListener 
@@ -17,12 +16,17 @@ public class ClientGameController extends GameController implements ActionListen
 	NetworkState networkState;
 	
 	protected enum ActualRol {Observer, Contributor, Tester, Committer, Leader}
-
 	protected ActualRol actualRol;
 
 	Button connectClientButton;
 	Button joinCommunity;
 	Button getPromotedTester;
+	Button askForCommiting;
+	Button removeValue;
+	Button getPromotedCommitter;
+	Button voteCommiting;
+	Button voteRemove;
+	Button getPromotedLeader;
 	
 	Label Title;
 	Label ipFieldLabel;
@@ -57,11 +61,11 @@ public class ClientGameController extends GameController implements ActionListen
 	Label positionCountFreeLabel;
 	Label countFreeLabel;
 	
-	Label contributorInformation;
-	Label contributorL2Information;
-	Label contributorL3Information;
-	Label contributorL4Information;
-
+	Label rolInformation;
+	Label rolL1Information;
+	Label rolL2Information;
+	Label rolL3Information;
+	
 	List console;
 	TextField ipField;
 	TextField portField;
@@ -75,6 +79,14 @@ public class ClientGameController extends GameController implements ActionListen
 	int[] positionContributed;
 	ArrayList<int[]> positionContributedList = new ArrayList<int[]>();
 	int numContributionsCommited = 0;
+	
+	int[] positionCommitted;
+	ArrayList<int[]> positionCommittedList = new ArrayList<int[]>();
+	int numCommittedSatisfactory = 0;
+	
+	int[] positionVoted;
+	ArrayList<int[]> positionVotedList = new ArrayList<int[]>();
+	int numVotedSatisfactory = 0;
 	
 	static Color[] clientColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
 	
@@ -135,6 +147,46 @@ public class ClientGameController extends GameController implements ActionListen
 		getPromotedTester.addActionListener(this);				//Afegim el Listener al button "Connect"
 		getPromotedTester.setVisible(false);
 		add(getPromotedTester);
+		
+		getPromotedCommitter = new Button("Get Promoted!");
+		getPromotedCommitter.setSize(180,40);
+		getPromotedCommitter.setLocation(530, 250);
+		getPromotedCommitter.setActionCommand("getCommitter");
+		getPromotedCommitter.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getPromotedCommitter.setVisible(false);
+		add(getPromotedCommitter);
+		
+		askForCommiting = new Button("Ask for Committing");
+		askForCommiting.setSize(180,30);
+		askForCommiting.setLocation(530, 170);
+		askForCommiting.setActionCommand("askCommitting");
+		askForCommiting.addActionListener(this);				//Afegim el Listener al button "Connect"
+		askForCommiting.setVisible(false);
+		add(askForCommiting);
+		
+		removeValue = new Button("Report a Bug");
+		removeValue.setSize(180,30);
+		removeValue.setLocation(530, 210);
+		removeValue.setActionCommand("removeValue");
+		removeValue.addActionListener(this);				//Afegim el Listener al button "Connect"
+		removeValue.setVisible(false);
+		add(removeValue);
+		
+		voteCommiting = new Button("Vote Committing");
+		voteCommiting.setSize(180,30);
+		voteCommiting.setLocation(530, 170);
+		voteCommiting.setActionCommand("no");
+		voteCommiting.addActionListener(this);				//Afegim el Listener al button "Connect"
+		voteCommiting.setVisible(false);
+		add(voteCommiting);
+		
+		voteRemove = new Button("Vote Remove");
+		voteRemove.setSize(180,30);
+		voteRemove.setLocation(530, 210);
+		voteRemove.setActionCommand("yes");
+		voteRemove.addActionListener(this);				//Afegim el Listener al button "Connect"
+		voteRemove.setVisible(false);
+		add(voteRemove);
 		
 		// Labels From Here
 		Title = new Label("Welcome to Mudoku-Agents Version");
@@ -329,29 +381,29 @@ public class ClientGameController extends GameController implements ActionListen
 		add(countFreeLabel);
 		
 		//------------------------------------------------------------------------------------------
-		contributorInformation = new Label("You can contribute adding Values to the Grid");
-		contributorInformation.setSize(280, 20);
-		contributorInformation.setLocation(492, 100);
-		contributorInformation.setVisible(false);
-		add(contributorInformation);
+		rolInformation = new Label("You can contribute adding Values to the Grid");
+		rolInformation.setSize(280, 20);
+		rolInformation.setLocation(492, 100);
+		rolInformation.setVisible(false);
+		add(rolInformation);
 		
-		contributorL2Information = new Label(" - Use the Numbers below the Grid.");
-		contributorL2Information.setSize(280, 20);
-		contributorL2Information.setLocation(510, 120);
-		contributorL2Information.setVisible(false);
-		add(contributorL2Information);
+		rolL1Information = new Label(" - Use the Numbers below the Grid.");
+		rolL1Information.setSize(280, 20);
+		rolL1Information.setLocation(510, 120);
+		rolL1Information.setVisible(false);
+		add(rolL1Information);
 		
-		contributorL3Information = new Label(" - You could be promoted when 5 of your");
-		contributorL3Information.setSize(280, 20);
-		contributorL3Information.setLocation(510, 140);
-		contributorL3Information.setVisible(false);
-		add(contributorL3Information);
+		rolL2Information = new Label(" - You could be promoted when 5 of your");
+		rolL2Information.setSize(280, 20);
+		rolL2Information.setLocation(510, 140);
+		rolL2Information.setVisible(false);
+		add(rolL2Information);
 		
-		contributorL4Information = new Label("    contributinons have been committed.");
-		contributorL4Information.setSize(280, 20);
-		contributorL4Information.setLocation(510, 160);
-		contributorL4Information.setVisible(false);
-		add(contributorL4Information);
+		rolL3Information = new Label("    contributinons have been committed.");
+		rolL3Information.setSize(280, 20);
+		rolL3Information.setLocation(510, 160);
+		rolL3Information.setVisible(false);
+		add(rolL3Information);
 		
 		// Components From Here
 		ipField = new TextField(20);
@@ -369,6 +421,7 @@ public class ClientGameController extends GameController implements ActionListen
 		userNameField = new TextField(15);
 		userNameField.setSize(100,20);
 		userNameField.setLocation(200, 440);
+		userNameField.setText("Default User");
 		add(userNameField);
 		
 		console = new List();
@@ -378,7 +431,6 @@ public class ClientGameController extends GameController implements ActionListen
 		add(console);
 		
 		networkController = new ClientNetworkController(this);
-		HideVote();					//Ocultem els botons innecessaris
 	}
 
 	@Override
@@ -562,8 +614,10 @@ public class ClientGameController extends GameController implements ActionListen
 		countContributedLabel.setText(val + "/" + sudokuSize*sudokuSize);
 		
 		// Draw Values
-		for (int y = 0; y < sudokuSize; y++) {
-			for (int x = 0; x < sudokuSize; x++) {
+		for (int y = 0; y < sudokuSize; y++) 
+		{
+			for (int x = 0; x < sudokuSize; x++) 
+			{
 				if (cells[x][y].valueState == 0) 			//Si no hi ha cap valor a la cel·la no feim res, pasem la posicio
 				{
 					tempLineX += deltaX;
@@ -603,6 +657,15 @@ public class ClientGameController extends GameController implements ActionListen
 							clearRequester = 5;
 							break;
 					}
+					
+					if(conflictExists  && x == conflictX && y == conflictY)
+					{
+						int conX = (int) (gridXOffset + conflictX * deltaX);
+						int conY = (int) (gridYOffset + conflictY * deltaY);
+						
+						setActive(conflictX, conflictY);
+						cells[activeX][activeY].DrawClientDomainConflict(gr, mouseOverDomainIndex, conX, conY, conflictX, conflictY, clientColors, actualRol);
+					}
 				}
 				
 				if(cells[x][y].current != -1)
@@ -634,7 +697,8 @@ public class ClientGameController extends GameController implements ActionListen
 			break;
 		}
 
-		if (mouseOverGrid) {
+		if (mouseOverGrid) 
+		{
 			gr.setColor(mouseOverColor);
 			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX), (int) (gridYOffset + mouseOverY * deltaY), (int) deltaX, (int) deltaY);
 		}
@@ -645,17 +709,19 @@ public class ClientGameController extends GameController implements ActionListen
 
 		// DrawActive
 		gr.drawRect(activeRectX, activeRectY, (int) deltaX, (int) deltaY);
-
 	}
 
+	public void setActive(int x, int y) {
+		activeX = x;
+		activeY = y;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent action) {
 		System.out.println("S'ha produit una accio");
 		super.actionPerformed(action);
-		// TODO Auto-generated method stub
 		switch(action.getActionCommand())
 		{
-		
 			case "connect":
 				if(!ipField.equals("") && !portField.equals(""))
 				{
@@ -664,7 +730,6 @@ public class ClientGameController extends GameController implements ActionListen
 						userName = userNameField.getText();
 						RequestInit();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						System.out.println("Can not connect to server");
 					}  
 				}
@@ -675,33 +740,48 @@ public class ClientGameController extends GameController implements ActionListen
 				break;
 			case "voteEnd":
 				conflictExists = false;
-				HideVote();
+				voteRemove.setVisible(false);
+				voteCommiting.setVisible(false);
 				voteTimer.stop();
 				break;
 			case "yes":
 				if(conflictExists)
 				{
-					networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "1");
+					networkController.SendMessage("voted#" + userName + ",-1," + conflictX + "," + conflictY + "," + "1");
 					conflictExists = false;
-					HideVote();
+					voteRemove.setVisible(false);
+					voteCommiting.setVisible(false);
 				}
 				break;
 			case "no":
 				if(conflictExists)
 				{
-					networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "-1");
+					networkController.SendMessage("voted#" + userName + ",-1," + conflictX + "," + conflictY + "," + "-1");
 					conflictExists = false;
-					HideVote();
+					voteRemove.setVisible(false);
+					voteCommiting.setVisible(false);
 				}
 				break;
-			case "askToClear":
-				networkController.SendMessage("clear#0,0," + activeX + "," + activeY);
+			case "askCommitting":
+				networkController.SendMessage("clear#" + userName + ",-1," + activeX + "," + activeY);
+				
+				positionCommitted = new int[2];
+				positionCommitted[0] = activeX;
+				positionCommitted[1] = activeY;
+				positionCommittedList.add(positionCommitted);
+				
+				break;
+			case "removeValue":
+				networkController.SendMessage("testerClear#" + userName + ",-1," + activeX + "," + activeY);
 				break;
 			case "joinCommunity":
 				joinCommunity();
 				break;
 			case "getTester":
 				getTester();
+				break;
+			case "getCommitter":
+				getCommitter();
 				break;
 		}
 	}
@@ -711,35 +791,68 @@ public class ClientGameController extends GameController implements ActionListen
 		joinCommunity.setVisible(false);
 		actualRol = ActualRol.Contributor;
 		actualRolLabel.setText("Actual Rol: " + actualRol);
-		contributorInformation.setVisible(true);
-		contributorL2Information.setVisible(true);
-		contributorL3Information.setVisible(true);
-		contributorL4Information.setVisible(true);
+		rolInformation.setVisible(true);
+		rolL1Information.setVisible(true);
+		rolL2Information.setVisible(true);
+		rolL3Information.setVisible(true);
 		repaint();
 	}
 	
 	public void getTester()
 	{
-		contributorInformation.setVisible(false);
-		contributorL2Information.setVisible(false);
-		contributorL3Information.setVisible(false);
-		contributorL4Information.setVisible(false);
+		rolL1Information.setLocation(500, 120);
+		rolL2Information.setLocation(500, 140);
+
+		rolInformation.setText("As a Tester you can check values:");
+		rolL1Information.setText(" - If you think it is correct ask for committing.");
+		rolL2Information.setText(" - If you think it is wrong report the bug.");
+		rolL3Information.setVisible(false);
 		getPromotedTester.setVisible(false);
 		
 		actualRol = ActualRol.Tester;
+		actualRolLabel.setLocation(560, 20);
 		actualRolLabel.setText("Actual Rol: " + actualRol);
 		repaint();
 	}
 	
-	public void ShowVote()
+	public void getCommitter()
 	{
-		//conflictLabel.setText("Clear Cell<" + conflictX + "," + conflictY + ">?");
+		rolL1Information.setLocation(480, 120);
+		rolL2Information.setLocation(480, 140);
 
+		rolInformation.setText("Now you participate in Votations:");
+		rolL1Information.setText(" - If you think the value is correct vote for Committe it");
+		rolL2Information.setText(" - If you think the value is wrong vote for Remove it");
+		rolL3Information.setVisible(false);
+		
+		getPromotedCommitter.setVisible(false);
+		askForCommiting.setVisible(false);
+		removeValue.setVisible(false);
+		
+		actualRol = ActualRol.Committer;
+		actualRolLabel.setLocation(540, 20);
+		actualRolLabel.setText("Actual Rol: " + actualRol);
+		repaint();
 	}
 	
-	public void HideVote()
+	public void getLeader()
 	{
+		rolL1Information.setLocation(500, 120);
+		rolL2Information.setLocation(500, 140);
 
+		rolInformation.setText("Now you can participate in Votations:");
+		rolL1Information.setText(" - If you think it is correct vote for Committe it");
+		rolL2Information.setText(" - If you think it is wrong vote for Remove it");
+		rolL3Information.setVisible(false);
+		
+		getPromotedLeader.setVisible(false);
+		askForCommiting.setVisible(false);
+		removeValue.setVisible(false);
+		
+		actualRol = ActualRol.Committer;
+		actualRolLabel.setLocation(540, 20);
+		actualRolLabel.setText("Actual Rol: " + actualRol);
+		repaint();
 	}
 	
 	public void RequestInit()
@@ -751,23 +864,48 @@ public class ClientGameController extends GameController implements ActionListen
 	@Override
 	public void DomainClick(int index)
 	{
-		IntDomain idom = cpController.GetCPVariable(activeX, activeY).getDomain();
-		DisposableIntIterator iter = idom.getIterator();
-		int val = 1;
-		for(;index >= 0 && iter.hasNext(); index--)
+		if(index != -1)
 		{
-			val = iter.next();
+			IntDomain idom = cpController.GetCPVariable(activeX, activeY).getDomain();
+			DisposableIntIterator iter = idom.getIterator();
+			int val = 1;
+			for(;index >= 0 && iter.hasNext(); index--)
+			{
+				val = iter.next();
+			}
+			
+			if (actualRol == ActualRol.Contributor)
+			{
+				networkState = NetworkState.waitingConfirm;
+				networkController.SendMessage("instantiate#" + userName + ",-1," + activeX + "," + activeY + "," + val);
+			
+				positionContributed = new int[2];
+				positionContributed[0] = activeX;
+				positionContributed[1] = activeY;
+				positionContributedList.add(positionContributed);
+			}
 		}
-
-		//send click to server
-		System.out.println("Asking to instantiate " + activeX + "," + activeY + " : " + val);
-		networkState = NetworkState.waitingConfirm;
-		networkController.SendMessage("instantiate#" + userName + ",-1," + activeX + "," + activeY + "," + val);
-	
-		positionContributed = new int[2];
-		positionContributed[0] = activeX;
-		positionContributed[1] = activeY;
-		positionContributedList.add(positionContributed);
+		else
+		{
+			if (actualRol == ActualRol.Tester && !conflictExists)
+			{
+				if (cells[activeX][activeY].valueState == 2 || cells[activeX][activeY].valueState == 3 || cells[activeX][activeY].valueState == 4)
+				{
+					askForCommiting.setVisible(true);
+					removeValue.setVisible(true);
+				}
+				else
+				{
+					askForCommiting.setVisible(false);
+					removeValue.setVisible(false);
+				}
+			}
+			else if (actualRol == ActualRol.Leader)
+			{
+				
+			}
+		}
+		
 		repaint();
 	}
 	
@@ -782,14 +920,6 @@ public class ClientGameController extends GameController implements ActionListen
 				instantiator[i][j] = -1;
 			}
 		}
-
-		/*clearButton = new Button("Clear");
-		clearButton.setLocation(gridXOffset, CellVariable.domainYOffset + (int)deltaY + 5);
-		clearButton.setSize(70,20);
-		clearButton.setActionCommand("askToClear");
-		clearButton.addActionListener(this);
-		add(clearButton);
-		clearButton.setVisible(false);*/
 	}
 	
 	public void MessageReceived(String message)
@@ -801,7 +931,7 @@ public class ClientGameController extends GameController implements ActionListen
 			switch(vars[0])
 			{
 			case "init":
-				System.out.println("Client: Initializing client for " + message);
+				//System.out.println("Client: Initializing client for " + message);
 				
 				for(int i = 1; i < vars.length; i++)
 				{
@@ -848,6 +978,22 @@ public class ClientGameController extends GameController implements ActionListen
 					case "clear":
 						conflictExists = true;
 						
+						if(actualRol == ActualRol.Committer)
+						{
+							voteCommiting.setVisible(true);
+							voteRemove.setVisible(true);
+							
+							positionVoted = new int[2];
+							positionVoted[0] = activeX;
+							positionVoted[1] = activeY;
+							positionVotedList.add(positionVoted);
+						}
+						else if (actualRol == ActualRol.Tester)
+						{
+							askForCommiting.setVisible(false);
+							removeValue.setVisible(false);
+						}
+						
 						repaint();
 						coordinates = vars2[1].split(",");
 						conflictX = Integer.parseInt(coordinates[0]);
@@ -873,6 +1019,8 @@ public class ClientGameController extends GameController implements ActionListen
 			case "committed":
 				vars2 = vars[1].split(",");
 				
+				boolean found = false;
+				
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
 				
@@ -880,7 +1028,6 @@ public class ClientGameController extends GameController implements ActionListen
 				
 				if (actualRol == ActualRol.Contributor)
 				{
-					boolean found = false;
 					for (int[] position : positionContributedList)
 					{
 						if (position[0] == conflictX && position[1] == conflictY)
@@ -889,18 +1036,49 @@ public class ClientGameController extends GameController implements ActionListen
 							numContributionsCommited++;
 						}
 						
-						if (numContributionsCommited >= 5)
+						if (numContributionsCommited > 5)
 							getPromotedTester.setVisible(true);
 					}
 					
-					if(!found)
-						Print("The value " + cells[conflictX][conflictY].current + " at the position ["+conflictX+"]["+conflictY+"] has been committed by Votation.");
-					else
-						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you contributed have been committed!");
+					if(found)
+						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you contributed has been committed!");
 				}
-				else
+				else if (actualRol == ActualRol.Tester)
+				{	
+					for (int[] position : positionCommittedList)
+					{
+						if (position[0] == conflictX && position[1] == conflictY)
+						{
+							found = true;
+							numCommittedSatisfactory++;
+						}
+						
+						if (numCommittedSatisfactory > 5)
+							getPromotedCommitter.setVisible(true);
+					}
+					
+					if(found)
+						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you asked for committing has been committed!");
+				}
+				else if (actualRol == ActualRol.Committer)
+				{
+					for (int[] position : positionVotedList)
+					{
+						if (position[0] == conflictX && position[1] == conflictY)
+						{
+							found = true;
+							numVotedSatisfactory++;
+						}
+						
+						if (numVotedSatisfactory >= 5)
+							getPromotedLeader.setVisible(true);
+					}
+				}
+
+
+				if (!found)
 					Print("The value " + cells[conflictX][conflictY].current + " at the position ["+conflictX+"]["+conflictY+"] has been committed by Votation.");
-				
+								
 				break;	
 			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
 		
@@ -913,7 +1091,6 @@ public class ClientGameController extends GameController implements ActionListen
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

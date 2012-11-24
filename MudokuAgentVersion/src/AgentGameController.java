@@ -610,7 +610,7 @@ public class AgentGameController extends GameController implements ActionListene
 						int conY = (int) (gridYOffset + conflictY * deltaY);
 						
 						setActive(conflictX, conflictY);
-						cells[activeX][activeY].DrawDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
+						cells[activeX][activeY].DrawAgentDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
 					}
 				}
 					
@@ -627,7 +627,6 @@ public class AgentGameController extends GameController implements ActionListene
 			lineX = gridXOffset;
 			tempLineX = lineX;
 		}
-		
 		
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);

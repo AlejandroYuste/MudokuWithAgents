@@ -557,10 +557,11 @@ public class GameController extends Applet implements ActionListener {
 	public void CellClick(int x, int y) {
 		activeX = x;
 		activeY = y;
+		
 		repaint();
 	}
 
-	public void DomainClick(int index) 		//Aquest funcio ja no l'uso mai
+	public void DomainClick(int index) 		
 	{
 		/*IntDomain idom = cpController.GetCPVariable(activeX, activeY) .getDomain();
 		DisposableIntIterator iter = idom.getIterator();

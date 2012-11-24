@@ -21,6 +21,7 @@ public class ServerNetworkController implements Runnable {
 		gameController.MessageReceived(handler, message);
 	}
 	
+	@SuppressWarnings("resource")
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub

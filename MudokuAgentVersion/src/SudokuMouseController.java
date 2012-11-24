@@ -56,12 +56,19 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 		// TODO Auto-generated method stub
 
 	}
+	
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+	public void mouseClicked(MouseEvent e) 
+	{
 		int activeX = 0;
 		int activeY = 0;
-		if(e.getX() < gridEndX && e.getX() > GameController.gridXOffset &&  e.getY() < gridEndY && e.getY() > AgentGameController.gridYOffset)
+		int index = -1;
+		
+		System.out.println("S'ha clicat el mouse a la posicio: " + e.getX() + "," + e.getY());
+
+		if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420)
+			index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
+		else if(e.getX() < gridEndX && e.getX() > GameController.gridXOffset &&  e.getY() < gridEndY && e.getY() > AgentGameController.gridYOffset)
 		{
 			activeX = (int) ((e.getX() - GameController.gridXOffset) / deltaX);
 			activeY = (int) ((e.getY() - GameController.gridYOffset) / deltaY);
@@ -72,14 +79,12 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 				lastActiveX = activeX;
 				lastActiveY = activeY;
 			}
-			//System.out.println( activeX + " - " + activeY);
+			System.out.println( activeX + " - " + activeY);
 		}
-		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY)
-		{
-			int index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
-			gameController.DomainClick(index);
-		}
+			
+		gameController.DomainClick(index);
 	}
+	
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -100,7 +105,7 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 				lastDomainIndex = -1;
 			}
 		}
-		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY)
+		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420)
 		{
 			int index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
 			
