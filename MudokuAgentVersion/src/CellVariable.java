@@ -80,7 +80,7 @@ public class CellVariable
 			gr.drawRect(domainYOffset + 10, 10 + activeDrawY, (int)deltaX, (int)deltaY);
 			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
 		}
-		else
+		else if (actualRol == ClientGameController.ActualRol.Contributor)
 		{
 			gr.setColor(Color.black);
 			

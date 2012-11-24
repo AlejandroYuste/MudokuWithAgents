@@ -6,10 +6,7 @@ import java.util.Random;
 
 public class GameController extends Applet implements ActionListener {
 
-	public enum GameState {
-		start, initGame, pregame, game, conflictResolution
-	}
-
+	public enum GameState {start, initGame, pregame, game, conflictResolution}
 	protected GameState state;
 
 	private static final long serialVersionUID = 1L;

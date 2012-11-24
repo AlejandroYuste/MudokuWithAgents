@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.Timer;
 
@@ -20,9 +21,19 @@ public class ClientGameController extends GameController implements ActionListen
 	protected ActualRol actualRol;
 
 	Button connectClientButton;
+	Button joinCommunity;
+	Button getPromotedTester;
+	
 	Label Title;
+	Label ipFieldLabel;
+	Label portFieldLabel;
+	Label ipFieldDoubtLabel;
+	Label informationL1Label;
+	Label informationL2Label;
+	Label informationConnectionLabel;
 	Label logLabel;
 	Label actualRolLabel;
+	Label userNameLabel;
 	
 	Label colorServerLabel;
 	Label colorRowContributorLabel;
@@ -42,16 +53,30 @@ public class ClientGameController extends GameController implements ActionListen
 	Label correctLabel;
 	Label valuesLabel;
 	Label countLabel;
+	Label emptyCountFreeLabel;
+	Label positionCountFreeLabel;
+	Label countFreeLabel;
 	
+	Label contributorInformation;
+	Label contributorL2Information;
+	Label contributorL3Information;
+	Label contributorL4Information;
+
 	List console;
+	TextField ipField;
+	TextField portField;
+	TextField userNameField;
+	
+	String userName;
 	
 	int[][] instantiator;
 	static ClientNetworkController networkController;
 	
-	static Color[] clientColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
+	int[] positionContributed;
+	ArrayList<int[]> positionContributedList = new ArrayList<int[]>();
+	int numContributionsCommited = 0;
 	
-	String ipField = "127.0.0.1";
-	String portField = "4433";
+	static Color[] clientColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
 	
 	int conflictX;
 	int conflictY;
@@ -89,20 +114,75 @@ public class ClientGameController extends GameController implements ActionListen
 		
 		// Buttons From Here
 		connectClientButton = new Button("Connect to the Server");
-		connectClientButton.setSize(200,150);
-		connectClientButton.setLocation(275, 100);
+		connectClientButton.setSize(150,75);
+		connectClientButton.setLocation(300, 200);
 		connectClientButton.setActionCommand("connect");
 		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectClientButton);
+		
+		joinCommunity = new Button("Join to the Community");
+		joinCommunity.setSize(180,40);
+		joinCommunity.setLocation(530, 100);
+		joinCommunity.setActionCommand("joinCommunity");
+		joinCommunity.addActionListener(this);				//Afegim el Listener al button "Connect"
+		joinCommunity.setVisible(false);
+		add(joinCommunity);
+		
+		getPromotedTester = new Button("Get Promoted!");
+		getPromotedTester.setSize(180,40);
+		getPromotedTester.setLocation(530, 250);
+		getPromotedTester.setActionCommand("getTester");
+		getPromotedTester.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getPromotedTester.setVisible(false);
+		add(getPromotedTester);
 		
 		// Labels From Here
 		Title = new Label("Welcome to Mudoku-Agents Version");
 		Font font = new Font("SansSerif", Font.BOLD, 15);
 		Title.setFont(font);
 		Title.setAlignment(Label.CENTER);
-		Title.setSize(400,150);
-		Title.setLocation(175, 0);
+		Title.setSize(400,50);
+		Title.setLocation(175, 50);
 		add(Title);
+		
+		informationL1Label = new Label();
+		informationL1Label.setLocation(100, 120);
+		informationL1Label.setSize(600, 20);
+		informationL1Label.setText("This tool have been created with an eductaional purpose. In this framework you can join to a simulation");
+		add(informationL1Label);
+		
+		informationL2Label = new Label();
+		informationL2Label.setLocation(92, 140);
+		informationL2Label.setSize(600, 20);
+		informationL2Label.setText("of an Open Source Community in order to participate in the different available roles and learn how it works.");
+		add(informationL2Label);
+		
+		informationConnectionLabel = new Label("(To run this aplication a server must be running)");
+		informationConnectionLabel.setLocation(240, 300);
+		informationConnectionLabel.setSize(600, 20);
+		add(informationConnectionLabel);
+		
+		ipFieldLabel = new Label("Select the IP of the Server:");
+		ipFieldLabel.setSize(180,20);
+		ipFieldLabel.setLocation(20, 400);
+		add(ipFieldLabel);
+		
+		ipFieldDoubtLabel = new Label("(If you have any doubt use the default values)");
+		ipFieldDoubtLabel.setSize(250,20);
+		ipFieldDoubtLabel.setLocation(320, 400);
+		add(ipFieldDoubtLabel);
+		
+		portFieldLabel = new Label("Select the Port of the Server:");
+		portFieldLabel.setSize(180,20);
+		portFieldLabel.setLocation(20, 420);
+		add(portFieldLabel);
+		
+		userNameLabel = new Label("Select an User Name:");
+		userNameLabel.setSize(180,20);
+		userNameLabel.setLocation(20, 440);
+		add(userNameLabel);
+		
+		//-----------------------------------------------------------------
 		
 		logLabel = new Label("Historic of the Game:");
 		logLabel.setSize(250,20);
@@ -187,9 +267,109 @@ public class ClientGameController extends GameController implements ActionListen
 		countLabel.setLocation(500, 455);
 		countLabel.setVisible(false);
 		add(countLabel);
-
+		
+		//------------------------------------------------------------------------------------------
+		
+		valuesContributedLabel = new Label("Values");
+		valuesContributedLabel.setSize(50, 10);
+		valuesContributedLabel.setLocation(595, 340);
+		valuesContributedLabel.setVisible(false);
+		add(valuesContributedLabel);	
+		
+		contributedLabel = new Label("Contributed");
+		contributedLabel.setSize(70, 10);
+		contributedLabel.setLocation(582, 355);
+		contributedLabel.setVisible(false);
+		add(contributedLabel);	
+		
+		countContributedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countContributedLabel.setSize(50, 10);
+		countContributedLabel.setLocation(595, 370);
+		countContributedLabel.setVisible(false);
+		add(countContributedLabel);	
+		
+		//------------------------------------------------------------------------------------------
+		
+		valuesCommittedLabel = new Label("Values");
+		valuesCommittedLabel.setSize(50, 10);
+		valuesCommittedLabel.setLocation(505, 340);
+		valuesCommittedLabel.setVisible(false);
+		add(valuesCommittedLabel);	
+		
+		committedLabel = new Label("Committed");
+		committedLabel.setSize(70, 10);
+		committedLabel.setLocation(493, 355);
+		committedLabel.setVisible(false);
+		add(committedLabel);	
+		
+		countCommittedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countCommittedLabel.setSize(50, 10);
+		countCommittedLabel.setLocation(505, 370);
+		countCommittedLabel.setVisible(false);
+		add(countCommittedLabel);	
+		
+		//------------------------------------------------------------------------------------------
+		
+		emptyCountFreeLabel = new Label("Empty");
+		emptyCountFreeLabel.setSize(50, 10);
+		emptyCountFreeLabel.setLocation(687, 340);
+		emptyCountFreeLabel.setVisible(false);
+		add(emptyCountFreeLabel);	
+		
+		positionCountFreeLabel = new Label("Positions");
+		positionCountFreeLabel.setSize(60, 10);
+		positionCountFreeLabel.setLocation(680, 355);
+		positionCountFreeLabel.setVisible(false);
+		add(positionCountFreeLabel);	
+		
+		countFreeLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
+		countFreeLabel.setSize(50, 10);
+		countFreeLabel.setLocation(695, 370);
+		countFreeLabel.setVisible(false);
+		add(countFreeLabel);
+		
+		//------------------------------------------------------------------------------------------
+		contributorInformation = new Label("You can contribute adding Values to the Grid");
+		contributorInformation.setSize(280, 20);
+		contributorInformation.setLocation(492, 100);
+		contributorInformation.setVisible(false);
+		add(contributorInformation);
+		
+		contributorL2Information = new Label(" - Use the Numbers below the Grid.");
+		contributorL2Information.setSize(280, 20);
+		contributorL2Information.setLocation(510, 120);
+		contributorL2Information.setVisible(false);
+		add(contributorL2Information);
+		
+		contributorL3Information = new Label(" - You could be promoted when 5 of your");
+		contributorL3Information.setSize(280, 20);
+		contributorL3Information.setLocation(510, 140);
+		contributorL3Information.setVisible(false);
+		add(contributorL3Information);
+		
+		contributorL4Information = new Label("    contributinons have been committed.");
+		contributorL4Information.setSize(280, 20);
+		contributorL4Information.setLocation(510, 160);
+		contributorL4Information.setVisible(false);
+		add(contributorL4Information);
 		
 		// Components From Here
+		ipField = new TextField(20);
+		ipField.setSize(100,20);
+		ipField.setLocation(200, 400);
+		ipField.setText("127.0.0.1");			//IP del client o del servidor?
+		add(ipField);
+
+		portField = new TextField(4);
+		portField.setSize(100,20);
+		portField.setLocation(200, 420);
+		portField.setText("4433");				//Port
+		add(portField);
+		
+		userNameField = new TextField(15);
+		userNameField.setSize(100,20);
+		userNameField.setLocation(200, 440);
+		add(userNameField);
 		
 		console = new List();
 		console.setLocation(20, 495);
@@ -225,8 +405,8 @@ public class ClientGameController extends GameController implements ActionListen
 			int conX = (int) (gridXOffset + conflictX * deltaX);
 			int conY = (int) (gridYOffset + conflictY * deltaY);
 			gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
-			gr.setColor(clientColors[clearRequester]);
-			gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
+			//gr.setColor(clientColors[clearRequester]);
+			//gr.drawString("Clear Requester", gridEndX + 20, gridYOffset + 100);
 		}
 
 		gr.setColor(Color.black);
@@ -288,10 +468,12 @@ public class ClientGameController extends GameController implements ActionListen
 		gr.drawLine(20, 460, 470, 460);				//Separador Grid Horizintal
 		gr.drawLine(470, 10, 470, 460);				//Separador Grid Vertical-Dreta
 		
+		gr.drawLine(485, 310, 745, 310);	
+		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
 		
-		gr.drawLine(485, 10, 485, 60);			//Caixa Per al Rol
+		gr.drawLine(485, 10, 485, 60);				//Caixa Per al Rol
 		gr.drawLine(485, 10, 745, 10);			
 		gr.drawLine(745, 10, 745, 60);			
 		gr.drawLine(485, 60, 745, 60);
@@ -305,6 +487,21 @@ public class ClientGameController extends GameController implements ActionListen
 		gr.drawLine(485, 410, 550, 410);			
 		gr.drawLine(550, 410, 550, 475);			
 		gr.drawLine(485, 475, 550, 475);
+		
+		gr.drawLine(485, 330, 485, 390);			//Caixa valors committed
+		gr.drawLine(485, 330, 565, 330);			
+		gr.drawLine(565, 330, 565, 390);			
+		gr.drawLine(485, 390, 565, 390);
+		
+		gr.drawLine(575, 330, 575, 390);			//Caixa valors contributed
+		gr.drawLine(575, 330, 655, 330);			
+		gr.drawLine(655, 330, 655, 390);			
+		gr.drawLine(575, 390, 655, 390);
+		
+		gr.drawLine(665, 330, 665, 390);			//Caixa valors empty Positions
+		gr.drawLine(665, 330, 745, 330);			
+		gr.drawLine(745, 330, 745, 390);			
+		gr.drawLine(665, 390, 745, 390);
 		
 		gr.setColor(clientColors[6]);
 		gr.fillRect(582, 425, 10, 10);
@@ -329,6 +526,40 @@ public class ClientGameController extends GameController implements ActionListen
 		
 		gr.setColor(clientColors[7]);
 		gr.fillRect(582, 565, 10, 10);
+		
+		int val = getCountCorrect();
+		if (val>0 && val<100)
+			countLabel.setLocation(497, 455);
+		else if (val>=100)
+			countLabel.setLocation(495, 455);
+		countLabel.setText(val + "/" + sudokuSize*sudokuSize);
+		
+		val = getCountCommitted();
+		if (val < 10)
+			countCommittedLabel.setLocation(508, 370);
+		else if (val>9 && val<100)
+			countCommittedLabel.setLocation(505, 370);
+		else if (val>=100)
+			countCommittedLabel.setLocation(502, 370);
+		countCommittedLabel.setText(val + "/" + sudokuSize*sudokuSize);
+		
+		val = getFreePositions();
+		if (val < 10)
+			countFreeLabel.setLocation(688, 370);
+		else if (val>0 && val<100)
+			countFreeLabel.setLocation(685, 370);
+		else if (val>=100)
+			countFreeLabel.setLocation(682, 370);	
+		countFreeLabel.setText(val + "/" + sudokuSize*sudokuSize);
+		
+		val = getCountContributed();
+		if (val < 10)
+			countContributedLabel.setLocation(598, 370);
+		else if (val>0 && val<100)
+			countContributedLabel.setLocation(595, 370);
+		else if (val>=100)
+			countContributedLabel.setLocation(592, 370);		
+		countContributedLabel.setText(val + "/" + sudokuSize*sudokuSize);
 		
 		// Draw Values
 		for (int y = 0; y < sudokuSize; y++) {
@@ -424,49 +655,82 @@ public class ClientGameController extends GameController implements ActionListen
 		// TODO Auto-generated method stub
 		switch(action.getActionCommand())
 		{
-		case "connect":
-			if(!ipField.equals("") && !portField.equals(""))
-			{
-				try {
-
-					networkController.Connect(ipField, Integer.parseInt(portField));
-					RequestInit();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					System.out.println("Can not connect to server");
-				}  
-			}
-			else
-			{
-				System.out.println("Check ip & port");
-			}
-			break;
-		case "voteEnd":
-			conflictExists = false;
-			HideVote();
-			voteTimer.stop();
-			break;
-		case "yes":
-			if(conflictExists)
-			{
-				networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "1");
+		
+			case "connect":
+				if(!ipField.equals("") && !portField.equals(""))
+				{
+					try {
+						networkController.Connect(ipField.getText(), Integer.parseInt(portField.getText()));
+						userName = userNameField.getText();
+						RequestInit();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						System.out.println("Can not connect to server");
+					}  
+				}
+				else
+				{
+					System.out.println("Check ip & port");
+				}
+				break;
+			case "voteEnd":
 				conflictExists = false;
 				HideVote();
-			}
-			break;
-		case "no":
-			if(conflictExists)
-			{
-				networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "-1");
-				conflictExists = false;
-				HideVote();
-			}
-			break;
-		case "askToClear":
-			networkController.SendMessage("clear#0,0," + activeX + "," + activeY);
-			break;
+				voteTimer.stop();
+				break;
+			case "yes":
+				if(conflictExists)
+				{
+					networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "1");
+					conflictExists = false;
+					HideVote();
+				}
+				break;
+			case "no":
+				if(conflictExists)
+				{
+					networkController.SendMessage("voted#0,0," + conflictX + "," + conflictY + "," + "-1");
+					conflictExists = false;
+					HideVote();
+				}
+				break;
+			case "askToClear":
+				networkController.SendMessage("clear#0,0," + activeX + "," + activeY);
+				break;
+			case "joinCommunity":
+				joinCommunity();
+				break;
+			case "getTester":
+				getTester();
+				break;
 		}
 	}
+	
+	public void joinCommunity()
+	{
+		joinCommunity.setVisible(false);
+		actualRol = ActualRol.Contributor;
+		actualRolLabel.setText("Actual Rol: " + actualRol);
+		contributorInformation.setVisible(true);
+		contributorL2Information.setVisible(true);
+		contributorL3Information.setVisible(true);
+		contributorL4Information.setVisible(true);
+		repaint();
+	}
+	
+	public void getTester()
+	{
+		contributorInformation.setVisible(false);
+		contributorL2Information.setVisible(false);
+		contributorL3Information.setVisible(false);
+		contributorL4Information.setVisible(false);
+		getPromotedTester.setVisible(false);
+		
+		actualRol = ActualRol.Tester;
+		actualRolLabel.setText("Actual Rol: " + actualRol);
+		repaint();
+	}
+	
 	public void ShowVote()
 	{
 		//conflictLabel.setText("Clear Cell<" + conflictX + "," + conflictY + ">?");
@@ -498,7 +762,12 @@ public class ClientGameController extends GameController implements ActionListen
 		//send click to server
 		System.out.println("Asking to instantiate " + activeX + "," + activeY + " : " + val);
 		networkState = NetworkState.waitingConfirm;
-		networkController.SendMessage("instantiate#0,0," + activeX + "," + activeY + "," + val);
+		networkController.SendMessage("instantiate#" + userName + ",-1," + activeX + "," + activeY + "," + val);
+	
+		positionContributed = new int[2];
+		positionContributed[0] = activeX;
+		positionContributed[1] = activeY;
+		positionContributedList.add(positionContributed);
 		repaint();
 	}
 	
@@ -557,6 +826,7 @@ public class ClientGameController extends GameController implements ActionListen
 					}
 				}
 				StartGame();
+				Print("Game Initialized");
 				
 				networkState = NetworkState.idle;
 				repaint();
@@ -597,24 +867,48 @@ public class ClientGameController extends GameController implements ActionListen
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
 				ClearCell(conflictX, conflictY);
+				Print("The value at the position ["+conflictX+"]["+conflictY+"] has been Removed.");
+
 				break;
 			case "committed":
-				//conflictExists = false;
-				//voteTimer.stop();
-				
 				vars2 = vars[1].split(",");
 				
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
 				
 				SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
+				
+				if (actualRol == ActualRol.Contributor)
+				{
+					boolean found = false;
+					for (int[] position : positionContributedList)
+					{
+						if (position[0] == conflictX && position[1] == conflictY)
+						{
+							found = true;
+							numContributionsCommited++;
+						}
+						
+						if (numContributionsCommited >= 5)
+							getPromotedTester.setVisible(true);
+					}
+					
+					if(!found)
+						Print("The value " + cells[conflictX][conflictY].current + " at the position ["+conflictX+"]["+conflictY+"] has been committed by Votation.");
+					else
+						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you contributed have been committed!");
+				}
+				else
+					Print("The value " + cells[conflictX][conflictY].current + " at the position ["+conflictX+"]["+conflictY+"] has been committed by Votation.");
+				
 				break;	
 			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
 		
 				vars2 = vars[1].split(",");
 				int x = Integer.parseInt(vars2[0]);
 				int y = Integer.parseInt(vars2[1]);
-				SetValueAndState(x, y, cells[x][y].current, 7);				
+				SetValueAndState(x, y, cells[x][y].current, 7);		
+				Print("The value " + cells[x][y].current + " at the position ["+x+"]["+y+"] has been accepted by the Project Leader");
 				break;
 			}
 
@@ -637,14 +931,26 @@ public class ClientGameController extends GameController implements ActionListen
 			int state = Integer.parseInt(component[3]);
 			
 			SetValueAndState(x, y, val, state);
+			if(state != 1)
+				Print("The value " + val + " at the position ["+x+"]["+y+"] has been Instantied.");
 		}
 	}
 	
 	@Override
 	public void StartGame()
 	{
-		connectClientButton.setVisible(false);
 		Title.setVisible(false);
+		connectClientButton.setVisible(false);
+		ipField.setVisible(false);
+		portField.setVisible(false);
+		informationL1Label.setVisible(false);
+		informationL2Label.setVisible(false);
+		informationConnectionLabel.setVisible(false);
+		ipFieldLabel.setVisible(false);
+		ipFieldDoubtLabel.setVisible(false);
+		portFieldLabel.setVisible(false);
+		userNameField.setVisible(false);
+		userNameLabel.setVisible(false);
 		
 		console.setVisible(true);
 		logLabel.setVisible(true);
@@ -662,24 +968,34 @@ public class ClientGameController extends GameController implements ActionListen
 		correctLabel.setVisible(true);
 		valuesLabel.setVisible(true);
 		countLabel.setVisible(true);
+		valuesContributedLabel.setVisible(true);
+		valuesCommittedLabel.setVisible(true);
+		contributedLabel.setVisible(true);
+		committedLabel.setVisible(true);
+		countContributedLabel.setVisible(true);
+		countCommittedLabel.setVisible(true);
+		emptyCountFreeLabel.setVisible(true);
+		positionCountFreeLabel.setVisible(true);
+		countFreeLabel.setVisible(true);
+		
+		joinCommunity.setVisible(true);
 		
 		state = GameState.game;
 	}
 	
+	
+	public void Print(String message)
+	{
+		console.add(message);
+		console.makeVisible(console.getItemCount()-1);
+	}
+	
 	@Override
-	public void CellClick(int x, int y) {
+	public void CellClick(int x, int y) 
+	{
 		activeX = x;
 		activeY = y;
-		
-		
-		/*if(instantiator[x][y] > -1)
-		{
-			clearButton.setVisible(true);
-		}
-		else
-		{
-			clearButton.setVisible(false);
-		}*/
+
 		repaint();
 	}
 	
@@ -726,6 +1042,23 @@ public class ClientGameController extends GameController implements ActionListen
 			for(int j=0;j<sudokuSize;j++)
 			{
 				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
+					count++;
+			}
+				
+		}
+		
+		return count;
+	}
+	
+	int getFreePositions()
+	{
+		int count = 0;
+		
+		for(int i=0;i<sudokuSize;i++)
+		{
+			for(int j=0;j<sudokuSize;j++)
+			{
+				if(cells[i][j].valueState == 0)
 					count++;
 			}
 				

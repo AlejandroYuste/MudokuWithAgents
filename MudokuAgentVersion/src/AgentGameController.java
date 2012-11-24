@@ -3,9 +3,6 @@ import java.awt.event.*;
 import java.io.IOException;
 import javax.swing.Timer;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.solver.variables.integer.IntDomain;
-
 public class AgentGameController extends GameController implements ActionListener 
 {
 	private static final long serialVersionUID = 1L;
@@ -14,6 +11,13 @@ public class AgentGameController extends GameController implements ActionListene
 	NetworkState networkState;
 
 	Label Title;
+	Label ipFieldLabel;
+	Label portFieldLabel;
+	Label ipFieldDoubtLabel;
+	Label informationL1Label;
+	Label informationL2Label;
+	Label informationConnectionLabel;
+	
 	Label NumAgentsLabel;
 	Label TypeAgentsLabel;
 	Label AgentsConnected;
@@ -42,6 +46,8 @@ public class AgentGameController extends GameController implements ActionListene
 	
 	TextField NumAgentsField;
 	TextField NumRadomAgentsField;
+	TextField ipField;
+	TextField portField;
 	Choice TypeAgentsField;
 	List listPanel;
 
@@ -54,9 +60,6 @@ public class AgentGameController extends GameController implements ActionListene
 	Button playExecution;
 	
 	static AgentNetworkController networkController;
-	
-	String ipField = "127.0.0.1";
-	String portField = "4433";
 	
 	static Color[] agentColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
 	
@@ -95,7 +98,19 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		super.init();										//Cirdem al init de GameController
 		
-		// Components from Here:
+		// Components from Here:	
+		ipField = new TextField(20);
+		ipField.setSize(100,20);
+		ipField.setLocation(200, 400);
+		ipField.setText("127.0.0.1");			//IP del client o del servidor?
+		add(ipField);
+
+		portField = new TextField(4);
+		portField.setSize(100,20);
+		portField.setLocation(200, 420);
+		portField.setText("4433");				//Port
+		add(portField);
+		
 		listPanel = new List(10);
 		listPanel.setLocation(gridEndX + 75, 40);
 		listPanel.setSize(240, 160);
@@ -136,6 +151,13 @@ public class AgentGameController extends GameController implements ActionListene
 		add(TypeAgentsField);
 		
 		//Buttons from here!
+		connectClientButton = new Button("Connect to the Server");
+		connectClientButton.setSize(150,75);
+		connectClientButton.setLocation(300, 200);
+		connectClientButton.setActionCommand("connect");
+		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
+		add(connectClientButton);
+		
 		connectRandomAgentsButton = new Button("Connect Random Agents");
 		connectRandomAgentsButton.setSize(160, 20);
 		connectRandomAgentsButton.setLocation(gridXOffset + 180 + 100 + 80, 560);
@@ -151,13 +173,6 @@ public class AgentGameController extends GameController implements ActionListene
 		connectAgentsButton.addActionListener(this);				//Afegim el Listener al button "Connect"
 		add(connectAgentsButton);
 		connectAgentsButton.setVisible(false);
-		
-		connectClientButton = new Button("Connect to the Server");
-		connectClientButton.setSize(200,150);
-		connectClientButton.setLocation(275, 100);
-		connectClientButton.setActionCommand("connect");
-		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
-		add(connectClientButton);
 		
 		disconnectButton = new Button("Disconnect Agent");
 		disconnectButton.setSize(120,20);
@@ -188,9 +203,42 @@ public class AgentGameController extends GameController implements ActionListene
 		Font font = new Font("SansSerif", Font.BOLD, 15);
 		Title.setFont(font);
 		Title.setAlignment(Label.CENTER);
-		Title.setSize(400,150);
-		Title.setLocation(175, 0);
+		Title.setSize(400,50);
+		Title.setLocation(175, 50);
 		add(Title);
+		
+		informationL1Label = new Label();
+		informationL1Label.setLocation(100, 120);
+		informationL1Label.setSize(600, 20);
+		informationL1Label.setText("This tool have been created with an eductaional purpose. In this framework have been implemented a");
+		add(informationL1Label);
+		
+		informationL2Label = new Label();
+		informationL2Label.setLocation(100, 140);
+		informationL2Label.setSize(600, 20);
+		informationL2Label.setText("  a simulation of an Open Source Community with Artificial Agents that colaborate to solver a Sudoku.");
+		add(informationL2Label);
+		
+		informationConnectionLabel = new Label("(To run this aplication a server must be running)");
+		informationConnectionLabel.setLocation(240, 300);
+		informationConnectionLabel.setSize(600, 20);
+		add(informationConnectionLabel);
+		
+		
+		ipFieldLabel = new Label("Select the IP of the Server:");
+		ipFieldLabel.setSize(180,20);
+		ipFieldLabel.setLocation(20, 400);
+		add(ipFieldLabel);
+		
+		ipFieldDoubtLabel = new Label("(If you have any doubt use the default values)");
+		ipFieldDoubtLabel.setSize(250,20);
+		ipFieldDoubtLabel.setLocation(320, 400);
+		add(ipFieldDoubtLabel);
+		
+		portFieldLabel = new Label("Select the Port of the Server:");
+		portFieldLabel.setSize(180,20);
+		portFieldLabel.setLocation(20, 420);
+		add(portFieldLabel);
 		
 		//------------------------------------------------------------------------------------------
 		
@@ -199,6 +247,7 @@ public class AgentGameController extends GameController implements ActionListene
 		AddNewAgents.setLocation(gridXOffset + 150, 470);
 		add(AddNewAgents);
 		AddNewAgents.setVisible(false);
+
 		
 		AgentsConnected = new Label("Agents Connected:");
 		AgentsConnected.setSize(150,20);
@@ -411,7 +460,6 @@ public class AgentGameController extends GameController implements ActionListene
 			lineY = (int) tempLineY;
 		}
 
-		//TODO: Milorar interficie grafica separant les seccions del Applet
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 		gr.drawLine(20, 460, 470, 460);				//Separador Grid Horizintal
@@ -609,6 +657,7 @@ public class AgentGameController extends GameController implements ActionListene
 		// DrawActive
 		gr.drawRect(activeRectX, activeRectY, (int) deltaX, (int) deltaY);
 	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent action) {
@@ -622,7 +671,7 @@ public class AgentGameController extends GameController implements ActionListene
 				{
 					try 
 					{	
-						networkController.Connect(ipField, Integer.parseInt(portField));
+						networkController.Connect(ipField.getText(), Integer.parseInt(portField.getText()));
 						RequestInit();					//Per afegir el Grid al Applet dels Agents
 					} catch (IOException e) {
 						System.out.println("Can not connect to server: " + e);
@@ -677,28 +726,13 @@ public class AgentGameController extends GameController implements ActionListene
 	}
 	
 	@Override
-	public void DomainClick(int index)
-	{
-		IntDomain idom = cpController.GetCPVariable(activeX, activeY).getDomain();
-		DisposableIntIterator iter = idom.getIterator();
-		for(;index >= 0 && iter.hasNext(); index--)
-		{
-			val = iter.next();
-		}
-		
-		repaint();
-	}
-	
-	@Override
 	public void Initialize()
 	{
 		super.Initialize();
 	}
 	
 	public void MessageReceived(String message)
-	{
-		//System.out.println("AgentGameController --> Message Received: " + message);
-		
+	{		
 		String[] vars = message.split("#");
 		String[] vars2 = null;
 		String equation = null;
@@ -814,6 +848,15 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		Title.setVisible(false);
 		connectClientButton.setVisible(false);
+		ipField.setVisible(false);
+		portField.setVisible(false);
+		informationL1Label.setVisible(false);
+		informationL2Label.setVisible(false);
+		informationConnectionLabel.setVisible(false);
+		ipFieldLabel.setVisible(false);
+		ipFieldDoubtLabel.setVisible(false);
+		portFieldLabel.setVisible(false);
+		
 		connectAgentsButton.setVisible(true);
 		AddNewAgents.setVisible(true);
 		AgentsConnected.setVisible(true);
@@ -909,8 +952,7 @@ public class AgentGameController extends GameController implements ActionListene
 			{
 				if(cells[i][j].valueState == 2 || cells[i][j].valueState == 3 || cells[i][j].valueState == 4 || cells[i][j].valueState == 5)
 					count++;
-			}
-				
+			}	
 		}
 		
 		return count;
@@ -926,8 +968,7 @@ public class AgentGameController extends GameController implements ActionListene
 			{
 				if(cells[i][j].valueState == 6)
 					count++;
-			}
-				
+			}	
 		}
 		
 		return count;
@@ -943,8 +984,7 @@ public class AgentGameController extends GameController implements ActionListene
 			{
 				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
 					count++;
-			}
-				
+			}	
 		}
 		
 		return count;

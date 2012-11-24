@@ -110,6 +110,7 @@ public class ServerGameController extends GameController implements ActionListen
 		{
 			networkController.BroadcastMessage("clear#" + conflictX + "," + conflictY);
 			ClearCell(conflictX, conflictY);
+			SetValueAndState(conflictX, conflictY, -1, 0);
 		}
 		else
 		{
@@ -170,16 +171,22 @@ public class ServerGameController extends GameController implements ActionListen
 				break;
 			case "instantiate":			 //"instantiate#" + agentId + "," typeAgent + "," + activeX + "," + activeY + "," + val
 				vars2 = vars[1].split(",");
-				agentId = Integer.parseInt(vars2[0]);
+				
 				agentType = Integer.parseInt(vars2[1]);
 				int x =Integer.parseInt(vars2[2]);
 				int y = Integer.parseInt(vars2[3]);
 				int val = Integer.parseInt(vars2[4]);
 
-				if (agentId == -1)
-					Print("Server: User contributed with the value: " + val + " at the position [" + x +"][" + y +"]");		//Acceptem totes les instanciacions
+				if (agentType == -1)
+				{
+					String userName = vars2[0];
+					Print("Server: " + userName + " Contributed at the Position [" + x +"][" + y +"] with the Value [" + val + "]");		//Acceptem totes les instanciacions		
+				}
 				else
+				{
+					agentId = Integer.parseInt(vars2[0]);
 					Print("Server: Agent " + agentId + " Contributed at the Position [" + x +"][" + y +"] with the Value [" + val + "]");
+				}
 				
 				switch(agentType)
 				{
@@ -196,8 +203,14 @@ public class ServerGameController extends GameController implements ActionListen
 						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 4);	
 						break;
 					case -1:	
-						SetValueAndState(x, y, val, 5);		//cellState = 4 --> contribution By Squares
-						networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 5);	
+						if (cells[x][y].valueState == 0)
+						{
+							SetValueAndState(x, y, val, 5);		//cellState = 4 --> contribution By Squares
+							networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + 5);	
+						}
+						else
+							clientHandler.SendMessage("instantiate_failed");
+						
 						break;
 				}
 				
