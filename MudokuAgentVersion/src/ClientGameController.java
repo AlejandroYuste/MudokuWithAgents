@@ -27,6 +27,14 @@ public class ClientGameController extends GameController implements ActionListen
 	Button voteCommiting;
 	Button voteRemove;
 	Button getPromotedLeader;
+	Button acceptValueLeader;
+	Button removeValueLeader;
+	
+	Button getContributor;
+	Button getTester;
+	Button getCommitter;
+	Button getLeader;
+	
 	
 	Label Title;
 	Label ipFieldLabel;
@@ -85,10 +93,16 @@ public class ClientGameController extends GameController implements ActionListen
 	int numCommittedSatisfactory = 0;
 	
 	int[] positionVoted;
-	ArrayList<int[]> positionVotedList = new ArrayList<int[]>();
+	ArrayList<int[]> positionVotedPositivelyList = new ArrayList<int[]>();
+	ArrayList<int[]> positionVotedNegativelyList = new ArrayList<int[]>();
 	int numVotedSatisfactory = 0;
 	
 	static Color[] clientColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
+	
+	boolean contributor = false;
+	boolean tester = false;
+	boolean committer = false;
+	boolean leader = false;
 	
 	int conflictX;
 	int conflictY;
@@ -156,6 +170,14 @@ public class ClientGameController extends GameController implements ActionListen
 		getPromotedCommitter.setVisible(false);
 		add(getPromotedCommitter);
 		
+		getPromotedLeader = new Button("Get Promoted!");
+		getPromotedLeader.setSize(180,40);
+		getPromotedLeader.setLocation(530, 250);
+		getPromotedLeader.setActionCommand("getLeader");
+		getPromotedLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getPromotedLeader.setVisible(false);
+		add(getPromotedLeader);
+		
 		askForCommiting = new Button("Ask for Committing");
 		askForCommiting.setSize(180,30);
 		askForCommiting.setLocation(530, 170);
@@ -187,6 +209,55 @@ public class ClientGameController extends GameController implements ActionListen
 		voteRemove.addActionListener(this);				//Afegim el Listener al button "Connect"
 		voteRemove.setVisible(false);
 		add(voteRemove);
+		
+		acceptValueLeader = new Button("Accept the Value");
+		acceptValueLeader.setSize(180,30);
+		acceptValueLeader.setLocation(530, 170);
+		acceptValueLeader.setActionCommand("acceptLeader");
+		acceptValueLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		acceptValueLeader.setVisible(false);
+		add(acceptValueLeader);
+		
+		removeValueLeader = new Button("Remove the Value");
+		removeValueLeader.setSize(180,30);
+		removeValueLeader.setLocation(530, 210);
+		removeValueLeader.setActionCommand("removeLeader");
+		removeValueLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		removeValueLeader.setVisible(false);
+		add(removeValueLeader);
+		
+		getContributor = new Button("Contributor");
+		getContributor.setSize(70,20);
+		getContributor.setLocation(485, 70);
+		getContributor.setActionCommand("joinCommunity");
+		getContributor.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getContributor.setVisible(false);
+		add(getContributor);
+		
+		getTester = new Button("Tester");
+		getTester.setSize(45,20);
+		getTester.setLocation(565, 70);
+		getTester.setActionCommand("getTester");
+		getTester.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getTester.setVisible(false);
+		add(getTester);
+		
+		getCommitter = new Button("Committer");
+		getCommitter.setSize(65,20);
+		getCommitter.setLocation(620, 70);
+		getCommitter.setActionCommand("getCommitter");
+		getCommitter.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getCommitter.setVisible(false);
+		add(getCommitter);
+		
+		getLeader = new Button("Leader");
+		getLeader.setSize(50,20);
+		getLeader.setLocation(695, 70);
+		getLeader.setActionCommand("getLeader");
+		getLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getLeader.setVisible(false);
+		add(getLeader);
+		
 		
 		// Labels From Here
 		Title = new Label("Welcome to Mudoku-Agents Version");
@@ -443,7 +514,6 @@ public class ClientGameController extends GameController implements ActionListen
 			DrawGrid(gr);
 			break;
 		default:
-			System.out.println("ClientGameControllet --> Paint: S'ha entrat al cas per defecte");
 			break;
 		}
 	}
@@ -649,11 +719,11 @@ public class ClientGameController extends GameController implements ActionListen
 							clearRequester = 3;
 							break;
 						case 6:
-							gr.setColor(clientColors[4]);			//Cell committed
+							gr.setColor(clientColors[4]);			//Value Committed
 							clearRequester = 4;
 							break;
 						case 7:
-							gr.setColor(clientColors[5]);			//Cell Accepted
+							gr.setColor(clientColors[5]);			//Value Accepted
 							clearRequester = 5;
 							break;
 					}
@@ -663,7 +733,7 @@ public class ClientGameController extends GameController implements ActionListen
 						int conX = (int) (gridXOffset + conflictX * deltaX);
 						int conY = (int) (gridYOffset + conflictY * deltaY);
 						
-						setActive(conflictX, conflictY);
+						//setActive(conflictX, conflictY);						//It's necessary if we want the user block during votations
 						cells[activeX][activeY].DrawClientDomainConflict(gr, mouseOverDomainIndex, conX, conY, conflictX, conflictY, clientColors, actualRol);
 					}
 				}
@@ -702,6 +772,11 @@ public class ClientGameController extends GameController implements ActionListen
 			gr.setColor(mouseOverColor);
 			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX), (int) (gridYOffset + mouseOverY * deltaY), (int) deltaX, (int) deltaY);
 		}
+		else if (mouseOverDomain && actualRol == ActualRol.Contributor)
+		{
+			gr.setColor(Color.black);
+			gr.drawRect((int) (gridXOffset + mouseOverDomainIndex * deltaX), (int) (170 + gridYOffset * deltaY), (int) deltaX, (int) deltaY);
+		}
 
 		gr.setColor(activeCellColor);
 		int activeRectX = (int) (gridXOffset + activeX * deltaX);
@@ -718,7 +793,6 @@ public class ClientGameController extends GameController implements ActionListen
 	
 	@Override
 	public void actionPerformed(ActionEvent action) {
-		System.out.println("S'ha produit una accio");
 		super.actionPerformed(action);
 		switch(action.getActionCommand())
 		{
@@ -743,23 +817,32 @@ public class ClientGameController extends GameController implements ActionListen
 				voteRemove.setVisible(false);
 				voteCommiting.setVisible(false);
 				voteTimer.stop();
+				//repaint();
 				break;
 			case "yes":
 				if(conflictExists)
 				{
 					networkController.SendMessage("voted#" + userName + ",-1," + conflictX + "," + conflictY + "," + "1");
-					conflictExists = false;
 					voteRemove.setVisible(false);
 					voteCommiting.setVisible(false);
+					
+					positionVoted = new int[2];
+					positionVoted[0] = conflictX;
+					positionVoted[1] = conflictY;
+					positionVotedPositivelyList.add(positionVoted);
 				}
 				break;
 			case "no":
 				if(conflictExists)
 				{
 					networkController.SendMessage("voted#" + userName + ",-1," + conflictX + "," + conflictY + "," + "-1");
-					conflictExists = false;
 					voteRemove.setVisible(false);
 					voteCommiting.setVisible(false);
+					
+					positionVoted = new int[2];
+					positionVoted[0] = conflictX;
+					positionVoted[1] = conflictY;
+					positionVotedNegativelyList.add(positionVoted);
 				}
 				break;
 			case "askCommitting":
@@ -783,13 +866,40 @@ public class ClientGameController extends GameController implements ActionListen
 			case "getCommitter":
 				getCommitter();
 				break;
-		}
+			case "getLeader":
+				getLeader();
+				break;
+			case "acceptLeader":
+				networkController.SendMessage("accepted#" + activeX + "," + activeY);
+				acceptValueLeader.setVisible(false);
+				removeValueLeader.setVisible(false);
+				break;
+			case "removeLeader":
+				networkController.SendMessage("rejected#" + activeX + "," + activeY);
+				acceptValueLeader.setVisible(false);
+				removeValueLeader.setVisible(false);
+				break;
+		}							
 	}
 	
 	public void joinCommunity()
 	{
-		joinCommunity.setVisible(false);
 		actualRol = ActualRol.Contributor;
+		
+		contributor = true;
+		getContributor.setVisible(false);
+		
+		if(tester)
+			getTester.setVisible(true);
+		if(committer)
+			getCommitter.setVisible(true);
+		if(leader)
+			getLeader.setVisible(true);
+		
+		
+		joinCommunity.setVisible(false);
+		actualRolLabel.setLocation(550, 20);
+		
 		actualRolLabel.setText("Actual Rol: " + actualRol);
 		rolInformation.setVisible(true);
 		rolL1Information.setVisible(true);
@@ -800,57 +910,92 @@ public class ClientGameController extends GameController implements ActionListen
 	
 	public void getTester()
 	{
-		rolL1Information.setLocation(500, 120);
-		rolL2Information.setLocation(500, 140);
+		actualRol = ActualRol.Tester;
+		
+		tester = true;
+		getTester.setVisible(false);
+		
+		if(contributor)
+			getContributor.setVisible(true);
+		if(committer)
+			getCommitter.setVisible(true);
+		if(leader)
+			getLeader.setVisible(true);
+		
+		rolL1Information.setLocation(480, 120);
+		rolL2Information.setLocation(480, 140);
 
 		rolInformation.setText("As a Tester you can check values:");
-		rolL1Information.setText(" - If you think it is correct ask for committing.");
-		rolL2Information.setText(" - If you think it is wrong report the bug.");
+		rolL1Information.setText(" - If you think a value is correct ask for committing.");
+		rolL2Information.setText(" - If you think a value is wrong report the bug.");
 		rolL3Information.setVisible(false);
 		getPromotedTester.setVisible(false);
 		
-		actualRol = ActualRol.Tester;
 		actualRolLabel.setLocation(560, 20);
 		actualRolLabel.setText("Actual Rol: " + actualRol);
 		repaint();
 	}
-	
+
 	public void getCommitter()
 	{
+		actualRol = ActualRol.Committer;
+		
+		committer = true;
+		getCommitter.setVisible(false);
+		
+		if(contributor)
+			getContributor.setVisible(true);
+		if(tester)
+			getTester.setVisible(true);
+		if(leader)
+			getLeader.setVisible(true);
+		
 		rolL1Information.setLocation(480, 120);
 		rolL2Information.setLocation(480, 140);
 
 		rolInformation.setText("Now you participate in Votations:");
-		rolL1Information.setText(" - If you think the value is correct vote for Committe it");
-		rolL2Information.setText(" - If you think the value is wrong vote for Remove it");
+		rolL1Information.setText(" - If the value is correct vote for Committe it");
+		rolL2Information.setText(" - If the value is wrong vote for Remove it");
 		rolL3Information.setVisible(false);
-		
+
 		getPromotedCommitter.setVisible(false);
 		askForCommiting.setVisible(false);
 		removeValue.setVisible(false);
-		
-		actualRol = ActualRol.Committer;
-		actualRolLabel.setLocation(540, 20);
+
+		actualRolLabel.setLocation(560, 20);
 		actualRolLabel.setText("Actual Rol: " + actualRol);
 		repaint();
 	}
-	
+
 	public void getLeader()
 	{
-		rolL1Information.setLocation(500, 120);
-		rolL2Information.setLocation(500, 140);
-
-		rolInformation.setText("Now you can participate in Votations:");
-		rolL1Information.setText(" - If you think it is correct vote for Committe it");
-		rolL2Information.setText(" - If you think it is wrong vote for Remove it");
-		rolL3Information.setVisible(false);
+		actualRol = ActualRol.Leader;
 		
+		leader = true;
+		getLeader.setVisible(false);
+		
+		if(contributor)
+			getContributor.setVisible(true);
+		if(tester)
+			getTester.setVisible(true);
+		if(committer)
+			getCommitter.setVisible(true);
+		
+		rolInformation.setLocation(488, 100);
+		rolL1Information.setLocation(480, 120);
+
+		rolInformation.setText("You decide if the values committed are accepted:");
+		rolL1Information.setText(" - Select them and choose wisely.");
+		rolL2Information.setVisible(false);
+		rolL3Information.setVisible(false);
+
 		getPromotedLeader.setVisible(false);
 		askForCommiting.setVisible(false);
 		removeValue.setVisible(false);
-		
-		actualRol = ActualRol.Committer;
-		actualRolLabel.setLocation(540, 20);
+		voteRemove.setVisible(false);
+		voteCommiting.setVisible(false);
+
+		actualRolLabel.setLocation(560, 20);
 		actualRolLabel.setText("Actual Rol: " + actualRol);
 		repaint();
 	}
@@ -874,7 +1019,7 @@ public class ClientGameController extends GameController implements ActionListen
 				val = iter.next();
 			}
 			
-			if (actualRol == ActualRol.Contributor)
+			if (actualRol == ActualRol.Contributor && cells[activeX][activeY].valueState == 0)
 			{
 				networkState = NetworkState.waitingConfirm;
 				networkController.SendMessage("instantiate#" + userName + ",-1," + activeX + "," + activeY + "," + val);
@@ -900,9 +1045,18 @@ public class ClientGameController extends GameController implements ActionListen
 					removeValue.setVisible(false);
 				}
 			}
-			else if (actualRol == ActualRol.Leader)
+			else if (actualRol == ActualRol.Leader && !conflictExists)
 			{
-				
+				if (cells[activeX][activeY].valueState == 6)
+				{
+					acceptValueLeader.setVisible(true);
+					removeValueLeader.setVisible(true);
+				}
+				else
+				{
+					acceptValueLeader.setVisible(false);
+					removeValueLeader.setVisible(false);
+				}
 			}
 		}
 		
@@ -930,9 +1084,7 @@ public class ClientGameController extends GameController implements ActionListen
 		try {
 			switch(vars[0])
 			{
-			case "init":
-				//System.out.println("Client: Initializing client for " + message);
-				
+			case "init":				
 				for(int i = 1; i < vars.length; i++)
 				{
 					equation = vars[i];
@@ -940,23 +1092,24 @@ public class ClientGameController extends GameController implements ActionListen
 					
 					switch(vars2[0])
 					{
-					case "ss":// sudoku size
+					case "ss":												// sudoku size
 						sudokuSize = Integer.parseInt(vars2[1]);
 						Initialize();
 						break;
-					case "ci":// client id
+					case "ci":												// client id
 						networkController.clientId = Integer.parseInt(vars2[1]);
 						break;
-					case "iv":// initial values
-						addToGrid(vars2[1]);
+					case "iv":												// initial values
+						addToGridInitialize(vars2[1]);
 						break;
 					default:
-						System.out.println(vars2[0]);
+						//System.out.println(vars2[0]);
 						break;
 					}
 				}
+				
 				StartGame();
-				Print("Game Initialized");
+				Print("State of the Game Received from the Server");
 				
 				networkState = NetworkState.idle;
 				repaint();
@@ -982,11 +1135,6 @@ public class ClientGameController extends GameController implements ActionListen
 						{
 							voteCommiting.setVisible(true);
 							voteRemove.setVisible(true);
-							
-							positionVoted = new int[2];
-							positionVoted[0] = activeX;
-							positionVoted[1] = activeY;
-							positionVotedList.add(positionVoted);
 						}
 						else if (actualRol == ActualRol.Tester)
 						{
@@ -1009,84 +1157,128 @@ public class ClientGameController extends GameController implements ActionListen
 					}
 				break;
 			case "clear":
+				conflictExists = false;
+				//voteTimer.stop();
+				
 				vars2 = vars[1].split(",");
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
 				ClearCell(conflictX, conflictY);
-				Print("The value at the position ["+conflictX+"]["+conflictY+"] has been Removed.");
-
+				Print("The value at the position [" + conflictX + "][" + conflictY + "] has been Removed.");
+				
+				repaint();
 				break;
 			case "committed":
 				vars2 = vars[1].split(",");
+				conflictExists = false;
+				//voteTimer.stop();
 				
 				boolean found = false;
+				boolean foundPositively = false;
+				boolean foundNegatively = false;
 				
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
+				
+				int positionTemp = 0;
 				
 				SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
 				
 				if (actualRol == ActualRol.Contributor)
 				{
-					for (int[] position : positionContributedList)
-					{
-						if (position[0] == conflictX && position[1] == conflictY)
+					for (int i=0;i<positionContributedList.size();i++)
+					{						
+						if (positionContributedList.get(i)[0] == conflictX && positionContributedList.get(i)[1] == conflictY)
 						{
 							found = true;
 							numContributionsCommited++;
+							positionTemp = i;
 						}
 						
-						if (numContributionsCommited > 5)
+						if (numContributionsCommited >= 5 && !tester)
 							getPromotedTester.setVisible(true);
 					}
 					
 					if(found)
-						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you contributed has been committed!");
+					{
+						positionContributedList.remove(positionTemp);
+						Print("The value you contributed at the position [" + conflictX + "][" + conflictY + "] has been committed!");
+					}
 				}
 				else if (actualRol == ActualRol.Tester)
 				{	
-					for (int[] position : positionCommittedList)
+					for (int i=0;i<positionCommittedList.size();i++)
 					{
-						if (position[0] == conflictX && position[1] == conflictY)
+						if (positionCommittedList.get(i)[0] == conflictX && positionCommittedList.get(i)[1] == conflictY)
 						{
 							found = true;
 							numCommittedSatisfactory++;
+							positionTemp = i;
 						}
 						
-						if (numCommittedSatisfactory > 5)
+						if (numCommittedSatisfactory >= 5 && !committer)
 							getPromotedCommitter.setVisible(true);
 					}
 					
 					if(found)
-						Print("The value " + cells[conflictX][conflictY].current +" at the position ["+conflictX+"]["+conflictY+"] you asked for committing has been committed!");
+					{
+						positionCommittedList.remove(positionTemp);
+						Print("The value you asked for Committing at the position ["+conflictX+"]["+conflictY+"] has been committed!");
+					}
 				}
 				else if (actualRol == ActualRol.Committer)
-				{
-					for (int[] position : positionVotedList)
+				{	
+					for (int i=0; i<positionVotedPositivelyList.size();i++)
 					{
-						if (position[0] == conflictX && position[1] == conflictY)
+						if (positionVotedPositivelyList.get(i)[0] == conflictX && positionVotedPositivelyList.get(i)[1] == conflictY)
 						{
-							found = true;
+							foundPositively = true;
 							numVotedSatisfactory++;
+							positionTemp = i;
+						}
+						
+						if (numVotedSatisfactory >= 5 && !leader)
+							getPromotedLeader.setVisible(true);
+					}
+					
+					for (int i=0; i<positionVotedNegativelyList.size();i++)
+					{
+						if (positionVotedNegativelyList.get(i)[0] == conflictX && positionVotedNegativelyList.get(i)[1] == conflictY)
+						{
+							foundNegatively = true;
+							numVotedSatisfactory++;
+							positionTemp = i;
 						}
 						
 						if (numVotedSatisfactory >= 5)
 							getPromotedLeader.setVisible(true);
 					}
+					
+					if(foundPositively)
+					{
+						Print("The value you voted for Removing at the position [" + conflictX + "][" + conflictY + "] has been Removed!");
+						positionVotedPositivelyList.remove(positionTemp);
+					}
+					else if (foundNegatively)
+					{
+						Print("The value you voted for Keeping at the position [" + conflictX + "][" + conflictY + "] has been Committed!");
+						positionVotedNegativelyList.remove(positionTemp);
+					}
 				}
 
-
-				if (!found)
-					Print("The value " + cells[conflictX][conflictY].current + " at the position ["+conflictX+"]["+conflictY+"] has been committed by Votation.");
+				if (!found || (!foundPositively && !foundNegatively))
+					Print("The value at the position [" + conflictX + "][" + conflictY + "] has been committed by Votation.");
 								
+				repaint();
 				break;	
-			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
+			case "accepted":		
 		
 				vars2 = vars[1].split(",");
 				int x = Integer.parseInt(vars2[0]);
 				int y = Integer.parseInt(vars2[1]);
+				
 				SetValueAndState(x, y, cells[x][y].current, 7);		
-				Print("The value " + cells[x][y].current + " at the position ["+x+"]["+y+"] has been accepted by the Project Leader");
+				Print("The Project Leader has accepted at the position [" + x + "][" + y + "] the value: " + cells[x][y].current);
 				break;
 			}
 
@@ -1108,8 +1300,26 @@ public class ClientGameController extends GameController implements ActionListen
 			int state = Integer.parseInt(component[3]);
 			
 			SetValueAndState(x, y, val, state);
-			if(state != 1)
-				Print("The value " + val + " at the position ["+x+"]["+y+"] has been Instantied.");
+			if(state == 2 || state == 3 || state == 4)
+				Print("An agent has contributed at the position [" + x + "][" + y + "] with the Value: " + val);
+			else if (state == 5)
+				Print("You have contributed at the position [" + x + "][" + y + "] with the Value: " + val);
+		}
+	}
+	
+	public void addToGridInitialize(String code)
+	{
+		String[] values = code.split("&");
+		for(String value : values)
+		{
+			String[] component = value.split(",");
+			
+			int x = Integer.parseInt(component[0]);
+			int y = Integer.parseInt(component[1]);
+			int val = Integer.parseInt(component[2]);
+			int state = Integer.parseInt(component[3]);
+			
+			SetValueAndState(x, y, val, state);
 		}
 	}
 	
@@ -1180,14 +1390,11 @@ public class ClientGameController extends GameController implements ActionListen
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 2 || cells[i][j].valueState == 3 || cells[i][j].valueState == 4 || cells[i][j].valueState == 5)
 					count++;
 			}
-				
 		}
 		
 		return count;
@@ -1197,14 +1404,11 @@ public class ClientGameController extends GameController implements ActionListen
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 6)
 					count++;
 			}
-				
 		}
 		
 		return count;
@@ -1214,14 +1418,11 @@ public class ClientGameController extends GameController implements ActionListen
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
 					count++;
-			}
-				
+			}	
 		}
 		
 		return count;
@@ -1231,14 +1432,11 @@ public class ClientGameController extends GameController implements ActionListen
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 0)
 					count++;
-			}
-				
+			}	
 		}
 		
 		return count;

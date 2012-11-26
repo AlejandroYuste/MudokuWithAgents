@@ -92,8 +92,6 @@ public class SudokuCPController {
 			solver.getVar(cellVars[x][y]).setVal(val);
 		}*/
 		
-		System.out.println("InstantiateVar: [" + x + "][" + y + "] --> " + val);
-		System.out.println("InstantiateVar: cellVars[x][y] --> " + cellVars[x][y]);
 		solver.getVar(cellVars[x][y]).setVal(val);
 	}
 	

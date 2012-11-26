@@ -797,14 +797,19 @@ public class AgentGameController extends GameController implements ActionListene
 				}
 				break;
 			case "clear":
+				conflictExists = false;
+				voteTimer.stop();
+				
 				vars2 = vars[1].split(",");
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
 				ClearCell(conflictX, conflictY);
+				
+				repaint();
 				break;
 			case "committed":
-				//conflictExists = false;
-				//voteTimer.stop();
+				conflictExists = false;
+				voteTimer.stop();
 				
 				vars2 = vars[1].split(",");
 				
@@ -812,6 +817,7 @@ public class AgentGameController extends GameController implements ActionListene
 				conflictY = Integer.parseInt(vars2[1]);
 				
 				SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
+				repaint();
 				break;	
 			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
 		
@@ -871,6 +877,7 @@ public class AgentGameController extends GameController implements ActionListene
 		connectRandomAgentsButton.setVisible(true);
 		playExecution.setVisible(true);
 		pauseExecution.setVisible(true);
+		
 		colorServerLabel.setVisible(true);
 		colorRowContributorLabel.setVisible(true);
 		colorColumnContributorLabel.setVisible(true);
@@ -880,6 +887,7 @@ public class AgentGameController extends GameController implements ActionListene
 		colorAcceptedLabel.setVisible(true);
 		colorConflictLabel.setVisible(true);
 		correctLabel.setVisible(true);
+		
 		valuesLabel.setVisible(true);
 		countLabel.setVisible(true);
 		valuesContributedLabel.setVisible(true);
@@ -893,20 +901,21 @@ public class AgentGameController extends GameController implements ActionListene
 	}
 	
 	@Override
-	public void CellClick(int x, int y) {
+	public void CellClick(int x, int y) 
+	{
 		activeX = x;
 		activeY = y;
 	
 		repaint();
 	}
 	
-	public void setActive(int x, int y) {
+	public void setActive(int x, int y) 
+	{
 		activeX = x;
 		activeY = y;
 	}
 	
-	int getRegion(int x, int y)
-	{
+	int getRegion(int x, int y) {
 		return super.getRegion(x, y);
 	}
 	
@@ -945,10 +954,8 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 2 || cells[i][j].valueState == 3 || cells[i][j].valueState == 4 || cells[i][j].valueState == 5)
 					count++;
 			}	
@@ -961,10 +968,8 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 6)
 					count++;
 			}	
@@ -977,10 +982,8 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		int count = 0;
 		
-		for(int i=0;i<sudokuSize;i++)
-		{
-			for(int j=0;j<sudokuSize;j++)
-			{
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
 				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
 					count++;
 			}	

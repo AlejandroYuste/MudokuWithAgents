@@ -549,14 +549,17 @@ public class GameController extends Applet implements ActionListener {
 	public void MouseOverDomain(int index) {
 		mouseOverDomain = true;
 		mouseOverGrid = false;
-
 		mouseOverDomainIndex = index;
+		
 		repaint();
 	}
 
 	public void CellClick(int x, int y) {
 		activeX = x;
 		activeY = y;
+		
+		mouseOverX = -1;
+		mouseOverY = -1;
 		
 		repaint();
 	}

@@ -64,8 +64,6 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 		int activeY = 0;
 		int index = -1;
 		
-		System.out.println("S'ha clicat el mouse a la posicio: " + e.getX() + "," + e.getY());
-
 		if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420)
 			index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
 		else if(e.getX() < gridEndX && e.getX() > GameController.gridXOffset &&  e.getY() < gridEndY && e.getY() > AgentGameController.gridYOffset)
@@ -90,13 +88,15 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 		// TODO Auto-generated method stub
 
 	}
+	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getX() < gridEndX && e.getY() < gridEndY)
+
+		if(e.getX() > GameController.gridXOffset && e.getX() < gridEndX && e.getY() < gridEndY && e.getY() > GameController.gridYOffset)
 		{
 			int newMouseOverX = (int) ((e.getX() - GameController.gridXOffset) / deltaX);
 			int newMouseOverY = (int) ((e.getY() - GameController.gridYOffset) / deltaY);
+			
 			if(newMouseOverX != mouseOverX || newMouseOverY != mouseOverY)
 			{
 				mouseOverX = newMouseOverX;
@@ -105,15 +105,18 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 				lastDomainIndex = -1;
 			}
 		}
-		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420)
+		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420 && e.getX() > GameController.gridXOffset)
 		{
 			int index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
+			
+			System.out.println("Nou Index: " + index);
 			
 			if (lastDomainIndex != index)
 			{
 				lastDomainIndex = index;
 				gameController.MouseOverDomain(index);
 				mouseOverX = -1;
+				mouseOverY = -1;
 			}
 		}
 		else
