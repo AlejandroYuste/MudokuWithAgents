@@ -134,7 +134,7 @@ public class ClientGameController extends GameController implements ActionListen
 		clientColors[7] = new Color(220, 20, 60);		//Color de la casella de conflicte --> crimson
 	}
 
-	public void init()			//Aqui comença l'execucio del Applet
+	public void init()			//Aqui comenï¿½a l'execucio del Applet
 	{
 		super.init();			//Cirdem al init de GameController
 		
@@ -266,43 +266,51 @@ public class ClientGameController extends GameController implements ActionListen
 		Title.setAlignment(Label.CENTER);
 		Title.setSize(400,50);
 		Title.setLocation(175, 50);
+		Title.setBackground(Color.white);
 		add(Title);
 		
 		informationL1Label = new Label();
 		informationL1Label.setLocation(100, 120);
 		informationL1Label.setSize(600, 20);
 		informationL1Label.setText("This tool have been created with an eductaional purpose. In this framework you can join to a simulation");
+		informationL1Label.setBackground(Color.white);
 		add(informationL1Label);
 		
 		informationL2Label = new Label();
 		informationL2Label.setLocation(92, 140);
 		informationL2Label.setSize(600, 20);
 		informationL2Label.setText("of an Open Source Community in order to participate in the different available roles and learn how it works.");
+		informationL2Label.setBackground(Color.white);
 		add(informationL2Label);
 		
 		informationConnectionLabel = new Label("(To run this aplication a server must be running)");
 		informationConnectionLabel.setLocation(240, 300);
 		informationConnectionLabel.setSize(600, 20);
+		informationConnectionLabel.setBackground(Color.white);
 		add(informationConnectionLabel);
 		
 		ipFieldLabel = new Label("Select the IP of the Server:");
 		ipFieldLabel.setSize(180,20);
 		ipFieldLabel.setLocation(20, 400);
+		ipFieldLabel.setBackground(Color.white);
 		add(ipFieldLabel);
 		
 		ipFieldDoubtLabel = new Label("(If you have any doubt use the default values)");
 		ipFieldDoubtLabel.setSize(250,20);
 		ipFieldDoubtLabel.setLocation(320, 400);
+		ipFieldDoubtLabel.setBackground(Color.white);
 		add(ipFieldDoubtLabel);
 		
 		portFieldLabel = new Label("Select the Port of the Server:");
 		portFieldLabel.setSize(180,20);
 		portFieldLabel.setLocation(20, 420);
+		portFieldLabel.setBackground(Color.white);
 		add(portFieldLabel);
 		
 		userNameLabel = new Label("Select an User Name:");
 		userNameLabel.setSize(180,20);
 		userNameLabel.setLocation(20, 440);
+		userNameLabel.setBackground(Color.white);
 		add(userNameLabel);
 		
 		//-----------------------------------------------------------------
@@ -688,7 +696,7 @@ public class ClientGameController extends GameController implements ActionListen
 		{
 			for (int x = 0; x < sudokuSize; x++) 
 			{
-				if (cells[x][y].valueState == 0) 			//Si no hi ha cap valor a la cel·la no feim res, pasem la posicio
+				if (cells[x][y].valueState == 0) 			//Si no hi ha cap valor a la celï¿½la no feim res, pasem la posicio
 				{
 					tempLineX += deltaX;
 					lineX = (int) tempLineX;
