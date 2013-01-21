@@ -10,6 +10,8 @@ public class AgentGameController extends GameController implements ActionListene
 	public enum NetworkState {idle, waitingInit, waitingConfirm}
 	NetworkState networkState;
 
+	//Labels of the welcome Interface
+	
 	Label Title;
 	Label ipFieldLabel;
 	Label portFieldLabel;
@@ -18,6 +20,8 @@ public class AgentGameController extends GameController implements ActionListene
 	Label informationL2Label;
 	Label informationConnectionLabel;
 	
+	//Labels to add new agents to the community
+	
 	Label NumAgentsLabel;
 	Label TypeAgentsLabel;
 	Label AgentsConnected;
@@ -25,14 +29,19 @@ public class AgentGameController extends GameController implements ActionListene
 	Label RandomCommunity;
 	Label RandomCommunityMember;
 	
+	//Labels of the Color Legend
+	
 	Label colorServerLabel;
-	Label colorRowContributorLabel;
-	Label colorColumnContributorLabel;
-	Label colorSquareContributorLabel;
+	Label colorRowAgentLabel;
+	Label colorColumnAgentLabel;
+	Label colorSquareAgentLabel;
+	Label colorLeaderLabel;
+	Label colorContributedLabel;
 	Label colorCommittedLabel;
 	Label colorAcceptedLabel;
-	Label colorConflictLabel;
 	Label colorUserContributorLabel;
+	
+	//Labels of the information boxes
 	
 	Label valuesContributedLabel;
 	Label valuesCommittedLabel;
@@ -43,6 +52,16 @@ public class AgentGameController extends GameController implements ActionListene
 	Label correctLabel;
 	Label valuesLabel;
 	Label countLabel;
+	Label valuesReportedLabel;
+	Label reportedLabel;
+	Label countReportedLabel;
+	Label votingLabel;
+	Label votingLabelON;
+	Label cellStateInfoLabel;	
+	Label cellValueLabel;
+	Label cellStateLabel;
+	
+	//Components of the interface of the Applet
 	
 	TextField NumAgentsField;
 	TextField NumRadomAgentsField;
@@ -51,6 +70,8 @@ public class AgentGameController extends GameController implements ActionListene
 	Choice TypeAgentsField;
 	List listPanel;
 
+	//Buttons of the interface of the Applet
+	
 	Button connectClientButton;
 	Button connectAgentsButton;
 	Button connectRandomAgentsButton;
@@ -59,56 +80,79 @@ public class AgentGameController extends GameController implements ActionListene
 	Button pauseExecution;
 	Button playExecution;
 	
+	//Other Variables
+	
 	static AgentNetworkController networkController;
 	
-	static Color[] agentColors;		// = new Color[]{Color.green, Color.blue, Color.yellow, Color.ORANGE, Color.gray};
-	
-	int conflictX;
-	int conflictY;
-	
-	int voteDelay = 10000;
-	
+	int voteDelay = 10000;				//Time for the voting (Timer System)
 	Timer voteTimer;
 	
-	boolean conflictExists;
-	int clearRequester;
-
-	int val;
+	int countContributed = 0;
+	int countCommitted = 0;
+	int countReported = 0;
+	
+	boolean conflictExists;				//Indicates if there's a Voting Open
+	int conflictX, conflictY;
+	
+	//Constants for the colors
+	
+	static Color[] agentColors;
+	
+	final int serverColor = 0;
+	final int rowAgentColor = 1;
+	final int columnAgentColor = 2;
+	final int squareAgentColor = 3;
+	final int userColor = 4;
+	final int agentLeaderColor = 5;
+	final int userLeaderColor = 6;
+	final int valueContributedColor = 7;
+	final int valueReportedColor = 8;
+	final int valueCommittedColor = 9;
+	final int valueNotCommittedColor = 10;
+	final int valueAcceptedColor = 11;
+	final int valueRejectedColor = 12;
+	final static int votingColor = 13;
 	
 	public AgentGameController()
 	{
 		super();
-		clearRequester = -1;
 		GameController.sudokuSize = 16;
 		networkState = NetworkState.idle;
-		agentColors = new Color[8];
+		agentColors = new Color[14];
 		conflictExists = false;
 		
-		agentColors[0] = new Color(28, 134, 238);		//Contributed By Rows 		--> dodgerblue 2
-		agentColors[1] = new Color(0, 205, 0);			//Contributed By Columns 	--> green 3
-		agentColors[2] = new Color(255, 215, 0);		//Contributed By Squares 	--> Gold
-		agentColors[3] = new Color(255, 0, 0);			//Contributed by User 		--> red
-		agentColors[4] = new Color(142, 56, 142);		//Cell committed			--> sgi beet
-		agentColors[5] = new Color(139, 69, 19);		//Cell Accepted				--> Chocolate
-		agentColors[6] = new Color(0, 0, 0);			//Cell from the Server		--> black
-		agentColors[7] = new Color(220, 20, 60);		//Color de la casella de conflicte --> crimson
+		agentColors[serverColor] = new Color(255, 193, 37);						// 0.  Server 				--> goldenrod 1
+		agentColors[rowAgentColor] = new Color(188,	210, 238);					// 1.  Row Agent 			--> lightsteelblue 2
+		agentColors[columnAgentColor] = new Color(173, 255, 47);				// 2.  Columns Agent 		--> greenyellow
+		agentColors[squareAgentColor] = new Color(255, 236,	139);				// 3.  Square Agent			--> lightgoldenrod 1
+		agentColors[userColor] = new Color(238, 180, 180);						// 4.  User 				--> rosybrown 2
+		agentColors[agentLeaderColor] = new Color(205, 201,	201);				// 5.  Leader Agent			--> snow 3
+		agentColors[userLeaderColor] = new Color(0, 0, 0);						// 6.  User Leader			--> black
+		agentColors[valueContributedColor] = new Color(56, 142, 142);			// 7.  Value Contributed	--> sgi teal
+		agentColors[valueReportedColor] = new Color(255, 255, 255);				// 8.  Value Reported		--> white
+		agentColors[valueCommittedColor] = new Color(220, 20, 60);				// 9.  Value Committed		--> crimson
+		agentColors[valueNotCommittedColor] = new Color(255, 255, 255);			// 10. Value NOT Committed	--> white
+		agentColors[valueAcceptedColor] = new Color(255, 193, 37);				// 11. Value Accepted 		--> goldenrod 1
+		agentColors[valueRejectedColor] = new Color(255, 255, 255);				// 12. Value Rejected		--> white
+		agentColors[votingColor] = new Color(220, 20, 60);						// 13. Voting Color			--> crimson
 	}
 
-	public void init()										//Aqui comença l'execucio del Applet
+	public void init()										
 	{
-		super.init();										//Cirdem al init de GameController
+		super.init();										
 		
-		// Components from Here:	
+		//-------------------------------         COMPONENTS FROM HERE         -------------------------------//	
+		
 		ipField = new TextField(20);
 		ipField.setSize(100,20);
 		ipField.setLocation(200, 400);
-		ipField.setText("127.0.0.1");			//IP del client o del servidor?
+		ipField.setText("127.0.0.1");						//IP of the host where is the server located
 		add(ipField);
 
 		portField = new TextField(4);
 		portField.setSize(100,20);
 		portField.setLocation(200, 420);
-		portField.setText("4433");				//Port
+		portField.setText("4433");							//Port where the server is waiting for data (Default 4433)
 		add(portField);
 		
 		listPanel = new List(10);
@@ -120,7 +164,7 @@ public class AgentGameController extends GameController implements ActionListene
 		NumRadomAgentsField = new TextField(20);
 		NumRadomAgentsField.setSize(40, 20);
 		NumRadomAgentsField.setLocation(gridXOffset + 200, 560);
-		NumRadomAgentsField.setText("10");
+		NumRadomAgentsField.setText("15");
 		add(NumRadomAgentsField);
 		NumRadomAgentsField.setVisible(false);
 		
@@ -137,6 +181,10 @@ public class AgentGameController extends GameController implements ActionListene
 		TypeAgentsField.add("Column Contributor");
 		TypeAgentsField.add("Square Contributor");
 		TypeAgentsField.add("------------------");
+		TypeAgentsField.add("Row Bug Reporter");
+		TypeAgentsField.add("Column Bug Reporter");
+		TypeAgentsField.add("Square Bug Reporter");
+		TypeAgentsField.add("------------------");
 		TypeAgentsField.add("Row Tester");
 		TypeAgentsField.add("Column Tester");
 		TypeAgentsField.add("Square Tester");
@@ -150,7 +198,8 @@ public class AgentGameController extends GameController implements ActionListene
 		TypeAgentsField.setLocation(gridXOffset + 160 + 20, 520);
 		add(TypeAgentsField);
 		
-		//Buttons from here!
+		//-------------------------------         BUTTONS FROM HERE         -------------------------------//
+		
 		connectClientButton = new Button("Connect to the Server");
 		connectClientButton.setSize(150,75);
 		connectClientButton.setLocation(300, 200);
@@ -198,7 +247,8 @@ public class AgentGameController extends GameController implements ActionListene
 		playExecution.setVisible(false);
 		add(playExecution);
 		
-		//Labels from Here
+		//-------------------------------         LABELS FROM HERE         -------------------------------//
+		
 		Title = new Label("Welcome to Mudoku-Agents Version");
 		Font font = new Font("SansSerif", Font.BOLD, 15);
 		Title.setFont(font);
@@ -240,14 +290,13 @@ public class AgentGameController extends GameController implements ActionListene
 		portFieldLabel.setLocation(20, 420);
 		add(portFieldLabel);
 		
-		//------------------------------------------------------------------------------------------
+		//------------------------------------------------------------------------------------------> Add New Agents to the Community
 		
 		AddNewAgents = new Label("Add New Agents to the Community:");
 		AddNewAgents.setSize(250,20);
 		AddNewAgents.setLocation(gridXOffset + 150, 470);
 		add(AddNewAgents);
 		AddNewAgents.setVisible(false);
-
 		
 		AgentsConnected = new Label("Agents Connected:");
 		AgentsConnected.setSize(150,20);
@@ -258,7 +307,6 @@ public class AgentGameController extends GameController implements ActionListene
 		NumAgentsLabel = new Label("Select the Number of Agents:");
 		NumAgentsLabel.setSize(180,20);
 		NumAgentsLabel.setLocation(gridXOffset, 500);
-		//NumAgentsLabel.setForeground(Color.green);			//Podem Canviar el Colors de les etiquetes
 		add(NumAgentsLabel);
 		NumAgentsLabel.setVisible(false);
 		
@@ -280,115 +328,175 @@ public class AgentGameController extends GameController implements ActionListene
 		add(RandomCommunityMember);
 		RandomCommunityMember.setVisible(false);
 		
-		//------------------------------------------------------------------------------------------
-		
-		colorServerLabel = new Label("Initialized by Server");
-		colorServerLabel.setSize(140,20);
-		colorServerLabel.setLocation(600, 420);
-		colorServerLabel.setVisible(false);
-		add(colorServerLabel);
-
-		colorRowContributorLabel = new Label("Contributed by Rows");
-		colorRowContributorLabel.setSize(140,20);
-		colorRowContributorLabel.setLocation(600, 440);
-		colorRowContributorLabel.setVisible(false);
-		add(colorRowContributorLabel);
-		
-		colorColumnContributorLabel = new Label("Contributed by Columns");
-		colorColumnContributorLabel.setSize(140,20);
-		colorColumnContributorLabel.setLocation(600, 460);
-		colorColumnContributorLabel.setVisible(false);
-		add(colorColumnContributorLabel);
-		
-		colorSquareContributorLabel = new Label("Contributed by Squares");
-		colorSquareContributorLabel.setSize(140,20);
-		colorSquareContributorLabel.setLocation(600, 480);
-		colorSquareContributorLabel.setVisible(false);
-		add(colorSquareContributorLabel);
-		
-		colorUserContributorLabel = new Label("Contributed by User");
-		colorUserContributorLabel.setSize(140,20);
-		colorUserContributorLabel.setLocation(600, 500);
-		colorUserContributorLabel.setVisible(false);
-		add(colorUserContributorLabel);
-		
-		colorCommittedLabel = new Label("Contribution Committed");
-		colorCommittedLabel.setSize(140,20);
-		colorCommittedLabel.setLocation(600, 520);
-		colorCommittedLabel.setVisible(false);
-		add(colorCommittedLabel);
-		
-		colorAcceptedLabel = new Label("Contribution Accepted");
-		colorAcceptedLabel.setSize(140,20);
-		colorAcceptedLabel.setLocation(600, 540);
-		colorAcceptedLabel.setVisible(false);
-		add(colorAcceptedLabel);
-		
-		colorConflictLabel = new Label("Votation Active");
-		colorConflictLabel.setSize(140,20);
-		colorConflictLabel.setLocation(600, 560);
-		colorConflictLabel.setVisible(false);
-		add(colorConflictLabel);		
-		
-		//------------------------------------------------------------------------------------------
+		//------------------------------------------------------------------------------------------> VALUES CONTRIBUTED
 		
 		valuesContributedLabel = new Label("Values");
 		valuesContributedLabel.setSize(50, 10);
-		valuesContributedLabel.setLocation(505, 270);
+		valuesContributedLabel.setLocation(505, 255);
 		valuesContributedLabel.setVisible(false);
 		add(valuesContributedLabel);	
 		
 		contributedLabel = new Label("Contributed");
 		contributedLabel.setSize(70, 10);
-		contributedLabel.setLocation(492, 285);
+		contributedLabel.setLocation(492, 270);
 		contributedLabel.setVisible(false);
 		add(contributedLabel);	
 		
-		countContributedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
-		countContributedLabel.setSize(50, 10);
-		countContributedLabel.setLocation(505, 302);
+		countContributedLabel = new Label("0");
+		countContributedLabel.setSize(30, 10);
+		countContributedLabel.setLocation(505, 285);
 		countContributedLabel.setVisible(false);
 		add(countContributedLabel);	
 		
-		//------------------------------------------------------------------------------------------
+		//------------------------------------------------------------------------------------------> VALUES COMMITTED
 		
 		valuesCommittedLabel = new Label("Values");
 		valuesCommittedLabel.setSize(50, 10);
-		valuesCommittedLabel.setLocation(505, 340);
+		valuesCommittedLabel.setLocation(595, 255);
 		valuesCommittedLabel.setVisible(false);
 		add(valuesCommittedLabel);	
 		
 		committedLabel = new Label("Committed");
 		committedLabel.setSize(70, 10);
-		committedLabel.setLocation(493, 355);
+		committedLabel.setLocation(585, 270);
 		committedLabel.setVisible(false);
 		add(committedLabel);	
 		
-		countCommittedLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
-		countCommittedLabel.setSize(50, 10);
-		countCommittedLabel.setLocation(505, 370);
+		countCommittedLabel = new Label("0");
+		countCommittedLabel.setSize(30, 10);
+		countCommittedLabel.setLocation(585, 285);
 		countCommittedLabel.setVisible(false);
 		add(countCommittedLabel);	
 		
-		//------------------------------------------------------------------------------------------
+		//------------------------------------------------------------------------------------------> BUGS REPORTED
+		
+		valuesReportedLabel = new Label("Values");
+		valuesReportedLabel.setSize(50, 10);
+		valuesReportedLabel.setLocation(685, 255);
+		valuesReportedLabel.setVisible(false);
+		add(valuesReportedLabel);	
+		
+		reportedLabel = new Label("Reported");
+		reportedLabel.setSize(60, 15);
+		reportedLabel.setLocation(680, 268);
+		reportedLabel.setVisible(false);
+		add(reportedLabel);	
+		
+		countReportedLabel = new Label("0");
+		countReportedLabel.setSize(30, 10);
+		countReportedLabel.setLocation(695, 285);
+		countReportedLabel.setVisible(false);
+		add(countReportedLabel);	
+		
+		//------------------------------------------------------------------------------------------> CORRECT VALUES
 		
 		correctLabel = new Label("Correct");
 		correctLabel.setSize(50, 10);
-		correctLabel.setLocation(495, 420);
+		correctLabel.setLocation(495, 400);
 		correctLabel.setVisible(false);
 		add(correctLabel);
 		
 		valuesLabel = new Label("Values");
 		valuesLabel.setSize(50, 10);
-		valuesLabel.setLocation(497, 435);
+		valuesLabel.setLocation(497, 415);
 		valuesLabel.setVisible(false);
 		add(valuesLabel);	
 		
 		countLabel = new Label(0 + "/" + sudokuSize*sudokuSize);
 		countLabel.setSize(50, 10);
-		countLabel.setLocation(500, 455);
+		countLabel.setLocation(500, 430);
 		countLabel.setVisible(false);
 		add(countLabel);
+		
+		//------------------------------------------------------------------------------------------> Voting ON?
+		
+		votingLabel = new Label("Voting");
+		votingLabel.setSize(50, 20);
+		votingLabel.setLocation(500, 320);
+		votingLabel.setVisible(false);
+		add(votingLabel);	
+		
+		votingLabelON = new Label("ON?");
+		votingLabelON.setSize(30, 10);
+		votingLabelON.setLocation(505, 340);
+		votingLabelON.setVisible(false);
+		add(votingLabelON);
+		
+		//------------------------------------------------------------------------------------------> Cell State
+		
+		cellStateInfoLabel = new Label("Active Cell:");
+		cellStateInfoLabel.setSize(140, 20);
+		cellStateInfoLabel.setLocation(570, 315);
+		cellStateInfoLabel.setVisible(false);
+		add(cellStateInfoLabel);	
+		
+		cellValueLabel = new Label("Value: ");
+		cellValueLabel.setSize(100, 20);
+		cellValueLabel.setLocation(570, 335);
+		cellValueLabel.setVisible(false);
+		add(cellValueLabel);
+		
+		cellStateLabel = new Label("State: ");
+		cellStateLabel.setSize(170, 20);
+		cellStateLabel.setLocation(570, 355);
+		cellStateLabel.setVisible(false);
+		add(cellStateLabel);
+
+		//------------------------------------------------------------------------------------------> COLOR LEGEND
+		
+		colorServerLabel = new Label("Initialized by Server");
+		colorServerLabel.setSize(140,20);
+		colorServerLabel.setLocation(600, 395);
+		colorServerLabel.setVisible(false);
+		add(colorServerLabel);
+
+		colorContributedLabel = new Label("Value Contributed");
+		colorContributedLabel.setSize(140,20);
+		colorContributedLabel.setLocation(600, 415);
+		colorContributedLabel.setVisible(false);
+		add(colorContributedLabel);
+		
+		colorCommittedLabel = new Label("Value Committed");
+		colorCommittedLabel.setSize(140,20);
+		colorCommittedLabel.setLocation(600, 435);
+		colorCommittedLabel.setVisible(false);
+		add(colorCommittedLabel);
+		
+		colorAcceptedLabel = new Label("Value Accepted");
+		colorAcceptedLabel.setSize(140,20);
+		colorAcceptedLabel.setLocation(600, 455);
+		colorAcceptedLabel.setVisible(false);
+		add(colorAcceptedLabel);	
+		
+		colorRowAgentLabel = new Label("Row Agent");
+		colorRowAgentLabel.setSize(140,20);
+		colorRowAgentLabel.setLocation(600, 485);
+		colorRowAgentLabel.setVisible(false);
+		add(colorRowAgentLabel);
+		
+		colorColumnAgentLabel = new Label("Column Agent");
+		colorColumnAgentLabel.setSize(140,20);
+		colorColumnAgentLabel.setLocation(600, 505);
+		colorColumnAgentLabel.setVisible(false);
+		add(colorColumnAgentLabel);
+		
+		colorSquareAgentLabel = new Label("Square Agent");
+		colorSquareAgentLabel.setSize(140,20);
+		colorSquareAgentLabel.setLocation(600, 525);
+		colorSquareAgentLabel.setVisible(false);
+		add(colorSquareAgentLabel);
+		
+		colorLeaderLabel = new Label("Leader Agent");
+		colorLeaderLabel.setSize(140,20);
+		colorLeaderLabel.setLocation(600, 545);
+		colorLeaderLabel.setVisible(false);
+		add(colorLeaderLabel);
+		
+		colorUserContributorLabel = new Label("User");
+		colorUserContributorLabel.setSize(140,20);
+		colorUserContributorLabel.setLocation(600, 565);
+		colorUserContributorLabel.setVisible(false);
+		add(colorUserContributorLabel);
 		
 		//------------------------------------------------------------------------------------------
 		
@@ -398,7 +506,7 @@ public class AgentGameController extends GameController implements ActionListene
 	@Override
 	public void paint ( Graphics gr )
 	{
-		initDraw(gr);				//S'ha d'inicialitzar cada vegada?
+		initDraw(gr);				//Clean the Applet
 		switch(state)
 		{
 		case game:
@@ -410,8 +518,8 @@ public class AgentGameController extends GameController implements ActionListene
 	}
 	
 	@Override
-	public void DrawGrid(Graphics gr) {
-		
+	public void DrawGrid(Graphics gr) 
+	{
 		gr.setColor(Color.black);
 		
 		Stroke stroke = new BasicStroke(1);
@@ -421,136 +529,159 @@ public class AgentGameController extends GameController implements ActionListene
 		int lineY = gridYOffset;
 		float tempLineY = lineY;
 
-		// Draw Vertical Lines
-		for (int i = 0; i <= sudokuSize; i++) {
-			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
-			tempLineX += deltaX;
-			lineX = (int) tempLineX;
-		}
-
-		lineX = gridXOffset;
-		lineY = gridYOffset;
-		// Draw Horizontal Lines
-		for (int i = 0; i <= sudokuSize; i++) {
-			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
-			tempLineY += deltaY;
-			lineY = (int) tempLineY;
-		}
-
-		// Draw Thick Lines
-		stroke = new BasicStroke(3);
-		((Graphics2D) gr).setStroke(stroke);
-
-		lineY = gridYOffset;
-		lineX = gridXOffset;
-		tempLineX = lineX;
-		int rootsize = (int) Math.pow(sudokuSize, 0.5);
-		for (int i = 0; i <= rootsize; i++) {
-			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
-			tempLineX += deltaX * rootsize;
-			lineX = (int) tempLineX;
-		}
-
-		lineX = gridXOffset;
-		lineY = gridYOffset;
-		tempLineY = lineY;
-		for (int i = 0; i <= rootsize; i++) {
-			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
-			tempLineY += deltaY * rootsize;
-			lineY = (int) tempLineY;
-		}
-
 		stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
-		gr.drawLine(20, 460, 470, 460);				//Separador Grid Horizintal
-		gr.drawLine(470, 10, 470, 460);				//Separador Grid Vertical-Dreta
+		gr.drawLine(20, 460, 470, 460);				//Separator Grid Horizintal
+		gr.drawLine(470, 10, 470, 460);				//Separator Grid Vertical-Right
 		
 		stroke = new BasicStroke(1);
-		((Graphics2D) gr).setStroke(stroke);		//Separador de la Part d'afegir Agents
-		gr.drawLine(10, 495, 550, 495);			
+		((Graphics2D) gr).setStroke(stroke);		
+		
+		gr.drawLine(10, 495, 550, 495);				//Add Agents Box
 		gr.drawLine(10, 550, 550, 550);			
 		gr.drawLine(10, 590, 550, 590);			
 		gr.drawLine(10, 495, 10, 590);
 		gr.drawLine(550, 495, 550, 590);
 		
-		gr.drawLine(485, 10, 485, 240);				//Separador del Panel d'Agents Connectats	
+		gr.drawLine(485, 10, 485, 240);				//Connected Agents Box
 		gr.drawLine(485, 10, 745, 10);			
 		gr.drawLine(745, 10, 745, 240);			
 		gr.drawLine(485, 240, 745, 240);
 		
-		gr.drawLine(585, 260, 585, 390);			//Separador del Pause-Play	
-		gr.drawLine(585, 260, 745, 260);			
-		gr.drawLine(745, 260, 745, 390);			
-		gr.drawLine(585, 390, 745, 390);
+		gr.drawLine(565, 310, 565, 380);			//Box Cell State
+		gr.drawLine(565, 310, 745, 310);			
+		gr.drawLine(745, 310, 745, 380);			
+		gr.drawLine(565, 380, 745, 380);
 				
-		gr.drawLine(565, 410, 565, 590);			//Pintem la llegenda de Colors
-		gr.drawLine(565, 410, 745, 410);			
-		gr.drawLine(745, 410, 745, 590);			
+		gr.drawLine(565, 390, 565, 590);			//Box Colors Legend
+		gr.drawLine(565, 390, 745, 390);			
+		gr.drawLine(745, 390, 745, 590);			
 		gr.drawLine(565, 590, 745, 590);
 		
-		gr.drawLine(485, 260, 485, 320);			//Caixa valors contributed
-		gr.drawLine(485, 260, 565, 260);			
-		gr.drawLine(565, 260, 565, 320);			
-		gr.drawLine(485, 320, 565, 320);
+		gr.drawLine(485, 250, 485, 300);			//Box Values Contributed
+		gr.drawLine(485, 250, 565, 250);			
+		gr.drawLine(565, 250, 565, 300);			
+		gr.drawLine(485, 300, 565, 300);
 		
-		gr.drawLine(485, 330, 485, 390);			//Caixa valors committed
-		gr.drawLine(485, 330, 565, 330);			
-		gr.drawLine(565, 330, 565, 390);			
-		gr.drawLine(485, 390, 565, 390);
+		gr.drawLine(575, 250, 575, 300);			//Box Values Committed
+		gr.drawLine(575, 250, 655, 250);			
+		gr.drawLine(655, 250, 655, 300);			
+		gr.drawLine(575, 300, 655, 300);
 		
-		gr.drawLine(485, 410, 485, 475);			//Caixa de la Puntuacio
-		gr.drawLine(485, 410, 550, 410);			
-		gr.drawLine(550, 410, 550, 475);			
-		gr.drawLine(485, 475, 550, 475);
+		gr.drawLine(665, 250, 665, 300);			//Box Bugs Reported
+		gr.drawLine(665, 250, 745, 250);			
+		gr.drawLine(745, 250, 745, 300);			
+		gr.drawLine(665, 300, 745, 300);
 		
-		gr.setColor(agentColors[6]);
-		gr.fillRect(582, 425, 10, 10);
+		gr.drawLine(485, 310, 485, 380);			//Box Voting On
+		gr.drawLine(485, 310, 550, 310);			
+		gr.drawLine(550, 310, 550, 380);			
+		gr.drawLine(485, 380, 550, 380);
 		
-		gr.setColor(agentColors[0]);
-		gr.fillRect(582, 445, 10, 10);
+		gr.setColor(agentColors[votingColor]);		//Voting Box		
+		if (getConflictExists())
+			gr.setColor(Color.green);
+		else
+			gr.setColor(Color.red);
 		
-		gr.setColor(agentColors[1]);
-		gr.fillRect(582, 465, 10, 10);
+		gr.fillRect(500, 357, 35, 15);
+		gr.setColor(Color.black);
+		gr.drawRect(500, 357, 35, 15);
 		
-		gr.setColor(agentColors[2]);
-		gr.fillRect(582, 485, 10, 10);
+		stroke = new BasicStroke(2);
+		((Graphics2D) gr).setStroke(stroke);
 		
-		gr.setColor(agentColors[3]);
-		gr.fillRect(582, 505, 10, 10);
+		gr.drawLine(485, 390, 485, 460);			//Correct Values
+		gr.drawLine(485, 390, 550, 390);			
+		gr.drawLine(550, 390, 550, 460);			
+		gr.drawLine(485, 460, 550, 460);
 		
-		gr.setColor(agentColors[4]);
-		gr.fillRect(582, 525, 10, 10);
+		//---------------------------------------------------------------------------> LEGEND
 		
-		gr.setColor(agentColors[5]);
-		gr.fillRect(582, 545, 10, 10);
+		stroke = new BasicStroke(1);
+		((Graphics2D) gr).setStroke(stroke);
 		
-		gr.setColor(agentColors[7]);
-		gr.fillRect(582, 565, 10, 10);
+		gr.setColor(agentColors[serverColor]);					// Initialized by the Server
+		gr.fillRect(582, 400, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 400, 10, 10);
+		
+		gr.setColor(agentColors[valueContributedColor]);		// Value Contributed
+		gr.fillRect(582, 420, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 420, 10, 10);
+		
+		gr.setColor(agentColors[valueCommittedColor]);			// Value Committed
+		gr.fillRect(582, 440, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 440, 10, 10);
+		
+		gr.setColor(agentColors[valueAcceptedColor]);			// Value Acceptted
+		gr.fillRect(582, 460, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 460, 10, 10);
+		
+		
+		gr.setColor(agentColors[rowAgentColor]);				// Rows Agent
+		gr.fillRect(582, 490, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 490, 10, 10);
+		
+		gr.setColor(agentColors[columnAgentColor]);				// Columns Agent
+		gr.fillRect(582, 510, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 510, 10, 10);
+		
+		gr.setColor(agentColors[squareAgentColor]);				// Square Agent
+		gr.fillRect(582, 530, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 530, 10, 10);
+		
+		gr.setColor(agentColors[agentLeaderColor]);				// Leader Agent
+		gr.fillRect(582, 550, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 550, 10, 10);
+		
+		gr.setColor(agentColors[userColor]);					// User
+		gr.fillRect(582, 570, 10, 10);
+		gr.setColor(Color.black);
+		gr.drawRect(582, 570, 10, 10);
+		
+		//---------------------------------------------------------------------------> Information Boxes
 		
 		int val = getCountCorrect();
 		if (val>0 && val<100)
-			countLabel.setLocation(497, 455);
+			countLabel.setLocation(497, 437);
 		else if (val>=100)
-			countLabel.setLocation(495, 455);
+			countLabel.setLocation(495, 437);
 		countLabel.setText(val + "/" + sudokuSize*sudokuSize);
 		
 		val = getCountContributed();
 		if (val < 10)
-			countContributedLabel.setLocation(508, 302);
+			countContributedLabel.setLocation(520, 285);
 		else if (val>0 && val<100)
-			countContributedLabel.setLocation(505, 302);
+			countContributedLabel.setLocation(517, 285);
 		else if (val>=100)
-			countContributedLabel.setLocation(502, 302);		
-		countContributedLabel.setText(val + "/" + sudokuSize*sudokuSize);
+			countContributedLabel.setLocation(515, 285);		
+		countContributedLabel.setText(val + "");
 		
 		val = getCountCommitted();
 		if (val < 10)
-			countCommittedLabel.setLocation(508, 370);
+			countCommittedLabel.setLocation(610, 285);
 		else if (val>9 && val<100)
-			countCommittedLabel.setLocation(505, 370);
+			countCommittedLabel.setLocation(608, 285);
 		else if (val>=100)
-			countCommittedLabel.setLocation(502, 370);
-		countCommittedLabel.setText(val + "/" + sudokuSize*sudokuSize);
+			countCommittedLabel.setLocation(605, 285);
+		countCommittedLabel.setText(val + "");
+		
+		val = getCountReported();
+		if (val < 10)
+			countReportedLabel.setLocation(700, 285);
+		else if (val>9 && val<100)
+			countReportedLabel.setLocation(698, 285);
+		else if (val>=100)
+			countReportedLabel.setLocation(695, 285);
+		countReportedLabel.setText(val + "");
 		
 		stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
@@ -559,64 +690,177 @@ public class AgentGameController extends GameController implements ActionListene
 		tempLineY = lineY;
 		tempLineX = lineX;
 		
-		// Draw Values
+		//---------------------------------------------------------------------------> Cell States
+		
+		cellStateInfoLabel.setText("Active Cell: " + "[" + activeX + "][" + activeY + "]");
+		cellValueLabel.setText("Current Value: " + cells[activeX][activeY].current);
+		cellStateLabel.setText("State: " + getLabelStateCell(cells[activeX][activeY].valueState));
+		
+		//---------------------------------------------------------------------------> Draw the bakground of the Active Cell
+		
+		stroke = new BasicStroke(2);
+		((Graphics2D) gr).setStroke(stroke);
+		
+		gr.setColor(activeBackgroundColor);
+		int activeRectX;
+		int activeRectY;
+		int[] region;
+		
+		/*if(!conflictExists)
+		{
+			activeRectX = (int) (gridXOffset + activeX * deltaX);
+			activeRectY = (int) (gridYOffset + activeY * deltaY);
+			region = Agent.getRegion(activeX, activeY);
+		}
+		else
+		{
+			activeRectX = (int) (gridXOffset + conflictX * deltaX);
+			activeRectY = (int) (gridYOffset + conflictY * deltaY);
+			region = Agent.getRegion(conflictX, conflictY);
+		}*/
+		
+		activeRectX = (int) (gridXOffset + activeX * deltaX);
+		activeRectY = (int) (gridYOffset + activeY * deltaY);
+		region = Agent.getRegion(activeX, activeY);
+		
+		
+		int activeRegionRectX = (int) (gridXOffset + region[0] * deltaX);
+		int activeRegionRectY = (int) (gridYOffset + region[1] * deltaY);
+		
+		gr.fillRect(activeRectX, gridYOffset, (int) deltaX, (int) deltaY * 16);
+		gr.fillRect(gridXOffset, activeRectY, (int) deltaX * 16, (int) deltaY);
+		gr.fillRect(activeRegionRectX, activeRegionRectY, (int) deltaX * 4, (int) deltaY * 4);
+		
+		//---------------------------------------------------------------------------> Draw Values
+		
+		stroke = new BasicStroke(1);
+		((Graphics2D) gr).setStroke(stroke);
+		
+		Color backgroundCell = null;
+		Color ovallCell = null;
+		
 		for (int y = 0; y < sudokuSize; y++) 
 		{
 			for (int x = 0; x < sudokuSize; x++) 
 			{
-				if (cells[x][y].valueState == 0) 			//Si no hi ha cap valor a la cel·la no feim res, pasem la posicio
+				if (cells[x][y].valueState == waitingValue) 			//If There's not value in the cell
 				{
 					tempLineX += deltaX;
 					lineX = (int) tempLineX;
 					continue;
 				}
-				else
+				else				
 				{
 					switch(cells[x][y].valueState)			
 					{
-						case 1:
-							gr.setColor(agentColors[6]);			//Cell from the Server
-							clearRequester = 6;
+						case intializedByServer:
+							backgroundCell = new Color(238, 233, 191);						//Cell from the Server
+							ovallCell = agentColors[serverColor];
 							break;
-						case 2:
-							gr.setColor(agentColors[0]);			//Contributed By Rows 
-							clearRequester = 0;
+						case contributedByRows:
+							backgroundCell = agentColors[rowAgentColor];					//Contributed By Rows 
+							ovallCell = agentColors[valueContributedColor];
 							break;
-						case 3:
-							gr.setColor(agentColors[1]);			//Contributed By Columns
-							clearRequester = 1;
+						case contributedByColumns:
+							backgroundCell = agentColors[columnAgentColor];					//Contributed By Columns	
+							ovallCell = agentColors[valueContributedColor];
 							break;
-						case 4:
-							gr.setColor(agentColors[2]);			//Contributed By Squares
-							clearRequester = 2;
+						case contributedBySquares:
+							backgroundCell = agentColors[squareAgentColor];					//Contributed By Squares	
+							ovallCell = agentColors[valueContributedColor];
 							break;
-						case 5:
-							gr.setColor(agentColors[3]);			//Contributed By User
-							clearRequester = 3;
+						case contributedByUser:
+							backgroundCell = agentColors[userColor];						//Contributed By User		
+							ovallCell = agentColors[valueContributedColor];
 							break;
-						case 6:
-							gr.setColor(agentColors[4]);			//Cell committed
-							clearRequester = 4;
+						case reportedByRows:
+							backgroundCell = agentColors[rowAgentColor];					//Reported By Rows 		
+							ovallCell = agentColors[valueReportedColor];
 							break;
-						case 7:
-							gr.setColor(agentColors[5]);			//Cell Accepted
-							clearRequester = 5;
+						case reportedByColumns:
+							backgroundCell = agentColors[columnAgentColor];					//Reported By Columns	
+							ovallCell = agentColors[valueReportedColor];
+							break;
+						case reportedBySquares:
+							backgroundCell = agentColors[squareAgentColor];					//Reported By Squares	
+							ovallCell = agentColors[valueReportedColor];
+							break;
+						case reportedByUser:
+							backgroundCell = agentColors[userColor];						//Reported By User		
+							ovallCell = agentColors[valueReportedColor];
+							break;
+						case committedByTesterByRows:
+							backgroundCell = agentColors[rowAgentColor];					//Committed By Rows 		
+							ovallCell = agentColors[valueCommittedColor];
+							break;
+						case committedByTesterByColumns:
+							backgroundCell = agentColors[columnAgentColor];					//Committed By Columns				
+							ovallCell = agentColors[valueCommittedColor];
+							break;
+						case committedByTesterBySquares:	
+							backgroundCell = agentColors[squareAgentColor];					//Committed By Squares	
+							ovallCell = agentColors[valueCommittedColor];
+							break;
+						case committedByTesterByUser:
+							backgroundCell = agentColors[userColor];						//Committed By User		
+							ovallCell = agentColors[valueCommittedColor];
+							break;
+						case notCommitted:
+							backgroundCell = agentColors[valueCommittedColor];				//Not Committed!
+							ovallCell = agentColors[valueNotCommittedColor];
+							break;
+						case acceptedByAgent:
+							backgroundCell = agentColors[agentLeaderColor];					//Accepted by Agent		
+							ovallCell = agentColors[valueAcceptedColor];
+							break;
+						case acceptedByUser:
+							backgroundCell = agentColors[userLeaderColor];					//Accepted by User	
+							ovallCell = agentColors[valueAcceptedColor];
+							break;
+						case rejectedByAgent:
+							backgroundCell = agentColors[agentLeaderColor];				//Rejected by Agent	
+							ovallCell = agentColors[valueRejectedColor];
+							break;
+						case rejectedByUser:
+							backgroundCell = agentColors[userLeaderColor];				//Rejected By User			
+							ovallCell = agentColors[valueRejectedColor];
 							break;
 					}
 					
-					if(conflictExists && x == conflictX && y == conflictY)
+					gr.setColor(backgroundCell);
+					gr.fillRect(lineX, lineY, (int) deltaX, (int) deltaY);
+					
+					gr.setColor(Color.black);
+					gr.drawOval(lineX + 2, lineY + 2, (int) deltaX - 4, (int) deltaY - 4);
+					
+					gr.setColor(ovallCell);
+					gr.fillOval(lineX + 2, lineY + 2, (int) deltaX - 4, (int) deltaY - 4);	
+					
+					if(conflictExists && x == conflictX && y == conflictY)				//If there's any voting open
 					{
 						int conX = (int) (gridXOffset + conflictX * deltaX);
 						int conY = (int) (gridYOffset + conflictY * deltaY);
 						
-						setActive(conflictX, conflictY);
+						setVotingCell(conflictX, conflictY);
 						cells[activeX][activeY].DrawAgentDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
+						gr.setColor(agentColors[votingColor]);
 					}
 				}
-					
-				//Pintem els numeros al Grid
-				if(cells[x][y].current != -1)
-					gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
+				
+				//---------------------------------------------------------------------------> Write Values on the grid
+				
+				if(cells[x][y].valueState != waitingValue)	
+				{
+					gr.setColor(Color.white);
+					if(cells[x][y].current < 10) 
+					{
+						gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 2, (int) (lineY + deltaY) - 10);
+					}
+					else
+					{
+						gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
+					}
+				}
 				
 				tempLineX += deltaX;
 				lineX = (int) tempLineX;
@@ -643,17 +887,72 @@ public class AgentGameController extends GameController implements ActionListene
 			break;
 		}
 
-		if (mouseOverGrid) 
+		//---------------------------------------------------------------------------> Draw Vertical Lines
+		
+		gr.setColor(Color.black);
+		stroke = new BasicStroke(1);
+		((Graphics2D) gr).setStroke(stroke);
+		lineX = gridXOffset;
+		tempLineX = lineX;
+		lineY = gridYOffset;
+		tempLineY = lineY;
+		
+		
+		for (int i = 0; i <= sudokuSize; i++) {
+			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
+			tempLineX += deltaX;
+			lineX = (int) tempLineX;
+		}
+
+		//---------------------------------------------------------------------------> Draw Horizontal Lines
+		
+		lineX = gridXOffset;
+		lineY = gridYOffset;
+		
+		for (int i = 0; i <= sudokuSize; i++) {
+			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
+			tempLineY += deltaY;
+			lineY = (int) tempLineY;
+		}
+
+		//---------------------------------------------------------------------------> Draw Thick Lines
+		
+		stroke = new BasicStroke(3);
+		((Graphics2D) gr).setStroke(stroke);
+
+		lineY = gridYOffset;
+		lineX = gridXOffset;
+		tempLineX = lineX;
+		int rootsize = (int) Math.pow(sudokuSize, 0.5);
+		for (int i = 0; i <= rootsize; i++) {
+			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
+			tempLineX += deltaX * rootsize;
+			lineX = (int) tempLineX;
+		}
+
+		lineX = gridXOffset;
+		lineY = gridYOffset;
+		tempLineY = lineY;
+		for (int i = 0; i <= rootsize; i++) {
+			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
+			tempLineY += deltaY * rootsize;
+			lineY = (int) tempLineY;
+		}
+		
+		//---------------------------------------------------------------------------> Draw The Square of the cell where the mouse is poiting at
+		
+		stroke = new BasicStroke(2);
+		((Graphics2D) gr).setStroke(stroke);
+		
+		if (mouseOverGrid) 			
 		{
 			gr.setColor(mouseOverColor);
 			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX), (int) (gridYOffset + mouseOverY * deltaY), (int) deltaX, (int) deltaY);
 		}
-
+		
+		//---------------------------------------------------------------------------> Draw The Square on the Active Cell
+		
 		gr.setColor(activeCellColor);
-		int activeRectX = (int) (gridXOffset + activeX * deltaX);
-		int activeRectY = (int) (gridYOffset + activeY * deltaY);
-
-		// DrawActive
 		gr.drawRect(activeRectX, activeRectY, (int) deltaX, (int) deltaY);
 	}
 	
@@ -730,102 +1029,149 @@ public class AgentGameController extends GameController implements ActionListene
 		super.Initialize();
 	}
 	
+	public void destroy()
+	{
+		ThreadsInformation threadInfo;
+		
+		for(int i=0; i < Agent.getAgentListSize(); i++)
+		{
+			threadInfo = Agent.getThreadInformationList(i);
+			AgentNetworkController.SendMessage("disconnect#" + threadInfo.agentId + "," + threadInfo.agentType);
+		}
+	}
+	
 	public void MessageReceived(String message)
 	{		
 		String[] vars = message.split("#");
 		String[] vars2 = null;
 		String equation = null;
+		
+		int x, y;
+		
+		int agentId, agentType;
+		
 		try {
 			switch(vars[0])
 			{
-			case "init":
-				System.out.println("Initializing Agents Applet");
-				
-				for(int i = 1; i < vars.length; i++)
-				{
-					equation = vars[i];
-					vars2 = equation.split("=");
+				case "init":
+					System.out.println("Initializing Agents Applet");
+					
+					for(int i = 1; i < vars.length; i++)
+					{
+						equation = vars[i];
+						vars2 = equation.split("=");
+						
+						switch(vars2[0])
+						{
+						case "ss":		//sudoku size
+							sudokuSize = Integer.parseInt(vars2[1]);
+							Initialize();
+							break;
+						case "iv":		// initial values
+							addToGrid(vars2[1]);
+							break;
+						default:
+							System.out.println(vars2[0]);
+							break;
+						}
+					}
+					StartGame();
+					
+					networkState = NetworkState.idle;
+					repaint();
+					break;
+				case "instantiated":
+					addToGrid(vars[1]);
+					countContributed++;
+					networkState = NetworkState.idle;
+					CellClick(activeX, activeY);
+					break;
+				case "instantiate_failed":
+					networkState = NetworkState.idle;
+					break;
+				case "vote":
+					vars2 = vars[1].split("=");
+					String[] coordinates;
 					
 					switch(vars2[0])
 					{
-					case "ss":		//sudoku size
-						sudokuSize = Integer.parseInt(vars2[1]);
-						Initialize();
-						break;
-					case "iv":		// initial values
-						addToGrid(vars2[1]);
-						break;
-					default:
-						System.out.println(vars2[0]);
-						break;
+						case "clear":
+							conflictExists = true;
+							
+							repaint();
+							coordinates = vars2[1].split(",");
+							conflictX = Integer.parseInt(coordinates[0]);
+							conflictY = Integer.parseInt(coordinates[1]);
+							
+							networkController.setPositionConflic(conflictX, conflictY);
+							
+							voteTimer = new Timer(voteDelay, this);
+							voteTimer.setActionCommand("voteEnd");
+							voteTimer.start();
+							break;
+						case "voting exists":
+							//TODO: Nothing to do?
+							repaint();
+							break;
 					}
-				}
-				StartGame();
+					break;
+				case "clear":
+					conflictExists = false;
+					voteTimer.stop();
+					
+					vars2 = vars[1].split(",");
+					conflictX = Integer.parseInt(vars2[0]);
+					conflictY = Integer.parseInt(vars2[1]);
+					int clearState = Integer.parseInt(vars2[2]);
+					
+					ClearCell(conflictX, conflictY, clearState);
+					
+					repaint();
+					break;
+				case "bugFound":
+					vars2 = vars[1].split(",");
+					int xClear = Integer.parseInt(vars2[0]);
+					int yClear = Integer.parseInt(vars2[1]);
+					int bugState = Integer.parseInt(vars2[2]);
+					ClearCell(xClear, yClear, bugState);
+					
+					countReported++;
+					repaint();
+					break;
+				case "committed":
+					conflictExists = false;
+					voteTimer.stop();
+					
+					vars2 = vars[1].split(",");
+					conflictX = Integer.parseInt(vars2[0]);
+					conflictY = Integer.parseInt(vars2[1]);
+					int committedState = Integer.parseInt(vars2[2]);
+					
+					SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, committedState);
+					
+					countCommitted++;
+					repaint();
+					break;	
+				case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
+			
+					vars2 = vars[1].split(",");
+					x = Integer.parseInt(vars2[0]);
+					y = Integer.parseInt(vars2[1]);
+					int acceptedState = Integer.parseInt(vars2[2]);
+					
+					System.out.println("Accepted State: " + acceptedState);
+					
+					SetValueAndState(x, y, cells[x][y].current, acceptedState);				
+					break;
+				case "rejected":		//networkController.BroadcastMessage("rejected#" + x + "," + y + "," + rejected);
 				
-				networkState = NetworkState.idle;
-				repaint();
-				break;
-			case "instantiated":
-				addToGrid(vars[1]);
-				networkState = NetworkState.idle;
-				CellClick(activeX, activeY);
-				break;
-			case "instantiate_failed":
-				networkState = NetworkState.idle;
-				break;
-			case "vote":
-				vars2 = vars[1].split("=");
-				String[] coordinates;
-				
-				switch(vars2[0])
-				{
-					case "clear":
-						conflictExists = true;
-						
-						repaint();
-						coordinates = vars2[1].split(",");
-						conflictX = Integer.parseInt(coordinates[0]);
-						conflictY = Integer.parseInt(coordinates[1]);
-						clearRequester = Integer.parseInt(coordinates[2]);
-						
-						networkController.setPositionConflic(conflictX, conflictY);
-						
-						voteTimer = new Timer(voteDelay, this);
-						voteTimer.setActionCommand("voteEnd");
-						voteTimer.start();
-						break;
-				}
-				break;
-			case "clear":
-				conflictExists = false;
-				voteTimer.stop();
-				
-				vars2 = vars[1].split(",");
-				conflictX = Integer.parseInt(vars2[0]);
-				conflictY = Integer.parseInt(vars2[1]);
-				ClearCell(conflictX, conflictY);
-				
-				repaint();
-				break;
-			case "committed":
-				conflictExists = false;
-				voteTimer.stop();
-				
-				vars2 = vars[1].split(",");
-				
-				conflictX = Integer.parseInt(vars2[0]);
-				conflictY = Integer.parseInt(vars2[1]);
-				
-				SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, 6);
-				repaint();
-				break;	
-			case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
-		
-				vars2 = vars[1].split(",");
-				int x = Integer.parseInt(vars2[0]);
-				int y = Integer.parseInt(vars2[1]);
-				SetValueAndState(x, y, cells[x][y].current, 7);				
-				break;
+					vars2 = vars[1].split(",");
+					x = Integer.parseInt(vars2[0]);
+					y = Integer.parseInt(vars2[1]);
+					int rejectedState = Integer.parseInt(vars2[2]);
+					
+					ClearCell(x, y, rejectedState);			
+					break;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -875,27 +1221,36 @@ public class AgentGameController extends GameController implements ActionListene
 		NumRadomAgentsField.setVisible(true);
 		RandomCommunityMember.setVisible(true);
 		connectRandomAgentsButton.setVisible(true);
-		playExecution.setVisible(true);
-		pauseExecution.setVisible(true);
+		//playExecution.setVisible(true);
+		//pauseExecution.setVisible(true);
+		cellStateInfoLabel.setVisible(true);	
+		cellValueLabel.setVisible(true);
+		cellStateLabel.setVisible(true);
 		
 		colorServerLabel.setVisible(true);
-		colorRowContributorLabel.setVisible(true);
-		colorColumnContributorLabel.setVisible(true);
-		colorSquareContributorLabel.setVisible(true);
+		colorRowAgentLabel.setVisible(true);
+		colorColumnAgentLabel.setVisible(true);
+		colorSquareAgentLabel.setVisible(true);
+		colorLeaderLabel.setVisible(true);
 		colorUserContributorLabel.setVisible(true);
 		colorCommittedLabel.setVisible(true);
 		colorAcceptedLabel.setVisible(true);
-		colorConflictLabel.setVisible(true);
-		correctLabel.setVisible(true);
+		colorContributedLabel.setVisible(true);
+		votingLabel.setVisible(true);
+		votingLabelON.setVisible(true);
 		
 		valuesLabel.setVisible(true);
+		correctLabel.setVisible(true);
 		countLabel.setVisible(true);
 		valuesContributedLabel.setVisible(true);
-		valuesCommittedLabel.setVisible(true);
-		contributedLabel.setVisible(true);
-		committedLabel.setVisible(true);
 		countContributedLabel.setVisible(true);
+		contributedLabel.setVisible(true);
+		valuesCommittedLabel.setVisible(true);
+		committedLabel.setVisible(true);
 		countCommittedLabel.setVisible(true);
+		valuesReportedLabel.setVisible(true);
+		reportedLabel.setVisible(true);
+		countReportedLabel.setVisible(true);
 
 		state = GameState.game;
 	}
@@ -913,6 +1268,12 @@ public class AgentGameController extends GameController implements ActionListene
 	{
 		activeX = x;
 		activeY = y;
+	}
+	
+	public void setVotingCell(int x, int y)
+	{
+		votingX = x;
+		votingY = y;
 	}
 	
 	int getRegion(int x, int y) {
@@ -952,43 +1313,149 @@ public class AgentGameController extends GameController implements ActionListene
 	
 	int getCountContributed()
 	{
-		int count = 0;
-		
-		for(int i=0;i<sudokuSize;i++) {
-			for(int j=0;j<sudokuSize;j++) {
-				if(cells[i][j].valueState == 2 || cells[i][j].valueState == 3 || cells[i][j].valueState == 4 || cells[i][j].valueState == 5)
-					count++;
-			}	
-		}
-		
-		return count;
+		return countContributed;
 	}
 	
 	int getCountCommitted()
 	{
-		int count = 0;
-		
-		for(int i=0;i<sudokuSize;i++) {
-			for(int j=0;j<sudokuSize;j++) {
-				if(cells[i][j].valueState == 6)
-					count++;
-			}	
-		}
-		
-		return count;
+		return countCommitted;
 	}
 	
-	int getCountCorrect()
+	int getCountReported()
 	{
-		int count = 0;
+		return countReported;
+	}
+	
+	String getLabelTypeAgent(int typeAgent)
+	{
+		String stringAgentType = "";
 		
-		for(int i=0;i<sudokuSize;i++) {
-			for(int j=0;j<sudokuSize;j++) {
-				if(cells[i][j].valueState == 1 || cells[i][j].valueState == 7)
-					count++;
-			}	
+		switch(typeAgent)
+		{
+			case 0:
+				stringAgentType = "Contributor by Rows";
+				break;
+			case 1:
+				stringAgentType = "Contributor by Columns";
+				break;
+			case 2:
+				stringAgentType = "Contributor by Squares";
+				break;
+			case 3:
+				stringAgentType = "User Contributor";
+				break;
+			case 4:
+				stringAgentType = "Bug Reporter by Rows";
+				break;
+			case 5:
+				stringAgentType = "Bug Reporter by Columns";
+				break;
+			case 6:
+				stringAgentType = "Bug Reporter by Squares";
+				break;
+			case 7:
+				stringAgentType = "User Bug Reporter";
+				break;
+			case 8:
+				stringAgentType = "Tester by Rows";
+				break;
+			case 9:
+				stringAgentType = "Tester by Columns";
+				break;
+			case 10:
+				stringAgentType = "Tester by Squares";
+				break;
+			case 11:
+				stringAgentType = "User Tester";
+				break;
+			case 12:
+				stringAgentType = "Comitter by Rows";
+				break;
+			case 13:
+				stringAgentType = "Comitter by Columns";
+				break;
+			case 14:
+				stringAgentType = "Comitter by Squares";
+				break;
+			case 15:
+				stringAgentType = "User Committer";
+				break;
+			case 16:
+				stringAgentType = "Agent Project Leader";
+				break;
+			case 17:
+				stringAgentType = "User Project Leader";
+				break;
 		}
 		
-		return count;
+		return stringAgentType;
+	}
+	
+	String getLabelStateCell(int state)
+	{
+		String stringState = "";
+		
+		switch(state)
+		{
+			case 0:
+				stringState = "Waiting Value";
+				break;
+			case 1:
+				stringState = "Initialized by Server";
+				break;
+			case 2:
+				stringState = "Contributed (Row Ag.)";
+				break;
+			case 3:
+				stringState = "Contributed (Col. Agent)";
+				break;
+			case 4:
+				stringState = "Contributed (Square Ag.)";
+				break;
+			case 5:
+				stringState = "Contributed (User)";
+				break;
+			case 6:
+				stringState = "Reported (Row Ag.)";
+				break;
+			case 7:
+				stringState = "Reported (Col. Agent)";
+				break;
+			case 8:
+				stringState = "Reported (Square Ag.)";
+				break;
+			case 9:
+				stringState = "Reported (User)";
+				break;
+			case 10:
+				stringState = "Committed (Row Ag.)";
+				break;
+			case 11:
+				stringState = "Committed (Col. Agent)";
+				break;
+			case 12:
+				stringState = "Committed (Square Ag.)";
+				break;
+			case 13:
+				stringState = "Committed (User)";
+				break;
+			case 14:
+				stringState = "NOT Committed (Voting)";
+				break;
+			case 15:
+				stringState = "Accepted (Ag. Leader)";
+				break;
+			case 16:
+				stringState = "Accepted (User Leader)";
+				break;
+			case 17:
+				stringState = "Rejected (Ag. Leader)";
+				break;
+			case 18:
+				stringState = "Rejected (User Leader)";
+				break;
+		}
+		
+		return stringState;
 	}
 }

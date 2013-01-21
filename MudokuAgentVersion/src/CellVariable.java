@@ -14,12 +14,22 @@ public class CellVariable
 
 	/* cellState = 0 --> waitingValue
 	 * cellState = 1 --> initializedByServer
-	 * cellState = 2 --> contribution By Rows
-	 * cellState = 3 --> contribution By Columns
-	 * cellState = 4 --> contribution By Squares
-	 * cellState = 5 --> contribution By User
-	 * cellState = 6 --> committed
-	 * cellState = 7 --> accepted
+	 * cellState = 2 --> Contributed By Rows
+	 * cellState = 3 --> Contributed By Columns
+	 * cellState = 4 --> Contributed By Squares
+	 * cellState = 5 --> Contributed By User
+	 * cellState = 6 --> Reported By Rows
+	 * cellState = 7 --> Reported By Columns
+	 * cellState = 8 --> Reported By Squares
+	 * cellState = 9 --> Reported By Users
+	 * cellState = 10 --> Committed By Rows
+	 * cellState = 11 --> Committed By Columns
+	 * cellState = 12 --> Committed By Squares
+	 * cellState = 13 --> Committed By User
+	 * cellState = 14 --> Accepted By Agent
+	 * cellState = 15 --> Accepted By User
+	 * cellState = 16 --> Rejected By Agent
+	 * cellState = 17 --> Rejected By User
 	 */
 
 	static int domainXOffset = 350;
@@ -29,10 +39,10 @@ public class CellVariable
 	static float deltaX;
 	static float deltaY;
 
-	public CellVariable(int x_, int y_)		//TODO: Afeguir lo del estat per cada cel·la segon l'estat de la contribucio
+	public CellVariable(int x_, int y_)		//TODO: Afegir lo del estat per cada cel·la segon l'estat de la contribucio
 	{
 		current = -1;
-		valueState = 0;
+		valueState = GameController.waitingValue;
 		
 		contradicting = false;
 		
@@ -56,6 +66,7 @@ public class CellVariable
 				tempDrawX += deltaX;
 				drawX = (int) tempDrawX;
 			}
+			
 			if(mouseOverIndex != -1)
 				gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
 		}
@@ -153,15 +164,17 @@ public class CellVariable
 	{
 		DrawDomainAgent(gr, cellX, cellY);
 		
-		gr.setColor(agentColors[7]);
+		gr.setColor(agentColors[AgentGameController.votingColor]);
 		gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
+		
+		gr.setColor(GameController.activeCellColor);
+		gr.drawOval(conX + 1, conY + 1, (int) deltaX - 4, (int) deltaY - 4);
 		
 		Stroke stroke = new BasicStroke(2);
 		((Graphics2D) gr).setStroke(stroke);
 		gr.setColor(Color.black);
 		gr.drawRect(conX, conY, (int)deltaX, (int)deltaY);
-		
-		gr.setColor(Color.white);
+	
 	}
 
 	public int EvaluateClick(int mouseX, int mouseY)
@@ -169,6 +182,7 @@ public class CellVariable
 		int index = (int)((mouseX - domainXOffset) / deltaX);
 		IntDomain idom = AgentGameController.cpController.GetCPVariable(x, y).getDomain();
 		DisposableIntIterator iter = idom.getIterator();
+		
 		int val = 1;
 		for(;index >= 0 && iter.hasNext(); index--)
 		{

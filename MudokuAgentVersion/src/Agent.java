@@ -3,29 +3,36 @@ import java.util.List;
 import java.util.Random;
 
 
-class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al run per cada thread.
+class Agent 
+{
 
 	int agentId;
 	int agentType;
 	
 	AgentContributor agentContributor;
 	Thread agentContributorThread;
+	
+	AgentBugReporter agentBugReporter;
+	Thread agentBugReporterThread;
+	
 	AgentTester agentTester;
 	Thread agentTesterThread;
+	
 	AgentCommitter agentCommitter;
 	Thread agentCommitterThread;
+	
 	AgentLeader agentLeader;
 	Thread agentLeaderThread;
 	
 	ThreadsInformation threadInfo;
-	List<ThreadsInformation> ThreadsAgent = new ArrayList<ThreadsInformation>();
+	static List<ThreadsInformation> ThreadsAgent = new ArrayList<ThreadsInformation>();
 	
 	static AgentNetworkController controller;
 	
 	int[][] actualGrid;
 		
 	static boolean modifyGrid = false;
-	boolean alreadyVoted = false;
+	static boolean alreadyVoted = false;
 	
 	Agent(AgentNetworkController controller_, int agentId_, int agentType_)
 	{
@@ -49,22 +56,28 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		AgentNetworkController.SendMessage(message);
 	}
 	
+	static ThreadsInformation getThreadInformationList(int index)
+	{
+		return ThreadsAgent.get(index);
+	}
+	
+	static int getAgentListSize()
+	{
+		return ThreadsAgent.size();
+	}
+	
 	@SuppressWarnings("deprecation")
 	void pauseExecution()
 	{
 		for(ThreadsInformation threadInfo : ThreadsAgent)
-		{
 			threadInfo.threadInfo.suspend();
-		}
 	}
 	
 	@SuppressWarnings("deprecation")
 	void playExecution()
 	{
 		for(ThreadsInformation threadInfo : ThreadsAgent)
-		{
 			threadInfo.threadInfo.resume();
-		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -73,50 +86,54 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		for(ThreadsInformation threadInfo : ThreadsAgent)
 		{
 			if(threadInfo.agentId == agentId_)
-			{
 				threadInfo.threadInfo.stop();
-			}
 		}
 	}
 	
-	
 	void executarAgents(int agentId, int agentType) 
 	{
-		//System.out.println("Agent --> Executant el Thread del Agent: " + agentId);
+		System.out.println("Agent --> Executant el Thread del Agent: " + agentId + " i tipus: " + agentType);
+		
 		switch(agentType)
 		{
-			case 0: case 1: case 2:
+			case GameController.agentContributorByRows: case GameController.agentContributorByColumns: case GameController.agentContributorBySquares:
 				agentContributor = new AgentContributor(this, agentId, agentType);
 				agentContributorThread = new Thread(agentContributor);        
 				agentContributorThread.start();
 				
-				ThreadsAgent.add(new ThreadsInformation(agentContributorThread, agentId)); 
+				ThreadsAgent.add(new ThreadsInformation(agentContributorThread, agentId, agentType)); 
 				break;
-			case 4: case 5: case 6:
+			case GameController.agentBugReporterByRows: case GameController.agentBugReporterByColumns: case GameController.agentBugReporterBySquares:
+				agentBugReporter = new AgentBugReporter(this, agentId, agentType);
+				agentBugReporterThread = new Thread(agentBugReporter);        
+				agentBugReporterThread.start();
+				
+				ThreadsAgent.add(new ThreadsInformation(agentBugReporterThread, agentId, agentType)); 
+				break;
+			case GameController.agentTesterByRows: case GameController.agentTesterByColumns: case GameController.agentTesterBySquares:
 				agentTester = new AgentTester(this, agentId, agentType);
 				agentTesterThread = new Thread(agentTester);        
 				agentTesterThread.start();
 				
-				ThreadsAgent.add(new ThreadsInformation(agentTesterThread, agentId)); 
+				ThreadsAgent.add(new ThreadsInformation(agentTesterThread, agentId, agentType)); 
 				break;
-			case 8: case 9: case 10:			//TODO: Votacions no Funcionen correctament
+			case GameController.agentCommitterByRows: case GameController.agentCommitterByColumns: case GameController.agentCommitterBySquares:
 				agentCommitter = new AgentCommitter(this, agentId, agentType);
 				agentCommitterThread = new Thread(agentCommitter);        
 				agentCommitterThread.start();
 				
-				ThreadsAgent.add(new ThreadsInformation(agentCommitterThread, agentId)); 
+				ThreadsAgent.add(new ThreadsInformation(agentCommitterThread, agentId, agentType)); 
 				break;
-			case 12:
+			case GameController.agentLeader:
 				agentLeader = new AgentLeader(this, agentId, agentType);
 				agentLeaderThread = new Thread(agentLeader);        
 				agentLeaderThread.start();
 				
-				ThreadsAgent.add(new ThreadsInformation(agentLeaderThread, agentId)); 
+				ThreadsAgent.add(new ThreadsInformation(agentLeaderThread, agentId, agentType)); 
 				break;
 		}
 	}	
-	
-	
+		
 	//#######################################    Set Value    ############################################
 	
 		static synchronized void setValue(int agentId, int agentType)
@@ -132,6 +149,27 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			{
 				
 				int[][] actualGrid = AgentNetworkController.getActualGrid();
+				int[][] actualState = AgentNetworkController.getActualState();
+				
+				/*
+				public final static int waitingValue = 0;
+				public final static int intializedByServer = 1;
+				public final static int contributedByRows = 2;
+				public final static int contributedByColumns = 3;
+				public final static int contributedBySquares = 4;
+				public final static int contributedByUser = 5;
+				public final static int reportedByRows = 6;
+				public final static int reportedByColumns = 7;
+				public final static int reportedBySquares = 8;	
+				public final static int reportedByUser = 9;	
+				public final static int testedByRows = 10;	
+				public final static int testedByColumns = 11;	
+				public final static int testedBySquares = 12;	
+				public final static int testedByUser = 13;	
+				public final static int acceptedByAgent = 14;
+				public final static int acceptedByUser = 15;	
+				public final static int rejectedByAgent = 16;	
+				public final static int rejectedByUser = 17;	*/
 				
 				int i, j, val;
 				ArrayList<Integer> options = new ArrayList<Integer>();
@@ -144,14 +182,19 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				switch(agentType)
 				{
-					case(0):		//Agent que nomes treballa per files		
+					case GameController.agentContributorByRows:		//Agent que nomes treballa per files		
 						
 						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
 							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
-							{
-								if(actualGrid[i][j] != -1)
+							{								
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
+								{
 									options.add(actualGrid[i][j]);
+								}
 								else
 								{
 									emptyPosition = new int[2];
@@ -160,6 +203,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 									emptyPositionList.add(emptyPosition);
 								}
 							}
+							
 							listOptions.add(options);
 							options = new ArrayList<Integer>();
 						}
@@ -183,24 +227,31 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						
 						break;
 						
-					case(1):		//Agent que nomes treballa per Columnes
+					case GameController.agentContributorByColumns:		//Agent que nomes treballa per Columnes
 									
-						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
-							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+							for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 							{
-								if(actualGrid[j][i] != -1)
-									options.add(actualGrid[j][i]);
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
+								{
+									options.add(actualGrid[i][j]);
+								}
 								else
 								{
 									emptyPosition = new int[2];
-									emptyPosition[0] = j;
-									emptyPosition[1] = i;
+									emptyPosition[0] = i;
+									emptyPosition[1] = j;
 									emptyPositionList.add(emptyPosition);
 								}
 							}
+							
 							listOptions.add(options);
 							options = new ArrayList<Integer>();
+							
 						}
 					
 						if(!emptyPositionList.isEmpty())
@@ -209,7 +260,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							i = emptyPosition[0];
 							j = emptyPosition[1];
 													
-							options = listOptions.get(i);	//Obtenim les opcions que tenim per aquella fila
+							options = listOptions.get(i);			//Obtenim les opcions que tenim per aquella fila
 							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 							
 							while(options.contains(val))
@@ -221,20 +272,25 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						}
 						break;
 						
-					case(2):		////Agent que nomes treballa per Quadrats
+					case GameController.agentContributorBySquares:		////Agent que nomes treballa per Quadrats
 						
 						int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 						
-						for (int row=0; row<AgentNetworkController.getSudokuSize();row+=sizeSquare)
+						for (int row = 0; row < AgentNetworkController.getSudokuSize(); row += sizeSquare)
 						{
-							for (int column=0; column<AgentNetworkController.getSudokuSize();column+=sizeSquare)
+							for (int column = 0; column < AgentNetworkController.getSudokuSize(); column += sizeSquare)
 							{
 								for(i=0;i<sizeSquare;i++)
 								{
 									for(j=0;j<sizeSquare;j++)
 									{
-										if(actualGrid[i + row][j + column] != -1)
+										if(actualState[i + row][j + column] != GameController.waitingValue && actualState[i + row][j + column] != GameController.reportedByRows && 
+										   actualState[i + row][j + column] != GameController.reportedByColumns &&  actualState[i + row][j + column] != GameController.reportedBySquares &&
+										   actualState[i + row][j + column] != GameController.reportedByUser &&  actualState[i + row][j + column] != GameController.rejectedByAgent &&
+										   actualState[i + row][j + column] != GameController.rejectedByUser)
+										{
 											options.add(actualGrid[i + row][j + column]);
+										}
 										else
 										{
 											emptyPosition = new int[2];
@@ -244,6 +300,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 										}
 									}
 								}
+								
 								listOptions.add(options);
 								options = new ArrayList<Integer>();
 							}
@@ -256,7 +313,6 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							j = emptyPosition[1];
 							
 							options = listOptions.get(controller.getRegion(i, j));	//Obtenim les opcions que tenim per aquella fila
-							System.out.println("Opciones possibles: " + options);
 							val = random.nextInt(AgentNetworkController.getSudokuSize()) + 1;
 							
 							while(options.contains(val))
@@ -269,15 +325,18 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						break;
 				}
 				
-				try {		
-					Thread.sleep(500);			//Donam teps a que s'actualitzi el grid
-				} catch (InterruptedException e) {
+				try 
+				{		
+					Thread.sleep(500);					//Time to updte the grid in the server and the clients
+				} 
+				catch (InterruptedException e)
+				{
 					e.printStackTrace();
 				}
 			}
 		}
 		
-		//#######################################    Check Grid    ############################################
+		//#######################################    Check Bugs    ############################################
 		
 		static synchronized void checkBugs(int agentId, int agentType)
 		{			
@@ -306,16 +365,20 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				switch(agentType)
 				{
-					case 4:				//Tester que nomes treballa per files
+					case GameController.agentBugReporterByRows:				//Tester que nomes treballa per files
 						
 						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
 							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 							{
-								if(actualGrid[i][j] != -1)
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
 								{
-									optionsToSearch.add(actualGrid[i][j]);								
-									if(actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									optionsToSearch.add(actualGrid[i][j]);		
+									
+									if(actualState[i][j] == GameController.contributedByColumns || actualState[i][j] == GameController.contributedBySquares || actualState[i][j] == GameController.contributedByUser)
 									{
 										optionsToAsk.add(actualGrid[i][j]);
 										
@@ -332,7 +395,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							
 							searchingList.add(optionsToSearch);
 							optionsToSearch = new ArrayList<Integer>();
-							
+						
 							listOptionsPosition.add(optionsPosition);
 							optionsPosition = new ArrayList<int[]>();
 						}
@@ -372,28 +435,30 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 										foundOnce = true;
 									}
 								}
-								
 							}
 						}
 						
 						if (cleanPosition)
 						{
 							val = random.nextInt(positionsToClean.size());
-							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+							SendMessage("bugReported#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
 						}
 						
 						break;
 						
-					case 5:		//Agent que nomes treballa per Columnes	
+					case GameController.agentBugReporterByColumns:		//Agent que nomes treballa per Columnes	
 						
 						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
 							for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 							{
-								if(actualGrid[i][j] != -1)
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
 								{
 									optionsToSearch.add(actualGrid[i][j]);								
-									if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									if(actualState[i][j] == GameController.contributedByRows || actualState[i][j] == GameController.contributedBySquares || actualState[i][j] == GameController.contributedByUser)
 									{
 										optionsToAsk.add(actualGrid[i][j]);
 										
@@ -456,7 +521,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						if (cleanPosition)
 						{
 							val = random.nextInt(positionsToClean.size());
-							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+							SendMessage("bugReported#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
 						}
 						
 						break;
@@ -473,16 +538,19 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 								{
 									for(j=0;j<sizeSquare;j++)
 									{
-										if(actualGrid[i + row][j + column] != -1)
+										if(actualState[i + row][j + column] != GameController.waitingValue && actualState[i + row][j + column] != GameController.reportedByRows && 
+										   actualState[i + row][j + column] != GameController.reportedByColumns &&  actualState[i + row][j + column] != GameController.reportedBySquares &&
+										   actualState[i + row][j + column] != GameController.reportedByUser &&  actualState[i + row][j + column] != GameController.rejectedByAgent &&
+										   actualState[i + row][j + column] != GameController.rejectedByUser)
 										{
-											optionsToSearch.add(actualGrid[i][j]);								
-											if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+											optionsToSearch.add(actualGrid[i + row][j + column]);								
+											if(actualState[i + row][j + column] == GameController.contributedByRows || actualState[i + row][j + column] == GameController.contributedByColumns || actualState[i + row][j + column] == GameController.contributedByUser)
 											{
-												optionsToAsk.add(actualGrid[i][j]);
+												optionsToAsk.add(actualGrid[i + row][j + column]);
 												
 												position = new int[2];
-												position[0] = i;
-												position[1] = j;
+												position[0] = i + row;
+												position[1] = j + column;
 												optionsPosition.add(position);
 											}
 										}
@@ -541,7 +609,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						if (cleanPosition)
 						{
 							val = random.nextInt(positionsToClean.size());
-							SendMessage("testerClear#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
+							SendMessage("bugReported#" + agentId + "," + agentType + "," + positionsToClean.get(val)[0] + "," + positionsToClean.get(val)[1]);
 						}
 						
 						break;
@@ -554,6 +622,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		
 		static synchronized void testValues(int agentId, int agentType)
 		{						
+			
 			if(!getConflictExists())
 			{
 				Random random = new Random(System.nanoTime());
@@ -579,16 +648,19 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				
 				switch(agentType)
 				{
-					case 4:				//Tester que nomes treballa per files
+					case GameController.agentTesterByRows:				//Tester que nomes treballa per files
 						
 						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
 							for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 							{
-								if(actualGrid[i][j] != -1)
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
 								{
 									optionsToSearch.add(actualGrid[i][j]);								
-									if(actualState[i][j] == 3 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									if(actualState[i][j] == GameController.contributedByColumns || actualState[i][j] == GameController.contributedBySquares || actualState[i][j] == GameController.contributedByUser)
 									{
 										optionsToAsk.add(actualGrid[i][j]);
 										
@@ -602,7 +674,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							
 							listOptions.add(optionsToAsk);
 							optionsToAsk = new ArrayList<Integer>();
-							
+														
 							searchingList.add(optionsToSearch);
 							optionsToSearch = new ArrayList<Integer>();
 							
@@ -661,16 +733,19 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						
 						break;
 						
-					case 5:		//Agent que nomes treballa per Columnes	
+					case GameController.agentTesterByColumns:		//Agent que nomes treballa per Columnes	
 						
 						for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 						{
 							for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 							{
-								if(actualGrid[i][j] != -1)
+								if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+								   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+								   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+								   actualState[i][j] != GameController.rejectedByUser)
 								{
 									optionsToSearch.add(actualGrid[i][j]);								
-									if(actualState[i][j] == 2 || actualState[i][j] == 4 || actualState[i][j] == 5)
+									if(actualState[i][j] == GameController.contributedByRows || actualState[i][j] == GameController.contributedBySquares || actualState[i][j] == GameController.contributedByUser)
 									{
 										optionsToAsk.add(actualGrid[i][j]);
 										
@@ -743,7 +818,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						
 						break;
 						
-					case 6:		////Agent que nomes treballa per Quadrats
+					case GameController.agentTesterBySquares:		////Agent que nomes treballa per Quadrats
 								
 						int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 						
@@ -755,16 +830,20 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 								{
 									for(j=0;j<sizeSquare;j++)
 									{
-										if(actualGrid[i + row][j + column] != -1)
+										if(actualState[i + row][j + column] != GameController.waitingValue && actualState[i + row][j + column] != GameController.reportedByRows && 
+										   actualState[i + row][j + column] != GameController.reportedByColumns &&  actualState[i + row][j + column] != GameController.reportedBySquares &&
+										   actualState[i + row][j + column] != GameController.reportedByUser &&  actualState[i + row][j + column] != GameController.rejectedByAgent &&
+										   actualState[i + row][j + column] != GameController.rejectedByUser)
 										{
-											optionsToSearch.add(actualGrid[i][j]);								
-											if(actualState[i][j] == 2 || actualState[i][j] == 3 || actualState[i][j] == 5)
+											optionsToSearch.add(actualGrid[i + row][j + column]);			
+											
+											if(actualState[i + row][j + column] == GameController.contributedByRows || actualState[i + row][j + column] == GameController.contributedByColumns || actualState[i + row][j + column] == GameController.contributedByUser)
 											{
-												optionsToAsk.add(actualGrid[i][j]);
+												optionsToAsk.add(actualGrid[i + row][j + column]);
 												
 												position = new int[2];
-												position[0] = i;
-												position[1] = j;
+												position[0] = i + row;
+												position[1] = j + column;
 												optionsPosition.add(position);
 											}
 										}
@@ -821,7 +900,6 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 										cleanPosition = true;
 									}
 								}
-								
 							}
 						}
 						
@@ -845,23 +923,30 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			boolean alreadyVoted = false;
 			
 			int[][] actualGrid = AgentNetworkController.getActualGrid();
-			int i, j, val, conflictX, conflictY;
+			int[][] actualState = AgentNetworkController.getActualState();
+			
+			int i, j, val, conflictX, conflictY, randomVal;
 			ArrayList<Integer> options = new ArrayList<Integer>();
 			ArrayList<ArrayList<Integer>> listOptions = new ArrayList<ArrayList<Integer>>();
 			
 			int[] position;
 			ArrayList<int[]> optionsPosition = new ArrayList<int[]>();
 			ArrayList<ArrayList<int[]>> listOptionsPosition = new ArrayList<ArrayList<int[]>>();
+			
+			Random random = new Random(System.nanoTime());
 					
 			switch(agentType)
 			{
-				case 8:		//Agent que nomes treballa per files
+				case GameController.agentCommitterByRows:		//Agent que nomes treballa per files
 							
 				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 				{
 					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
-						if(actualGrid[i][j] != -1)
+						if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+						   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+						   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+						   actualState[i][j] != GameController.rejectedByUser)
 						{
 							options.add(actualGrid[i][j]);
 							
@@ -871,6 +956,7 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							optionsPosition.add(position);
 						}
 					}
+					
 					listOptions.add(options);
 					options = new ArrayList<Integer>();
 					
@@ -891,7 +977,12 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					{
 						if(value == val && firstTime)
 						{
-							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+							randomVal = random.nextInt(10);
+							if (randomVal >= 0 && randomVal < 8)			//Add a Random possibility (20%) that the Agents Fails the vote
+								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+							else
+								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+							
 							alreadyVoted = true;
 							break;
 						}
@@ -900,17 +991,26 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 				}
 
 				if (!alreadyVoted)
-					SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+				{
+					randomVal = random.nextInt(10);
+					if (randomVal >= 0 && randomVal < 8)
+						SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+					else
+						SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+				}
 				
 				break;
 					
-				case 9:		//Agent que nomes treballa per Columnes	
+				case GameController.agentCommitterByColumns:		//Agent que nomes treballa per Columnes	
 
 					for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 					{
 						for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 						{
-							if(actualGrid[i][j] != -1)
+							if(actualState[i][j] != GameController.waitingValue && actualState[i][j] != GameController.reportedByRows && 
+							   actualState[i][j] != GameController.reportedByColumns &&  actualState[i][j] != GameController.reportedBySquares &&
+							   actualState[i][j] != GameController.reportedByUser &&  actualState[i][j] != GameController.rejectedByAgent &&
+							   actualState[i][j] != GameController.rejectedByUser)
 							{
 								options.add(actualGrid[i][j]);
 								
@@ -940,7 +1040,12 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						{
 							if(value == val && firstTime)
 							{
-								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+								randomVal = random.nextInt(10);
+								if (randomVal >= 0 && randomVal < 7)
+									SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+								else
+									SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+								
 								alreadyVoted = true;
 								break;
 							}
@@ -949,11 +1054,17 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					}
 		
 					if (!alreadyVoted)
-						SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+					{
+						randomVal = random.nextInt(10);
+						if (randomVal >= 0 && randomVal < 8)
+							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+						else
+							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+					}
 					
 					break;
 					
-				case 10:		////Agent que nomes treballa per Quadrats
+				case GameController.agentCommitterBySquares:		////Agent que nomes treballa per Quadrats
 							
 					int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
 					
@@ -965,7 +1076,10 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 							{
 								for(j=0;j<sizeSquare;j++)
 								{
-									if(actualGrid[i + row][j + column] != -1)
+									if(actualState[i + row][j + column] != GameController.waitingValue && actualState[i + row][j + column] != GameController.reportedByRows && 
+									   actualState[i + row][j + column] != GameController.reportedByColumns &&  actualState[i + row][j + column] != GameController.reportedBySquares &&
+									   actualState[i + row][j + column] != GameController.reportedByUser &&  actualState[i + row][j + column] != GameController.rejectedByAgent &&
+									   actualState[i + row][j + column] != GameController.rejectedByUser)
 									{
 										options.add(actualGrid[i + row][j + column]);
 										
@@ -998,7 +1112,12 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						{
 							if(value == val && firstTime)
 							{
-								SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+								randomVal = random.nextInt(10);
+								if (randomVal >= 0 && randomVal < 7)
+									SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+								else
+									SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+								
 								alreadyVoted = true;
 								break;
 							}
@@ -1006,8 +1125,14 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 						}
 					}
 
-					if(!alreadyVoted)
-						SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+					if (!alreadyVoted)
+					{
+						randomVal = random.nextInt(10);
+						if (randomVal >= 0 && randomVal < 8)
+							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + -1);
+						else
+							SendMessage("voted#" + agentId + "," + agentType + "," + conflictX + "," + conflictY + "," + 1);
+					}
 					
 					break;
 			}
@@ -1021,37 +1146,38 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			int[][] actualGrid = AgentNetworkController.getActualGrid();
 			int i, j, val, x, y;
 						
-			int[] emptyPosition;
-			ArrayList<int[]> emptyPositionList = new ArrayList<int[]>();
+			int[] committedList;
+			ArrayList<int[]> committedPositionList = new ArrayList<int[]>();
 			
 			Random random = new Random(System.nanoTime());
 			
-			for(j=0;j<AgentNetworkController.getSudokuSize();j++)
+			for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 			{
-				for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+				for(j=0;j<AgentNetworkController.getSudokuSize();j++)
 				{
-					if(controller.getCellState(i, j) == 6)
+					if(controller.getCellState(i, j) == GameController.committedByTesterByRows || controller.getCellState(i, j) == GameController.committedByTesterByColumns || 
+					   controller.getCellState(i, j) == GameController.committedByTesterBySquares || controller.getCellState(i, j) == GameController.committedByTesterByUser)
 					{
-						emptyPosition = new int[2];
-						emptyPosition[0] = i;
-						emptyPosition[1] = j;
-						emptyPositionList.add(emptyPosition);
+						committedList = new int[2];
+						committedList[0] = i;
+						committedList[1] = j;
+						committedPositionList.add(committedList);
 					}
 				}
 			}
 			
-			if(!emptyPositionList.isEmpty())
+			if(!committedPositionList.isEmpty())
 			{
-				val = random.nextInt(emptyPositionList.size());
-				x = emptyPositionList.get(val)[0];
-				y = emptyPositionList.get(val)[1];
+				val = random.nextInt(committedPositionList.size());
+				x = committedPositionList.get(val)[0];
+				y = committedPositionList.get(val)[1];
 				
 				boolean correct = checkPosition(x, y, actualGrid[x][y]);
 				
 				if(correct)
-					SendMessage("accepted#"+ x + "," + y);
+					SendMessage("accepted#" + agentId + "," + agentType + "," + x + "," + y);
 				else
-					SendMessage("rejected#"+ x + "," + y);
+					SendMessage("rejected#" + agentId + "," + agentType + "," + x + "," + y);
 				
 			}
 			else
@@ -1068,14 +1194,21 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 		{
 			
 			int i, j;
+			
 			int[][] actualGrid = AgentNetworkController.getActualGrid();
+			int[][] actualState = AgentNetworkController.getActualState();
 			
 			ArrayList<Integer> number = new ArrayList<Integer>();
 			
 			for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 			{
-				if(actualGrid[i][y] != -1 && x != i)
+				if((actualState[i][y] != GameController.waitingValue && actualState[i][y] != GameController.reportedByRows && 
+				    actualState[i][y] != GameController.reportedByColumns &&  actualState[i][y] != GameController.reportedBySquares &&
+				    actualState[i][y] != GameController.reportedByUser &&  actualState[i][y] != GameController.rejectedByAgent &&
+				    actualState[i][y] != GameController.rejectedByUser) && x != i)
+				{
 					number.add(actualGrid[i][y]);
+				}
 			}
 				
 			if(number.contains(val))
@@ -1087,8 +1220,13 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 					
 			for(i=0;i<AgentNetworkController.getSudokuSize();i++)
 			{
-				if(actualGrid[x][i] != -1 && y != i)
+				if((actualState[x][i] != GameController.waitingValue && actualState[x][i] != GameController.reportedByRows && 
+				    actualState[x][i] != GameController.reportedByColumns &&  actualState[x][i] != GameController.reportedBySquares &&
+				    actualState[x][i] != GameController.reportedByUser &&  actualState[x][i] != GameController.rejectedByAgent &&
+				    actualState[x][i] != GameController.rejectedByUser) && y != i)
+				{
 					number.add(actualGrid[x][i]);
+				}
 			}
 			
 			if(number.contains(val))
@@ -1105,8 +1243,13 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			{
 				for(j=0;j<sizeSquare;j++)
 				{
-					if(actualGrid[i + region[0]][j + region[1]] != -1 && x != (i + region[0]) && y != (j + region[1]))
+					if((actualState[i + region[0]][j + region[1]] != GameController.waitingValue && actualState[i + region[0]][j + region[1]] != GameController.reportedByRows && 
+					    actualState[i + region[0]][j + region[1]] != GameController.reportedByColumns &&  actualState[i + region[0]][j + region[1]] != GameController.reportedBySquares &&
+					    actualState[i + region[0]][j + region[1]] != GameController.reportedByUser &&  actualState[i + region[0]][j + region[1]] != GameController.rejectedByAgent &&
+					    actualState[i + region[0]][j + region[1]] != GameController.rejectedByUser) && x != (i + region[0]) && y != (j + region[1]))
+					{
 						number.add(actualGrid[i + region[0]][j + region[1]]);
+					}
 				}
 			}
 			
@@ -1117,7 +1260,6 @@ class Agent {		//TODO: Separar cada agent en subclasses i cridar desde aqui al r
 			
 			return true;
 		}
-		
 		
 		static int[] getRegion(int x, int y)
 		{

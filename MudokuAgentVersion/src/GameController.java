@@ -9,6 +9,102 @@ public class GameController extends Applet implements ActionListener {
 	public enum GameState {start, initGame, pregame, game, conflictResolution}
 	protected GameState state;
 
+	/* cellState = 0 --> waitingValue
+	 * cellState = 1 --> initializedByServer
+	 * cellState = 2 --> Contributed By Rows
+	 * cellState = 3 --> Contributed By Columns
+	 * cellState = 4 --> Contributed By Squares
+	 * cellState = 5 --> Contributed By User
+	 * cellState = 6 --> Reported By Rows
+	 * cellState = 7 --> Reported By Columns
+	 * cellState = 8 --> Reported By Squares
+	 * cellState = 9 --> Reported By Users
+	 * cellState = 10 --> Committed By Rows
+	 * cellState = 11 --> Committed By Columns
+	 * cellState = 12 --> Committed By Squares
+	 * cellState = 13 --> Committed By User
+	 * cellState = 14 --> Not Committed
+	 * cellState = 15 --> Accepted By Agent
+	 * cellState = 16 --> Accepted By User
+	 * cellState = 17 --> Rejected By Agent
+	 * cellState = 18 --> Rejected By User
+	 */
+	
+	public final static int waitingValue = 0;
+	public final static int intializedByServer = 1;
+	public final static int contributedByRows = 2;
+	public final static int contributedByColumns = 3;
+	public final static int contributedBySquares = 4;
+	public final static int contributedByUser = 5;
+	public final static int reportedByRows = 6;
+	public final static int reportedByColumns = 7;
+	public final static int reportedBySquares = 8;	
+	public final static int reportedByUser = 9;	
+	public final static int committedByTesterByRows = 10;	
+	public final static int committedByTesterByColumns = 11;	
+	public final static int committedByTesterBySquares = 12;	
+	public final static int committedByTesterByUser = 13;	
+	public final static int notCommitted = 14;	
+	public final static int acceptedByAgent = 15;
+	public final static int acceptedByUser = 16;	
+	public final static int rejectedByAgent = 17;	
+	public final static int rejectedByUser = 18;	
+	
+	/* AgentType:
+	    0 --> Contributor by Rows
+		1 --> Contributor by Columns
+		2 --> Contributor by Squares
+		4 --> Bug Reporter by Rows
+		5 --> Bug Reporter by Columns
+		6 --> Bug Reporter by Squares
+		8 --> Tester by Rows
+		9 --> Tester by Columns
+		10 --> Tester by Squares
+		12 --> Committer by Rows
+		13 --> Committer by Columns
+		14 --> Committer by Squares
+		16 --> Project Leader 
+	 */
+	
+	public final static int agentContributorByRows = 0;
+	public final static int agentContributorByColumns = 1;
+	public final static int agentContributorBySquares = 2;
+	public final static int userContributor = 3;
+	public final static int agentBugReporterByRows = 4;
+	public final static int agentBugReporterByColumns = 5;
+	public final static int agentBugReporterBySquares = 6;
+	public final static int userBugReporter = 7;	
+	public final static int agentTesterByRows = 8;	
+	public final static int agentTesterByColumns = 9;	
+	public final static int agentTesterBySquares = 10;	
+	public final static int userTester = 11;	
+	public final static int agentCommitterByRows = 12;	
+	public final static int agentCommitterByColumns = 13;
+	public final static int agentCommitterBySquares = 14;	
+	public final static int userCommitter = 15;	
+	public final static int agentLeader = 16;
+	public final static int userLeader = 17;
+	public final static int passiveUser = 18;
+	
+	public final static int NO_TYPE = -1;
+	
+	public final static int ID = 0;
+	public final static int TYPE = 1;
+	public final static int ACTION = 2;
+	public final static int X = 3;
+	public final static int Y = 4;
+	public final static int VALUE = 5;
+	public final static int RESULT_VOTING = 0;
+	
+	public final static int CONTRIBUTION = 0;
+	public final static int BUG_REPORTED = 1;
+	public final static int VOTING = 2;
+	public final static int COMMITTED = 3;
+	public final static int NOT_COMMITTED = 4;
+	public final static int ACCEPTED = 5;
+	public final static int REJECTED = 6;
+	public final static int NEW_GAME = 7;
+	
 	private static final long serialVersionUID = 1L;
 	static int screenWidth = 765;
 	static int screenHeight = 600;
@@ -22,11 +118,14 @@ public class GameController extends Applet implements ActionListener {
 	static int gridEndX = gridXOffset + gridWidth;
 	static int gridEndY = gridYOffset + gridHeight;
 
-	static Color mouseOverColor = new Color(220, 20, 60);
-	static Color activeCellColor = new Color(0, 0, 0);
+	static Color mouseOverColor = new Color(0, 0, 205);						//	Color to move over the grid
+	static Color activeBackgroundColor = new Color(238, 233, 191);			//	Color of the Background Active
+	static Color activeCellColor = new Color(48, 128, 20);				//	Color of the Active Cell
 
 	int activeX;
 	int activeY;
+	int votingX;
+	int votingY;
 	int mouseOverX;
 	int mouseOverY;
 	int mouseOverDomainIndex;
@@ -116,6 +215,14 @@ public class GameController extends Applet implements ActionListener {
 		int y = 0;
 		int val = 0;
 		
+		
+		
+		for (int i=0; i<sudokuSize; i++) {						//Reset the whole Grid!
+			for (int j=0; j<sudokuSize; j++) {
+				SetValueAndState(i, j, -1, waitingValue);
+			}
+		}
+		
 		Random random = new Random(System.nanoTime());
 		
 		while (count > 0) 
@@ -123,14 +230,14 @@ public class GameController extends Applet implements ActionListener {
 			x = random.nextInt(sudokuSize);
 			y = random.nextInt(sudokuSize);
 
-			if (cells[x][y].valueState == 0) 
+			if (cells[x][y].valueState == waitingValue) 
 			{
-				val = random.nextInt(sudokuSize) + 1;			//Utilitzem per inicialitzar
+				val = random.nextInt(sudokuSize) + 1;			//Random Values at random positions!
 				
 				if (checkPosition(x, y, val)) 
 				{
 					count--;
-					SetValueAndState(x, y, val, 1);
+					SetValueAndState(x, y, val, intializedByServer);
 					cells[x][y].IsConstant();
 				}
 			}
@@ -148,7 +255,7 @@ public class GameController extends Applet implements ActionListener {
 		{
 			for(j=0;j<sudokuSize;j++)
 			{
-				if(cells[i][j].valueState != 0)
+				if(cells[i][j].valueState != waitingValue)
 					number.add(cells[i][j].current);
 			}
 			listNumbers.add(number);
@@ -168,7 +275,7 @@ public class GameController extends Applet implements ActionListener {
 		{
 			for(i=0;i<sudokuSize;i++)
 			{
-				if(cells[i][j].valueState != 0)
+				if(cells[i][j].valueState != waitingValue)
 					number.add(cells[i][j].current);
 			}
 			listNumbers.add(number);
@@ -194,7 +301,7 @@ public class GameController extends Applet implements ActionListener {
 				{
 					for(j=0;j<sizeSquare;j++)
 					{
-						if(cells[i + row][j + column].valueState != 0)
+						if(cells[i + row][j + column].valueState != waitingValue)
 							number.add(cells[i + row][j + column].current);
 					}
 				}
@@ -280,7 +387,11 @@ public class GameController extends Applet implements ActionListener {
 	}
 
 	//Called by applet engine
-	public void initDraw(Graphics gr) {
+	public void destroy() {}
+	
+	//Called by applet engine
+	public void initDraw(Graphics gr) 
+	{
 		gr.setFont(new Font("Calibri", Font.BOLD, 12));
 		gr.setColor(Color.white);
 		gr.fillRect(0, 0, screenWidth, screenHeight);
@@ -290,12 +401,14 @@ public class GameController extends Applet implements ActionListener {
 	@Override
 	public final synchronized void update(Graphics g) {
 		Dimension d = getSize();
+		
 		if ((offScreenImage == null) || (d.width != offScreenSize.width)
 				|| (d.height != offScreenSize.height)) {
 			offScreenImage = createImage(d.width, d.height);
 			offScreenSize = d;
 			offScreenGraphics = offScreenImage.getGraphics();
 		}
+		
 		offScreenGraphics.clearRect(0, 0, d.width, d.height);
 		paint(offScreenGraphics);
 		g.drawImage(offScreenImage, 0, 0, null);
@@ -303,8 +416,8 @@ public class GameController extends Applet implements ActionListener {
 
 	@Override
 	public void paint(Graphics gr) {
-		// initDraw(gr);
-		// DrawGrid(gr);
+		//initDraw(gr);
+		//DrawGrid(gr);
 	}
 
 	public void DrawGrid(Graphics gr) {
@@ -364,7 +477,7 @@ public class GameController extends Applet implements ActionListener {
 		// Draw Values
 		for (int y = 0; y < sudokuSize; y++) {
 			for (int x = 0; x < sudokuSize; x++) {
-				if (cells[x][y].valueState == 0) {
+				if (cells[x][y].valueState == waitingValue) {
 					if (cpController.GetCPVariable(x, y).getDomainSize() == 1) {
 						gr.drawString("*", (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
 					}
@@ -374,12 +487,13 @@ public class GameController extends Applet implements ActionListener {
 				}
 				else if(cells[x][y].contradicting)
 				{
-						gr.setColor(Color.red);
+					gr.setColor(Color.red);
 				}
 				else
 				{
 					gr.setColor(Color.black);
 				}
+				
 				gr.drawString(String.valueOf(cpController.GetCPVariable(x, y)
 						.getVal()), (int) (lineX + deltaX / 2) - 5,
 						(int) (lineY + deltaY) - 10);
@@ -415,8 +529,8 @@ public class GameController extends Applet implements ActionListener {
 
 	//Handles button clicks
 	@Override
-	public void actionPerformed(ActionEvent action) {
-		// TODO Auto-generated method stub
+	public void actionPerformed(ActionEvent action) 
+	{
 		System.out.println("GameController --> actionPerformed. Accio: " + action.getActionCommand());
 		switch (action.getActionCommand()) {
 		case "sweep":
@@ -426,15 +540,14 @@ public class GameController extends Applet implements ActionListener {
 		}
 	}
 	
-	public void ClearCell(int x, int y)
+	public void ClearCell(int x, int y, int cellState)
 	{
 		if(cells[x][y].IsConstant())
 		{
 			return;
 		}
 		
-		SetValueAndState(x, y, -1, 0);	
-				
+		SetValueAndState(x, y, cells[x][y].current, cellState);	
 		repaint();
 	}
 	
@@ -451,92 +564,15 @@ public class GameController extends Applet implements ActionListener {
 			}
 		}*/
 	}
-
-	/*public boolean TryInstantiate(int x, int y, int value) {
-		boolean success = true;
-		cpController.solver.worldPush();
-
-		try {
-			cpController.InstantiateVar(x, y, value);
-		} catch (ContradictionException e1) {
-			// TODO Auto-generated catch block
-			System.out.println("instantiation failed : " + e1.toString());
-			success = false;
-		}
-		if (success) {
-			try {
-				cpController.Propagate();
-			} catch (ContradictionException e) {
-				// TODO Auto-generated catch block
-				System.out.println("propagation failed : " + e.getLocalizedMessage().toString());
-				DomainWipeOut();
-				success = false;
-				cpController.solver.worldPop();
-			}
-		}
-		if (success) {
-			cells[x][y].current = value;
-			cells[x][y].contradicting = false;
-		}
-		else
-		{
-			System.out.println("contradicted");
-			cells[x][y].contradicting = true;
-			cells[x][y].current = -1;
-		}
-		return success;
-	}*/
 	
-	/*public boolean TryInstantiate(int x, int y, int value) {
-		boolean success = true;
-		cpController.solver.worldPush();
-
-		try {
-			cpController.InstantiateVar(x, y, value);
-		} catch (ContradictionException e1) {
-			// TODO Auto-generated catch block
-			System.out.println("instantiation failed : " + e1.toString());
-			//success = false;
-		}
-		if (success) {
-			try {
-				cpController.Propagate();
-			} catch (ContradictionException e) {
-				// TODO Auto-generated catch block
-				System.out.println("propagation failed : " + e.getLocalizedMessage().toString());
-				DomainWipeOut();
-				success = false;
-				cpController.solver.worldPop();
-			}
-		}
-		
-		if (success) {
-			cells[x][y].current = value;
-			cells[x][y].contradicting = false;
-		}
-		else
-		{
-			System.out.println("contradicted");
-			cells[x][y].contradicting = true;
-			cells[x][y].current = -1;
-		}
-		
-		return success;
-	}*/
-	
-	
-	//Instantiates active cell with given value
-	/*public void SetValue(int value) {
-		cells[activeX][activeY].current = value;
-	}*/
-	
-	public void SetValueAndState(int x, int y, int value, int state) {
+	public void SetValueAndState(int x, int y, int value, int state) 
+	{
 		cells[x][y].current = value;
 		cells[x][y].valueState = state;
 	}
 
-
-	public void MouseOverCell(int x, int y) {
+	public void MouseOverCell(int x, int y) 
+	{
 		mouseOverGrid = true;
 		mouseOverDomain = false;
 		mouseOverDomainIndex = -1;
@@ -585,7 +621,7 @@ public class GameController extends Applet implements ActionListener {
 	{
 		for (int i = 0; i < sudokuSize; i++) {
 			for (int k = 0; k < sudokuSize; k++) {
-				if (cells[i][k].valueState == 0) {
+				if (cells[i][k].valueState == waitingValue) {
 					if (cpController.GetCPVariable(i, k).getDomainSize() == 0) {
 						System.out.println("domain wipe out at " + i + "," + k);
 					}
@@ -604,4 +640,19 @@ public class GameController extends Applet implements ActionListener {
 	{
 		return cells[x][y].valueState;
 	}
+	
+	int getCountCorrect()
+	{
+		int count = 0;
+		
+		for(int i=0;i<sudokuSize;i++) {
+			for(int j=0;j<sudokuSize;j++) {
+				if(cells[i][j].valueState == intializedByServer || cells[i][j].valueState == acceptedByAgent || cells[i][j].valueState == acceptedByUser)
+					count++;
+			}	
+		}
+		
+		return count;
+	}
+	
 }

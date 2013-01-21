@@ -1171,7 +1171,7 @@ public class ClientGameController extends GameController implements ActionListen
 				vars2 = vars[1].split(",");
 				conflictX = Integer.parseInt(vars2[0]);
 				conflictY = Integer.parseInt(vars2[1]);
-				ClearCell(conflictX, conflictY);
+				//ClearCell(conflictX, conflictY);
 				Print("The value at the position [" + conflictX + "][" + conflictY + "] has been Removed.");
 				
 				repaint();

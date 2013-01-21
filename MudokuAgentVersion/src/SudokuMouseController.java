@@ -77,7 +77,6 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 				lastActiveX = activeX;
 				lastActiveY = activeY;
 			}
-			System.out.println( activeX + " - " + activeY);
 		}
 			
 		gameController.DomainClick(index);
@@ -108,9 +107,7 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420 && e.getX() > GameController.gridXOffset)
 		{
 			int index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
-			
-			System.out.println("Nou Index: " + index);
-			
+						
 			if (lastDomainIndex != index)
 			{
 				lastDomainIndex = index;

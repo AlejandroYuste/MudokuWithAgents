@@ -118,9 +118,8 @@ public class SinglePlayerGameController extends GameController implements Action
 		// TODO Auto-generated method stub
 		switch(action.getActionCommand())
 		{
-		case "clear":
-			
-			ClearCell(activeX, activeY);
+		case "clear":	
+			//ClearCell(activeX, activeY);
 		break;
 		case "random":
 			RandomAssign(5);
