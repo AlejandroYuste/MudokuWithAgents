@@ -15,7 +15,7 @@ public class ClientGameController extends GameController implements ActionListen
 	public enum NetworkState {idle, waitingInit, waitingConfirm}
 	NetworkState networkState;
 	
-	protected enum ActualRol {Observer, Contributor, Tester, Committer, Leader}
+	protected enum ActualRol {Observer, Contributor, BugReproter, Tester, Committer, Leader}
 	protected ActualRol actualRol;
 
 	Button connectClientButton;
@@ -34,7 +34,6 @@ public class ClientGameController extends GameController implements ActionListen
 	Button getTester;
 	Button getCommitter;
 	Button getLeader;
-	
 	
 	Label Title;
 	Label ipFieldLabel;
@@ -143,14 +142,14 @@ public class ClientGameController extends GameController implements ActionListen
 		connectClientButton.setSize(150,75);
 		connectClientButton.setLocation(300, 200);
 		connectClientButton.setActionCommand("connect");
-		connectClientButton.addActionListener(this);				//Afegim el Listener al button "Connect"
+		connectClientButton.addActionListener(this);				
 		add(connectClientButton);
 		
 		joinCommunity = new Button("Join to the Community");
 		joinCommunity.setSize(180,40);
 		joinCommunity.setLocation(530, 100);
 		joinCommunity.setActionCommand("joinCommunity");
-		joinCommunity.addActionListener(this);				//Afegim el Listener al button "Connect"
+		joinCommunity.addActionListener(this);						
 		joinCommunity.setVisible(false);
 		add(joinCommunity);
 		
@@ -158,15 +157,15 @@ public class ClientGameController extends GameController implements ActionListen
 		getPromotedTester.setSize(180,40);
 		getPromotedTester.setLocation(530, 250);
 		getPromotedTester.setActionCommand("getTester");
-		getPromotedTester.addActionListener(this);				//Afegim el Listener al button "Connect"
-		getPromotedTester.setVisible(false);
+		getPromotedTester.addActionListener(this);					
+		getPromotedTester.setVisible(false);	
 		add(getPromotedTester);
 		
 		getPromotedCommitter = new Button("Get Promoted!");
 		getPromotedCommitter.setSize(180,40);
 		getPromotedCommitter.setLocation(530, 250);
 		getPromotedCommitter.setActionCommand("getCommitter");
-		getPromotedCommitter.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getPromotedCommitter.addActionListener(this);				
 		getPromotedCommitter.setVisible(false);
 		add(getPromotedCommitter);
 		
@@ -174,7 +173,7 @@ public class ClientGameController extends GameController implements ActionListen
 		getPromotedLeader.setSize(180,40);
 		getPromotedLeader.setLocation(530, 250);
 		getPromotedLeader.setActionCommand("getLeader");
-		getPromotedLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		getPromotedLeader.addActionListener(this);				
 		getPromotedLeader.setVisible(false);
 		add(getPromotedLeader);
 		
@@ -182,7 +181,7 @@ public class ClientGameController extends GameController implements ActionListen
 		askForCommiting.setSize(180,30);
 		askForCommiting.setLocation(530, 170);
 		askForCommiting.setActionCommand("askCommitting");
-		askForCommiting.addActionListener(this);				//Afegim el Listener al button "Connect"
+		askForCommiting.addActionListener(this);
 		askForCommiting.setVisible(false);
 		add(askForCommiting);
 		

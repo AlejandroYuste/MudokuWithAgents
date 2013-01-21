@@ -965,8 +965,7 @@ public class AgentGameController extends GameController implements ActionListene
 		switch(action.getActionCommand())
 		{
 			case "connect":
-				if(!ipField.equals("") && !portField.equals(""))
-				{
+				if(!ipField.equals("") && !portField.equals("")) {
 					try 
 					{	
 						networkController.Connect(ipField.getText(), Integer.parseInt(portField.getText()));
@@ -976,10 +975,10 @@ public class AgentGameController extends GameController implements ActionListene
 						e.printStackTrace();
 					}  
 				}
-				else
-				{
+				else {
 					System.out.println("Check --> IP & port incorrect");
 				}
+				
 				break;
 			case "connectRandomAgents":
 				networkController.createRandomCommunity(Integer.parseInt(NumRadomAgentsField.getText()));
@@ -1046,18 +1045,16 @@ public class AgentGameController extends GameController implements ActionListene
 		String[] vars2 = null;
 		String equation = null;
 		
-		int x, y;
-		
-		int agentId, agentType;
-		
 		try {
+			
+			int x, y;
+			
 			switch(vars[0])
 			{
 				case "init":
 					System.out.println("Initializing Agents Applet");
 					
-					for(int i = 1; i < vars.length; i++)
-					{
+					for(int i = 1; i < vars.length; i++) {
 						equation = vars[i];
 						vars2 = equation.split("=");
 						
@@ -1110,10 +1107,10 @@ public class AgentGameController extends GameController implements ActionListene
 							voteTimer.start();
 							break;
 						case "voting exists":
-							//TODO: Nothing to do?
 							repaint();
 							break;
 					}
+					
 					break;
 				case "clear":
 					conflictExists = false;
@@ -1158,9 +1155,7 @@ public class AgentGameController extends GameController implements ActionListene
 					x = Integer.parseInt(vars2[0]);
 					y = Integer.parseInt(vars2[1]);
 					int acceptedState = Integer.parseInt(vars2[2]);
-					
-					System.out.println("Accepted State: " + acceptedState);
-					
+										
 					SetValueAndState(x, y, cells[x][y].current, acceptedState);				
 					break;
 				case "rejected":		//networkController.BroadcastMessage("rejected#" + x + "," + y + "," + rejected);

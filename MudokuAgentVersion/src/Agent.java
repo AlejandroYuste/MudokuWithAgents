@@ -85,9 +85,13 @@ class Agent
 	{
 		for(ThreadsInformation threadInfo : ThreadsAgent)
 		{
-			if(threadInfo.agentId == agentId_)
+			if(threadInfo.agentId == agentId_) {
 				threadInfo.threadInfo.stop();
+				SendMessage("disconnect#" + threadInfo.agentId + "," + threadInfo.agentType);
+			}
 		}
+		
+
 	}
 	
 	void executarAgents(int agentId, int agentType) 

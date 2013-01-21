@@ -28,10 +28,17 @@ public class ServerGameController extends GameController implements ActionListen
 	Label squareCommittersLabel;
 	Label userCommittersLabel;
 	
+	Label correctLabel;
 	Label correctValuesLabel;
-	Label reportedValuesLabel;
-	Label contributionValuesLabel;
-	Label votingValuesLabel;
+	
+	Label numMemebersLabel;
+	Label reportedLabel;
+	Label contributionLabel;
+	Label votingLabel;
+	Label commitedLabel;
+	Label notCommitedLabel;
+	Label rejectedLabel;
+	Label acceptedLabel;
 	
 	Label infoCommitters;
 
@@ -40,6 +47,14 @@ public class ServerGameController extends GameController implements ActionListen
 
 	int legendOffSetX = 125;
 	int legendOffSetY = 20;
+	
+	int valuesVoting;
+	int valuesBugReported;
+	int valuesContributed;
+	int valuesCommitted;
+	int valuesNotCommited;
+	int valuesRejected;
+	int valuesAccepted;
 	
 	ArrayList<Integer> agentIdList;			// This list saves all the IDs of Agents/Users of the same type connected to the server
 	ArrayList<ArrayList<Integer>> agentsList = new ArrayList<ArrayList<Integer>>();
@@ -191,26 +206,56 @@ public class ServerGameController extends GameController implements ActionListen
 		add(userCommittersLabel);
 		
 		
-		correctValuesLabel = new Label("Correct Values: ");
-		correctValuesLabel.setSize(100,20);
-		correctValuesLabel.setLocation(55, 195);
+		correctLabel = new Label("Correct Values: ");
+		correctLabel.setSize(100,20);
+		correctLabel.setLocation(55, 190);
+		add(correctLabel);
+		
+		correctValuesLabel = new Label("0 / " + sudokuSize*sudokuSize);
+		correctValuesLabel.setSize(80,20);
+		correctValuesLabel.setLocation(77, 200);
 		add(correctValuesLabel);
 		
-		contributionValuesLabel = new Label("Values Contributed: ");
-		contributionValuesLabel.setSize(115,20);
-		contributionValuesLabel.setLocation(43, 265);
-		add(contributionValuesLabel);
 		
-		reportedValuesLabel = new Label("Values Reported: ");
-		reportedValuesLabel.setSize(100,20);
-		reportedValuesLabel.setLocation(48, 335);
-		add(reportedValuesLabel);
+		numMemebersLabel = new Label("The Comunity has 0 Memebers.");
+		numMemebersLabel.setSize(250,20);
+		numMemebersLabel.setLocation(415, 20);
+		add(numMemebersLabel);
 		
-		votingValuesLabel = new Label("Voting Sessions: ");
-		votingValuesLabel.setSize(100,20);
-		votingValuesLabel.setLocation(50, 405);
-		add(votingValuesLabel);
+		contributionLabel = new Label("Contributions: 0");
+		contributionLabel.setSize(130,20);
+		contributionLabel.setLocation(35, 250);
+		add(contributionLabel);
 		
+		reportedLabel = new Label("Bugs Reported: 0");
+		reportedLabel.setSize(130,20);
+		reportedLabel.setLocation(35, 280);
+		add(reportedLabel);
+		
+		votingLabel = new Label("Voting Sessions: 0");
+		votingLabel.setSize(130,20);
+		votingLabel.setLocation(35, 310);
+		add(votingLabel);
+		
+		commitedLabel = new Label("Committed: 0");
+		commitedLabel.setSize(130,20);
+		commitedLabel.setLocation(35, 340);
+		add(commitedLabel);
+		
+		notCommitedLabel = new Label("Not Committed: 0");
+		notCommitedLabel.setSize(130,20);
+		notCommitedLabel.setLocation(35, 370);
+		add(notCommitedLabel);
+		
+		rejectedLabel = new Label("Rejected: 0");
+		rejectedLabel.setSize(130,20);
+		rejectedLabel.setLocation(35, 400);
+		add(rejectedLabel);
+		
+		acceptedLabel = new Label("Accpeted: 0");
+		acceptedLabel.setSize(130,20);
+		acceptedLabel.setLocation(35, 430);
+		add(acceptedLabel);
 		
 		//-------------------------------         COLORS         -------------------------------//
 		
@@ -295,6 +340,14 @@ public class ServerGameController extends GameController implements ActionListen
 		for(int i=0; i<agentsList.get(agentCommitterBySquares).size(); i++) {
 			committerBySquaresList[i] = 0;
 		}
+		
+		valuesVoting = 0;
+		valuesBugReported = 0;
+		valuesContributed = 0;
+		valuesCommitted = 0;
+		valuesNotCommited = 0;
+		valuesRejected = 0;
+		valuesAccepted = 0;
 	}
 	
 	@Override
@@ -332,14 +385,11 @@ public class ServerGameController extends GameController implements ActionListen
 	
 	public void DrawGraphicMode(Graphics gr) 
 	{
-
 		gr.setColor(Color.black);		
 		
 		Stroke stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
-		
-		//TODO: Posar Informations Box i Separadors amb la info!
-		
+				
 		gr.drawLine(10, 10, 10, 580);			// General Box
 		gr.drawLine(755, 10, 755, 580);	
 		gr.drawLine(10, 10, 755, 10);			
@@ -365,25 +415,47 @@ public class ServerGameController extends GameController implements ActionListen
 		gr.drawLine(15, 180, 750, 180);			
 		gr.drawLine(15, 465, 750, 465);
 		
-		gr.drawLine(25, 185, 25, 250);			// Correct Values Box
-		gr.drawLine(170, 185, 170, 250);	
+		gr.drawLine(25, 185, 25, 235);			// Correct Values Box
+		gr.drawLine(170, 185, 170, 235);	
 		gr.drawLine(25, 185, 170, 185);			
-		gr.drawLine(25, 250, 170, 250);
+		gr.drawLine(25, 235, 170, 235);
 		
-		gr.drawLine(25, 255, 25, 320);			// Contributions Box
-		gr.drawLine(170, 255, 170, 320);	
-		gr.drawLine(25, 255, 170, 255);			
-		gr.drawLine(25, 320, 170, 320);
+		numMemebersLabel.setText("The Community has " + getNumMembers() + " Members");
 		
-		gr.drawLine(25, 325, 25, 390);			// Reported Values Box
-		gr.drawLine(170, 325, 170, 390);	
-		gr.drawLine(25, 325, 170, 325);			
-		gr.drawLine(25, 390, 170, 390);
+		int correctValues = getCountCorrect();
+		correctValuesLabel.setText(correctValues + " / " + sudokuSize*sudokuSize);
+		if (correctValues < 100) {
+			correctValuesLabel.setLocation(73, 210);
+		} 
+		else {
+			correctValuesLabel.setLocation(70, 210);
+		}	
 		
-		gr.drawLine(25, 395, 25, 460);			// Number of Voting sessions
-		gr.drawLine(170, 395, 170, 460);	
-		gr.drawLine(25, 395, 170, 395);			
-		gr.drawLine(25, 460, 170, 460);
+		gr.drawLine(25, 245, 25, 455);			// Misc Information Box
+		gr.drawLine(170, 245, 170, 455);	
+		gr.drawLine(25, 245, 170, 245);			
+		gr.drawLine(25, 455, 170, 455);			
+		
+												//Num Members Connected
+		contributionLabel.setText("Contributions: " + valuesContributed);	
+		
+		gr.drawLine(25, 275, 170, 275);			//Num Contributions
+		reportedLabel.setText("Bugs Reported: " + valuesBugReported);	
+
+		gr.drawLine(25, 305, 170, 305);			//Num Values Reported
+		votingLabel.setText("Voting Sessions: " + valuesVoting);	
+		
+		gr.drawLine(25, 335, 170, 335);			//Num Voting Sessions
+		commitedLabel.setText("Committed: " + valuesCommitted);	
+		
+		gr.drawLine(25, 365, 170, 365);			//Num Values Committed
+		notCommitedLabel.setText("Not Committed: " + valuesNotCommited);
+		
+		gr.drawLine(25, 395, 170, 395);			//Num Values Not Committed
+		rejectedLabel.setText("Rejected: " + valuesRejected);
+		
+		gr.drawLine(25, 425, 170, 425);			//Num Values Rejected
+		acceptedLabel.setText("Accepted: " + valuesAccepted);
 		
 		// -------------------------------------------------------------->  Elements in Voting Box
 		
@@ -896,6 +968,25 @@ public class ServerGameController extends GameController implements ActionListen
 		committerLabel.setVisible(true);
 		leaderConnectedLabel.setVisible(true);
 		
+		rowCommittersLabel.setVisible(true);
+		columnCommittersLabel.setVisible(true);
+		squareCommittersLabel.setVisible(true);
+		userCommittersLabel.setVisible(true);
+		
+		correctLabel.setVisible(true);
+		correctValuesLabel.setVisible(true);
+		
+		numMemebersLabel.setVisible(true);
+		reportedLabel.setVisible(true);
+		contributionLabel.setVisible(true);
+		votingLabel.setVisible(true);
+		commitedLabel.setVisible(true);
+		notCommitedLabel.setVisible(true);
+		rejectedLabel.setVisible(true);
+		acceptedLabel.setVisible(true);
+		
+		infoCommitters.setVisible(true);
+		
 		repaint();
 	}
 	
@@ -912,6 +1003,25 @@ public class ServerGameController extends GameController implements ActionListen
 		testerLabel.setVisible(false);
 		committerLabel.setVisible(false);
 		leaderConnectedLabel.setVisible(false);
+		
+		rowCommittersLabel.setVisible(false);
+		columnCommittersLabel.setVisible(false);
+		squareCommittersLabel.setVisible(false);
+		userCommittersLabel.setVisible(false);
+		
+		correctLabel.setVisible(false);
+		correctValuesLabel.setVisible(false);
+		
+		numMemebersLabel.setVisible(false);
+		reportedLabel.setVisible(false);
+		contributionLabel.setVisible(false);
+		votingLabel.setVisible(false);
+		commitedLabel.setVisible(false);
+		notCommitedLabel.setVisible(false);
+		rejectedLabel.setVisible(false);
+		acceptedLabel.setVisible(false);
+		
+		infoCommitters.setVisible(false);
 		
 		repaint();
 	}
@@ -953,17 +1063,17 @@ public class ServerGameController extends GameController implements ActionListen
 		lastAction[VALUE] = cells[conflictX][conflictY].current;
 		lastAction[RESULT_VOTING] = getVotingResult();
 		
-		if(EvaluateVote())
-		{
+		if(EvaluateVote()) {
 			lastAction[ACTION] = NOT_COMMITTED;
 			networkController.BroadcastMessage("notCommitted#" + conflictX + "," + conflictY + "," + lastVoting);
 			ClearCell(conflictX, conflictY, notCommitted);
+			valuesNotCommited++;
 		}
-		else
-		{
+		else {
 			lastAction[ACTION] = COMMITTED;
 			networkController.BroadcastMessage("committed#" + conflictX + "," + conflictY + "," + lastVoting);
 			SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, lastVoting);
+			valuesCommitted++;
 		}
 		
 		lastActionsList.add(0, lastAction);
@@ -1015,9 +1125,7 @@ public class ServerGameController extends GameController implements ActionListen
 				vars2 = vars[1].split(",");
 				agentId = Integer.parseInt(vars2[0]);
 				agentType = Integer.parseInt(vars2[1]);	
-				
-				System.out.println("Connected and Agent of type: " + agentType);
-				
+								
 				agentIdList = new ArrayList<Integer>();
 				
 				sizeList = agentsList.get(agentType).size();
@@ -1042,13 +1150,12 @@ public class ServerGameController extends GameController implements ActionListen
 				agentIdList = new ArrayList<Integer>();
 				agentIdList = agentsList.get(agentType);
 				
-				sizeList = agentsList.get(agentType).size();
-				if (sizeList > 0)
-				{
-					for(int i = 0; i<sizeList; i++)
-					{
-						if(agentIdList.get(i) == agentId) {			//TODO: Aqui peta!
+				sizeList = agentIdList.size();
+				if (sizeList > 0) {
+					for(int i = 0; i<sizeList; i++) {
+						if(agentIdList.get(i) == agentId) {			
 							agentIdList.remove(i);
+							break;								//I had to include the break to avoid errors in next iterations by sizeList.
 						}
 					}
 				}
@@ -1131,7 +1238,8 @@ public class ServerGameController extends GameController implements ActionListen
 				if (!instantiateFailed)
 				{
 					SetValueAndState(x, y, val, contributed);
-					networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + contributed);	
+					networkController.BroadcastMessage("instantiated#" + x + "," + y + "," + val + "," + contributed);
+					valuesContributed++;
 				}
 				
 				break;
@@ -1192,6 +1300,8 @@ public class ServerGameController extends GameController implements ActionListen
 				
 				networkController.BroadcastMessage("bugFound#" + cleanX + "," + cleanY + "," + reported);
 				ClearCell(cleanX, cleanY, reported);
+
+				valuesBugReported++;
 				
 				break;
 			case "clear":
@@ -1278,6 +1388,8 @@ public class ServerGameController extends GameController implements ActionListen
 					
 					lastVoting = tested;
 					networkController.BroadcastMessage("vote#clear=" + conflictX + "," + conflictY + "," + clientHandler.clientId + "," + tested);
+					
+					valuesVoting++;
 				}
 				else {
 					clientHandler.SendMessage("vote#voting exists");
@@ -1401,6 +1513,7 @@ public class ServerGameController extends GameController implements ActionListen
 				
 				SetValueAndState(x, y, cells[x][y].current, accepted);		
 				networkController.BroadcastMessage("accepted#" + x + "," + y + "," + accepted);
+				valuesAccepted++;
 				
 				break;
 			case "rejected":
@@ -1447,6 +1560,7 @@ public class ServerGameController extends GameController implements ActionListen
 				
 				ClearCell(x, y, rejected);
 				networkController.BroadcastMessage("rejected#" + x + "," + y + "," + rejected);
+				valuesRejected++;
 				
 				break;
 			}
@@ -1473,5 +1587,22 @@ public class ServerGameController extends GameController implements ActionListen
 			Print("Server: The committers have decided to keep the value by votation.");
 		
 		return resultVotation;
+	}
+	
+	int getNumMembers() {
+		
+		int numMembers = 0;
+		
+		agentIdList = new ArrayList<Integer>();
+		
+		for (int i=0; i<agentsList.size(); i++) {
+			agentIdList = agentsList.get(i);
+			for (int j=0; j<agentIdList.size(); j++) {
+				numMembers++;
+			}
+		}
+		
+		//TODO: Falta Sumar els Users
+		return numMembers;
 	}
 }
