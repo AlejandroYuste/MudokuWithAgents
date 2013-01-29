@@ -48,14 +48,32 @@ public class ServerNetworkController implements Runnable {
 		}
 	}
 	
-	void addAgent(int clientId, int typeAgent)
+	void addMember(int memberId, int memberType, String userName)
 	{
-		gameController.Print("Server: Agent " + clientId + " Connected to server");
+		switch (memberType)
+		{
+			case GameController.passiveUser: case GameController.userContributor: case GameController.userBugReporter:  
+			case GameController.userTester: case GameController.userCommitter: case GameController.userLeader:
+				gameController.Print("Server: " + userName + " with the ID " + memberId + " has been Connected to server");
+				break;
+			default:
+				gameController.Print("Server: Agent " + memberId + " Connected to server");
+				break;
+		}
 	}
 	
-	void removeAgent(int clientId)
+	void removeAgent(int memberId, int memberType, String userName)
 	{
-		gameController.Print("Server: Agent " + clientId + " Disconnected to server");
+		switch (memberType)
+		{
+			case GameController.passiveUser: case GameController.userContributor: case GameController.userBugReporter:  
+			case GameController.userTester: case GameController.userCommitter: case GameController.userLeader:
+				gameController.Print("Server: User " + userName + " with the ID " + memberId + " has been Disconnected to server");
+				break;
+			default:
+				gameController.Print("Server: Agent " + memberId + " Disconnected to server");
+				break;
+		}
 	}
 	
 	

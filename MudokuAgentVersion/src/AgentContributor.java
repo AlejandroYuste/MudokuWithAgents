@@ -9,7 +9,6 @@ public class AgentContributor implements Runnable{
 	
 	Agent agent;
 	
-	
 	AgentContributor(Agent agent_, int agentId_, int agentType_)
 	{
 		agentId = agentId_;

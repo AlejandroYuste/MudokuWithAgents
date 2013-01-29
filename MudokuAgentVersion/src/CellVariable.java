@@ -50,12 +50,12 @@ public class CellVariable
 		y = y_;
 	}
 	
-	public void DrawDomain(Graphics gr, int mouseOverIndex, int x, int y, ClientGameController.ActualRol actualRol)
+	public void DrawDomainClient(Graphics gr, int mouseOverIndex, int x, int y, ClientGameController.ActualRole actualRole)
 	{
 		float tempDrawX = domainXOffset;
 		int drawX = (int) tempDrawX;
 		
-		if (actualRol == ClientGameController.ActualRol.Contributor)
+		if (actualRole == ClientGameController.ActualRole.Contributor)
 		{
 			gr.setColor(ClientGameController.mouseOverColor);
 			
@@ -70,7 +70,7 @@ public class CellVariable
 			if(mouseOverIndex != -1)
 				gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
 		}
-		else // if (actualRol == ClientGameController.ActualRol.Observer || actualRol == ClientGameController.ActualRol.Tester)
+		else // if (actualRole == ClientGameController.ActualRol.Observer || actualRole == ClientGameController.ActualRol.Tester)
 		{
 			int activeDrawX = 0;
 			int activeDrawY = 0;
@@ -106,9 +106,9 @@ public class CellVariable
 		}
 	}
 	
-	public void DrawClientDomainConflict(Graphics gr, int mouseOverIndex, int conX, int conY, int cellX, int cellY, Color[] agentColors, ClientGameController.ActualRol actualRol)
+	public void DrawClientDomainConflict(Graphics gr, int mouseOverIndex, int conX, int conY, int cellX, int cellY, Color[] agentColors, ClientGameController.ActualRole actualRole)
 	{
-		DrawDomain(gr, mouseOverIndex, cellX, cellY, actualRol);
+		DrawDomainClient(gr, mouseOverIndex, cellX, cellY, actualRole);
 		
 		gr.setColor(agentColors[7]);
 		gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);

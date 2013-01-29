@@ -36,6 +36,7 @@ public class ClientNetworkController {
 	PrintStream writer;
 	
     public int clientId;
+    public String userName;
     ClientGameController gameController;
 
 	public ClientNetworkController(ClientGameController gameController_)
@@ -51,10 +52,12 @@ public class ClientNetworkController {
 		socket.close();
 	}
 	
-	public void Connect(String host_, int port_) throws UnknownHostException, IOException
+	public void Connect(String host_, int port_, String userName_) throws UnknownHostException, IOException
 	{
 		host = host_;
 		port = port_;
+		userName = userName_;
+		
 		System.out.println("Connecting to server");
         socket = new Socket(host, port);
         
@@ -63,6 +66,8 @@ public class ClientNetworkController {
         readerThread.start(); 
         
         writer = new PrintStream(socket.getOutputStream());
+        
+        SendMessage("connect#" + gameController.clientType + "," + userName);
 	}
 	
 	public void SendMessage(String message)

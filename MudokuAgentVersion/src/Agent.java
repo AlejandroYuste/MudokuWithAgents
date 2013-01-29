@@ -5,7 +5,6 @@ import java.util.Random;
 
 class Agent 
 {
-
 	int agentId;
 	int agentType;
 	
@@ -90,11 +89,9 @@ class Agent
 				SendMessage("disconnect#" + threadInfo.agentId + "," + threadInfo.agentType);
 			}
 		}
-		
-
 	}
 	
-	void executarAgents(int agentId, int agentType) 
+	void executeAgent(int agentId, int agentType) 
 	{
 		System.out.println("Agent --> Executant el Thread del Agent: " + agentId + " i tipus: " + agentType);
 		
@@ -154,26 +151,6 @@ class Agent
 				
 				int[][] actualGrid = AgentNetworkController.getActualGrid();
 				int[][] actualState = AgentNetworkController.getActualState();
-				
-				/*
-				public final static int waitingValue = 0;
-				public final static int intializedByServer = 1;
-				public final static int contributedByRows = 2;
-				public final static int contributedByColumns = 3;
-				public final static int contributedBySquares = 4;
-				public final static int contributedByUser = 5;
-				public final static int reportedByRows = 6;
-				public final static int reportedByColumns = 7;
-				public final static int reportedBySquares = 8;	
-				public final static int reportedByUser = 9;	
-				public final static int testedByRows = 10;	
-				public final static int testedByColumns = 11;	
-				public final static int testedBySquares = 12;	
-				public final static int testedByUser = 13;	
-				public final static int acceptedByAgent = 14;
-				public final static int acceptedByUser = 15;	
-				public final static int rejectedByAgent = 16;	
-				public final static int rejectedByUser = 17;	*/
 				
 				int i, j, val;
 				ArrayList<Integer> options = new ArrayList<Integer>();

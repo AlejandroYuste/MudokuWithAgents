@@ -11,18 +11,19 @@ public class ThreadsInformation {
 		agentType = agentType_;
 	}
 
-	Thread getThread()
-	{
+	Thread getThread() {
 		return threadInfo;
 	}
 	
-	int getAgentId()
-	{
+	int getAgentId() {
 		return agentId;
 	}
 	
-	int getAgentType()
-	{
+	int getAgentType() {
 		return agentType;
+	}
+	
+	void setAgentId(int _agentId) {
+		agentId = _agentId;
 	}
 }

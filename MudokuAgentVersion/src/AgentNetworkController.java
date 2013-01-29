@@ -7,8 +7,6 @@ public class AgentNetworkController
 {
 	String host;
 	int port;
-	int numAgents;
-	int typeAgent;
 	
 	static int conflictX;
 	static int conflictY;
@@ -18,9 +16,7 @@ public class AgentNetworkController
 	Agent agent;
 	AgentReader reader;
 	Thread readerThread;
-	
-	private int agentId = 1;
-	
+		
     static AgentGameController gameController;
     static PrintStream writer;
 
@@ -154,25 +150,21 @@ public class AgentNetworkController
 	
 	public void Connect(int numAgents_, int typeAgents_)
 	{
-		numAgents = numAgents_;
-		typeAgent = typeAgents_;
-					
-		String stringAgentType = new String();
-		
-		stringAgentType = gameController.getLabelTypeAgent(typeAgent);
-
-		for (int i=0; i<numAgents; i++)
-        {
-	        gameController.listPanel.add("Agent [" + agentId + "] --> " + stringAgentType);
-	        
-	        agent = new Agent(this, agentId, typeAgent);
-	        agent.executarAgents(agentId, typeAgent);
-	        
-	        SendMessage("connect#" + agentId + "," + typeAgent);
-	        
-	        agentId++;
+		for (int i=0; i<numAgents_; i++) {
+	        SendMessage("connect#" + typeAgents_);
         }
     }
+	
+	public void ConnectionAccepted(int agentId_, int agentType_) 
+	{	
+		String stringAgentType = new String();
+		stringAgentType = gameController.getLabelTypeAgent(agentType_);
+		
+        gameController.listPanel.add("Agent [" + agentId_ + "] --> " + stringAgentType);
+        
+        agent = new Agent(this, agentId_, agentType_);
+        agent.executeAgent(agentId_, agentType_);
+	}
 	
 	int getCellState(int x, int y)
 	{

@@ -94,6 +94,8 @@ public class AgentGameController extends GameController implements ActionListene
 	boolean conflictExists;				//Indicates if there's a Voting Open
 	int conflictX, conflictY;
 	
+	boolean isFirstTime = true;
+	
 	//Constants for the colors
 	
 	static Color[] agentColors;
@@ -579,10 +581,8 @@ public class AgentGameController extends GameController implements ActionListene
 		gr.drawLine(485, 380, 550, 380);
 		
 		gr.setColor(agentColors[votingColor]);		//Voting Box		
-		if (getConflictExists())
-			gr.setColor(Color.green);
-		else
-			gr.setColor(Color.red);
+		if (!getConflictExists())
+			gr.setColor(Color.white);
 		
 		gr.fillRect(500, 357, 35, 15);
 		gr.setColor(Color.black);
@@ -706,19 +706,12 @@ public class AgentGameController extends GameController implements ActionListene
 		int activeRectY;
 		int[] region;
 		
-		/*if(!conflictExists)
-		{
-			activeRectX = (int) (gridXOffset + activeX * deltaX);
-			activeRectY = (int) (gridYOffset + activeY * deltaY);
-			region = Agent.getRegion(activeX, activeY);
+		if(conflictExists && isFirstTime) {
+			activeX = conflictX;
+			activeY = conflictY;
+			isFirstTime = false;
 		}
-		else
-		{
-			activeRectX = (int) (gridXOffset + conflictX * deltaX);
-			activeRectY = (int) (gridYOffset + conflictY * deltaY);
-			region = Agent.getRegion(conflictX, conflictY);
-		}*/
-		
+
 		activeRectX = (int) (gridXOffset + activeX * deltaX);
 		activeRectY = (int) (gridYOffset + activeY * deltaY);
 		region = Agent.getRegion(activeX, activeY);
@@ -1077,6 +1070,13 @@ public class AgentGameController extends GameController implements ActionListene
 					networkState = NetworkState.idle;
 					repaint();
 					break;
+				case "memberConnected":
+					vars2 = vars[1].split(",");
+					int agentId = Integer.parseInt(vars2[0]);
+					int agentType = Integer.parseInt(vars2[1]);
+					
+					networkController.ConnectionAccepted(agentId, agentType);
+					break;
 				case "instantiated":
 					addToGrid(vars[1]);
 					countContributed++;
@@ -1094,6 +1094,7 @@ public class AgentGameController extends GameController implements ActionListene
 					{
 						case "clear":
 							conflictExists = true;
+							isFirstTime = true;
 							
 							repaint();
 							coordinates = vars2[1].split(",");
