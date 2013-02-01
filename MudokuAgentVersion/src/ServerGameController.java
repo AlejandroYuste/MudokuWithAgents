@@ -63,7 +63,7 @@ public class ServerGameController extends GameController implements ActionListen
 	ArrayList<Integer> memberIdList;			// This list saves all the IDs of Agents/Users of the same type connected to the server
 	ArrayList<ArrayList<Integer>> memberList = new ArrayList<ArrayList<Integer>>();
 	
-	int[] committerByRowsList, committerByColumnsList, committerBySquaresList;
+	int[] committerByRowsList, committerByColumnsList, committerBySquaresList, userCommitterList;
 	
 	int[] lastAction;				
 	ArrayList<int[]> lastActionsList = new ArrayList<int[]>();
@@ -284,7 +284,7 @@ public class ServerGameController extends GameController implements ActionListen
 		colors[committerByColumnsColor] = new Color(69,	139, 0);				// Committer by Columns 	--> chartreuse 4
 		colors[committerBySquaresColor] = new Color(139, 117, 0);				// Committer by Squares 	--> gold 4
 		colors[agentLeaderColor] = new Color(205, 201,	201);					// Agent Leader 			--> snow 3
-		colors[userLeaderColor] = new Color(238, 180, 180);						// User Leader				--> rosybrown 2
+		colors[userLeaderColor] = new Color(255, 187, 255);						// 5Leader Agent			--> plum 1
 		colors[userColor] = new Color(238, 180, 180);							// User 					--> rosybrown 2
 		colors[votingColor] = new Color(220, 20, 60);							// Conflict Color	 		--> crimson
 		colors[valueContributedColor] = new Color(56, 142, 142);				// Value Contributed		--> sgi teal
@@ -346,6 +346,11 @@ public class ServerGameController extends GameController implements ActionListen
 		committerBySquaresList = new int[memberList.get(agentCommitterBySquares).size()];
 		for(int i=0; i<memberList.get(agentCommitterBySquares).size(); i++) {
 			committerBySquaresList[i] = 0;
+		}
+		
+		userCommitterList = new int[memberList.get(userCommitter).size()];
+		for(int i=0; i<memberList.get(userCommitter).size(); i++) {
+			userCommitterList[i] = 0;
 		}
 		
 		valuesVoting = 0;
@@ -672,20 +677,20 @@ public class ServerGameController extends GameController implements ActionListen
 					}
 					break;
 			}
-				
-			if(isUser && !isVotingFinished && !isNewGame) 
-			{																								//Write the Word: "Agent" or "User"
-				gr.drawString("User ", drawActionOffSetX, drawActionOffSetY);
-				
-				//TODO: Afegir el nom del user! (No esta fet el Sistma).
-			}
-			else if (!isUser && !isVotingFinished && !isNewGame)
+			
+			if (!isVotingFinished && !isNewGame)
 			{
-				gr.fillRect(drawActionOffSetX + 40, drawActionOffSetY - 15, (int) deltaX, (int) deltaY);		//Fill the square of the Agent ID
+				
+				gr.fillRect(drawActionOffSetX + 40, drawActionOffSetY - 15, (int) deltaX, (int) deltaY);		//Fill the square of ID
 				
 				gr.setColor(Color.black);			
-				gr.drawRect(drawActionOffSetX + 40, drawActionOffSetY - 15, (int) deltaX, (int) deltaY);		//Draw the square of the Agent ID
-				gr.drawString("Agent ", drawActionOffSetX, drawActionOffSetY);
+				gr.drawRect(drawActionOffSetX + 40, drawActionOffSetY - 15, (int) deltaX, (int) deltaY);		//Draw the square of ID
+				
+				if(isUser) {													//Write the Word: "Agent" or "User"											
+					gr.drawString("User", drawActionOffSetX, drawActionOffSetY);
+				} else{
+					gr.drawString("Agent", drawActionOffSetX, drawActionOffSetY);
+				}
 				
 				gr.setColor(Color.white);
 				if(lastAction[ID] < 10) {																		//Write the ID of the Agent
@@ -804,6 +809,9 @@ public class ServerGameController extends GameController implements ActionListen
 					}
 					
 					break;
+				case PROMOTION:
+					gr.drawString("has changed its position from " + getTypeLabel(lastAction[TYPE]) + " to " + getTypeLabel(lastAction[NEW_TYPE]) + ".", drawActionOffSetX + 75, drawActionOffSetY);
+					break;
 			}
 			
 			drawActionOffSetY += 40;
@@ -845,15 +853,13 @@ public class ServerGameController extends GameController implements ActionListen
 				gr.drawString(String.valueOf(memberList.get(agentCommitterByRows).get(i)), committerByRowsX + committerMoveX + 5, committerY + 17);
 			}
 			
-					
-			if (committerByRowsList.length > i && committerByRowsList[i] == -1) {
-				gr.setColor(Color.green);			
-			}
-			else if (committerByRowsList.length > i && committerByRowsList[i] == 0) {
-				gr.setColor(Color.white);
-			}
-			else if (committerByRowsList.length > i && committerByRowsList[i] == 1) {
-				gr.setColor(Color.red);
+			if (committerByRowsList.length > i) {
+				if (committerByRowsList[i] == -1) {
+					gr.setColor(Color.green);		
+				}
+				else if (committerByRowsList[i] == 1) {
+					gr.setColor(Color.red);
+				}
 			}
 			else {
 				gr.setColor(Color.white);
@@ -883,15 +889,13 @@ public class ServerGameController extends GameController implements ActionListen
 				gr.drawString(String.valueOf(memberList.get(agentCommitterByColumns).get(i)), committerByColumnsX + committerMoveX + 5, committerY + 17);
 			}
 			
-
-			if (committerByColumnsList.length > i && committerByColumnsList[i] == -1) {
-				gr.setColor(Color.green);			
-			}
-			else if (committerByColumnsList.length > i && committerByColumnsList[i] == 0) {
-				gr.setColor(Color.white);
-			}
-			else if (committerByColumnsList.length > i && committerByColumnsList[i] == 1) {
-				gr.setColor(Color.red);
+			if (committerByColumnsList.length > i) {
+				if (committerByColumnsList[i] == -1) {
+					gr.setColor(Color.green);		
+				}
+				else if (committerByColumnsList[i] == 1) {
+					gr.setColor(Color.red);
+				}
 			}
 			else {
 				gr.setColor(Color.white);
@@ -921,14 +925,13 @@ public class ServerGameController extends GameController implements ActionListen
 				gr.drawString(String.valueOf(memberList.get(agentCommitterBySquares).get(i)), committerBySquaresX + committerMoveX + 5, committerY + 17);
 			}
 			
-			if (committerBySquaresList.length > i && committerBySquaresList[i] == -1) {
-				gr.setColor(Color.green);		
-			}
-			else if (committerBySquaresList.length > i && committerBySquaresList[i] == 0) {
-				gr.setColor(Color.white);
-			}
-			else if (committerBySquaresList.length > i && committerBySquaresList[i] == 1) {
-				gr.setColor(Color.red);
+			if (committerBySquaresList.length > i) {
+				if (committerBySquaresList[i] == -1) {
+					gr.setColor(Color.green);		
+				}
+				else if (committerBySquaresList[i] == 1) {
+					gr.setColor(Color.red);
+				}
 			}
 			else {
 				gr.setColor(Color.white);
@@ -942,7 +945,43 @@ public class ServerGameController extends GameController implements ActionListen
 			committerMoveX += 29;
 		}
 		
-		//TODO: Falta afegir tot los dels users aqui!
+		committerMoveX = 0;
+		
+		for (int i=0; i<memberList.get(userCommitter).size() && i<6; i++)
+		{
+			gr.setColor(colors[userColor]);
+			gr.fillRect(committerByUserX + committerMoveX, committerY, (int) deltaX, (int) deltaY);
+			gr.setColor(Color.black);
+			gr.drawRect(committerByUserX + committerMoveX, committerY, (int) deltaX, (int)deltaY);
+			gr.setColor(Color.white);
+
+			if(memberList.get(userCommitter).get(i) < 99) {																		//Write the ID of the Agent
+				gr.drawString(String.valueOf(memberList.get(userCommitter).get(i)), committerByUserX + committerMoveX + 8, committerY + 17);
+			}
+			else {
+				gr.drawString(String.valueOf(memberList.get(userCommitter).get(i)), committerByUserX + committerMoveX + 5, committerY + 17);
+			}
+						
+			if (userCommitterList.length > i) {
+				//System.out.println("Pintant UserCommiters. i: " +i+" . userCommitterList[i]: " + userCommitterList[i]);
+				if (userCommitterList[i] == -1) {
+					gr.setColor(Color.green);		
+				}
+				else if (userCommitterList[i] == 1) {
+					gr.setColor(Color.red);
+				}
+			}
+			else {
+				gr.setColor(Color.white);
+			}
+			
+			gr.fillRect(committerByUserX + committerMoveX + 7, committerY + 30, 10, 10);
+			
+			gr.setColor(Color.black);
+			gr.drawRect(committerByUserX + committerMoveX + 7, committerY + 30, 10, 10);
+
+			committerMoveX += 29;
+		}
 	}
 
 	int getVotingResult()
@@ -957,6 +996,9 @@ public class ServerGameController extends GameController implements ActionListen
 		
 		for(int i=0; i<committerBySquaresList.length;i++)
 			result += committerBySquaresList[i];
+		
+		for(int i=0; i<userCommitterList.length;i++)
+			result += userCommitterList[i];
 		
 		return result;
 	}
@@ -1182,9 +1224,52 @@ public class ServerGameController extends GameController implements ActionListen
 				memberList.set(memberType, memberIdList);
 				
 				break;
+			case "getPromotion":
+				vars2 = vars[1].split(",");
+				memberId = Integer.parseInt(vars2[0]);
+				memberType = Integer.parseInt(vars2[1]);
+				int newMemberType = Integer.parseInt(vars2[2]);
+				userName = vars2[3];
+				
+				if (memberType != newMemberType)
+				{
+					memberIdList = new ArrayList<Integer>();
+					memberIdList = memberList.get(memberType);
+					
+					sizeList = memberIdList.size();
+					if (sizeList > 0) {
+						for(int i = 0; i<sizeList; i++) {
+							if(memberIdList.get(i) == memberId) {			
+								memberIdList.remove(i);
+								break;								//I had to include the break to avoid errors in next iterations by sizeList.
+							}
+						}
+					}
+					
+					memberList.set(memberType, memberIdList);		//Delete de Member from the initial Type
+					memberIdList = new ArrayList<Integer>();		//Add the Member to the new type list
+					memberIdList = memberList.get(newMemberType);
+					
+					memberIdList.add(memberId);
+					memberList.set(newMemberType, memberIdList);
+	
+					if(lastActionsList.size() == 7) {
+						lastActionsList.remove(6);
+					}
+					
+					lastAction = new int[6];
+					lastAction[ID] = memberId;
+					lastAction[TYPE] = memberType;
+					lastAction[ACTION] = PROMOTION;
+					lastAction[NEW_TYPE] = newMemberType;
+					
+					lastActionsList.add(0, lastAction);
+					repaint();
+				}
+				
+				break;
 			case "instantiate":			//	When an Agent or User tries to add a new Value to the grid.
 										//	"instantiate#" + memberId + "," typeAgent + "," + X + "," + Y + "," + value
-				
 				vars2 = vars[1].split(",");
 				memberId = Integer.parseInt(vars2[0]);
 				memberType = Integer.parseInt(vars2[1]);
@@ -1209,7 +1294,7 @@ public class ServerGameController extends GameController implements ActionListen
 					case userContributor:	
 						if (cells[x][y].valueState == waitingValue || cells[x][y].valueState == reportedByRows || cells[x][y].valueState == reportedByColumns || 
 						    cells[x][y].valueState == reportedBySquares || cells[x][y].valueState == reportedByUser || cells[x][y].valueState == rejectedByAgent || 
-						    cells[x][y].valueState == rejectedByUser) 
+						    cells[x][y].valueState == rejectedByUser ||  cells[x][y].valueState == notCommitted) 
 						{
 							contributed = contributedByUser;
 						} else {
@@ -1277,7 +1362,7 @@ public class ServerGameController extends GameController implements ActionListen
 				if (isAgent(memberType)) {			//Graphic Mode
 					Print("Server: Agent " + memberId + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");
 				} else {
-					userName = vars2[5];
+					userName = vars2[4];
 					Print("Server: " + userName + " with the ID " + memberId + " has found a bug at the position [" + cleanX + "][" + cleanY +"]. The value will be removed.");
 				}
 				
@@ -1326,6 +1411,10 @@ public class ServerGameController extends GameController implements ActionListen
 					for(int i=0; i<memberList.get(agentCommitterBySquares).size(); i++)
 						committerBySquaresList[i] = 0;
 					
+					userCommitterList = new int[memberList.get(userCommitter).size()];
+					for(int i=0; i<memberList.get(userCommitter).size(); i++)
+						userCommitterList[i] = 0;
+					
 					switch(memberType)
 					{
 						case agentTesterByRows:
@@ -1345,7 +1434,7 @@ public class ServerGameController extends GameController implements ActionListen
 					if (isAgent(memberType)) {			//Graphic Mode
 						Print("Server: Agent " + memberId + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");
 					} else {
-						userName = vars2[5];
+						userName = vars2[4];
 						Print("Server: " + userName + " with the ID " + memberId + " has tested correctly the position [" + conflictX + "][" + conflictY +"]. Votation for committing.");
 					}
 					
@@ -1392,61 +1481,65 @@ public class ServerGameController extends GameController implements ActionListen
 				int conY = Integer.parseInt(vars2[3]);
 				int voteVal = Integer.parseInt(vars2[4]);
 				
-				if (!isAgent(memberType))					//User Committer
-				{
-					userName = vars2[5];
-					if(!votingExists || conflictX != conX || conflictY != conY) {
-						Print("Server: Received an Unexpected vote from User " + userName + " for the position [" + conX + "][" + conY +"]");
+				boolean isUser = false;
+				
+				if(!votingExists || conflictX != conX || conflictY != conY)
+					Print("Server: Received an Unexpected vote from Agent " + memberId + " for the position [" + conX + "][" + conY +"]");
+				else
+				{				
+					switch(memberType)
+					{
+						case agentCommitterByRows:
+							for(int i=0; i<memberList.get(agentCommitterByRows).size(); i++)
+							{
+								if (memberList.get(agentCommitterByRows).get(i) == memberId)
+									committerByRowsList[i] = voteVal;
+							}
+							break;
+						case agentCommitterByColumns:
+							for(int i=0; i<memberList.get(agentCommitterByColumns).size(); i++)
+							{
+								if (memberList.get(agentCommitterByColumns).get(i) == memberId)
+									committerByColumnsList[i] = voteVal;
+							}
+							break;
+						case agentCommitterBySquares:
+							for(int i=0; i<memberList.get(agentCommitterBySquares).size(); i++)
+							{
+								if (memberList.get(agentCommitterBySquares).get(i) == memberId)
+									committerBySquaresList[i] = voteVal;
+							}
+							break;
+						case userCommitter:
+							isUser = true;
+							userName = vars2[5];
+														
+							for(int i=0; i<memberList.get(userCommitter).size(); i++)
+							{								
+								if (memberList.get(userCommitter).get(i) == memberId) {
+									userCommitterList[i] = voteVal;
+								}
+							}
+							break;
 					}
-					else
-					{				
-						if(voteVal == -1) {
-							Print("Server: " + userName + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
-						}
-						else if (voteVal == 1) {
-							Print("Server: " + userName + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
-						}
-					}
-				} else {									//Agent Committer
-					memberId = Integer.parseInt(vars2[0]);
 					
-					if(!votingExists || conflictX != conX || conflictY != conY)
-						Print("Server: Received an Unexpected vote from Agent " + memberId + " for the position [" + conX + "][" + conY +"]");
-					else
-					{				
-						switch(memberType)
-						{
-							case agentCommitterByRows:
-								for(int i=0; i<memberList.get(agentCommitterByRows).size(); i++)
-								{
-									if (memberList.get(agentCommitterByRows).get(i) == memberId)
-										committerByRowsList[i] = voteVal;
-								}
-								break;
-							case agentCommitterByColumns:
-								for(int i=0; i<memberList.get(agentCommitterByColumns).size(); i++)
-								{
-									if (memberList.get(agentCommitterByColumns).get(i) == memberId)
-										committerByColumnsList[i] = voteVal;
-								}
-								break;
-							case agentCommitterBySquares:
-								for(int i=0; i<memberList.get(agentCommitterBySquares).size(); i++)
-								{
-									if (memberList.get(agentCommitterBySquares).get(i) == memberId)
-										committerBySquaresList[i] = voteVal;
-								}
-								break;
+					if (isUser)
+					{
+						if(voteVal == -1) {
+							Print("Server: User " + userName + " with he ID " + memberId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
+						} else if (voteVal == 1) {
+							Print("Server: User " + userName + " with he ID " + memberId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
 						}
-						
+					} 
+					else {
 						if(voteVal == -1) {
 							Print("Server: Agent " + memberId + " voted to keep the Contribution at the position [" + conX + "][" + conY +"]");
 						} else if (voteVal == 1) {
 							Print("Server: Agent " + memberId + " voted to remove the Contribution at the position [" + conX + "][" + conY +"]");
 						}
-						
-						repaint();
 					}
+					
+					repaint();
 				}
 				
 				votes.add(voteVal);
@@ -1483,7 +1576,7 @@ public class ServerGameController extends GameController implements ActionListen
 						accepted = acceptedByAgent;
 						break;
 					case userLeader:
-						userName = vars2[0];
+						userName = vars2[4];
 						Print("Server: " + userName + " has accepted the value " + cells[x][y].current + " for the position [" + x + "][" + y +"]");
 						accepted = acceptedByUser;
 						break;
@@ -1510,7 +1603,7 @@ public class ServerGameController extends GameController implements ActionListen
 						rejected = rejectedByAgent;
 						break;
 					case userLeader:
-						userName = vars2[0];
+						userName = vars2[4];
 						Print("Server: User " + userName + " has rejected the value " + cells[x][y].current + " for the position [" + x + "][" + y +"]");
 						rejected = rejectedByUser;
 						break;
@@ -1586,5 +1679,34 @@ public class ServerGameController extends GameController implements ActionListen
 		} else {
 			return true;
 		}
+	}
+	
+	String getTypeLabel(int type)
+	{
+		String newType = "";
+		
+		switch (type)
+		{
+			case passiveUser:
+				newType = "Passive User";
+				break;
+			case userContributor:
+				newType = "Contributor";
+				break;
+			case userBugReporter:
+				newType = "Bug Reporter";
+				break;
+			case userTester:
+				newType = "Tester";
+				break;
+			case userCommitter:
+				newType = "Committer";
+				break;
+			case userLeader:
+				newType = "Project Leader";
+				break;
+		}
+		
+		return newType;
 	}
 }

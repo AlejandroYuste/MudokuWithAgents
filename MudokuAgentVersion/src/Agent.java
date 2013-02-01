@@ -92,9 +92,7 @@ class Agent
 	}
 	
 	void executeAgent(int agentId, int agentType) 
-	{
-		System.out.println("Agent --> Executant el Thread del Agent: " + agentId + " i tipus: " + agentType);
-		
+	{		
 		switch(agentType)
 		{
 			case GameController.agentContributorByRows: case GameController.agentContributorByColumns: case GameController.agentContributorBySquares:
@@ -1155,10 +1153,12 @@ class Agent
 				
 				boolean correct = checkPosition(x, y, actualGrid[x][y]);
 				
-				if(correct)
+				if(correct) {
 					SendMessage("accepted#" + agentId + "," + agentType + "," + x + "," + y);
-				else
+				}
+				else {
 					SendMessage("rejected#" + agentId + "," + agentType + "," + x + "," + y);
+				}
 				
 			}
 			else
@@ -1241,6 +1241,47 @@ class Agent
 			
 			return true;
 		}
+		
+		//#######################################    LEADER REMOVE RANDOM VALUE   ############################################
+		
+		static void LeaderRemoveRandomValues(int agentId, int agentType){
+			
+			int[][] actualState = AgentNetworkController.getActualState();
+			
+			Random random = new Random(System.nanoTime());
+			int x, y;
+			int correctValues = 0;
+			
+			for (int i = 0; i<GameController.sudokuSize; i++)
+			{
+				for (int j = 0; j<GameController.sudokuSize; j++)
+				{
+					if (actualState[i][j] == GameController.intializedByServer || actualState[i][j] == GameController.acceptedByUser || actualState[i][j] == GameController.acceptedByAgent) {
+						correctValues++;
+					}
+				}
+			}
+			
+			if (correctValues > 200)
+			{
+				x = random.nextInt(GameController.sudokuSize);
+				y = random.nextInt(GameController.sudokuSize);
+				
+				while (actualState[x][y] != GameController.intializedByServer && actualState[x][y] != GameController.acceptedByUser && actualState[x][y] != GameController.acceptedByAgent) {
+					x = random.nextInt(GameController.sudokuSize);
+					y = random.nextInt(GameController.sudokuSize);
+				}
+				
+				SendMessage("rejected#" + agentId + "," + agentType + "," + x + "," + y);
+				
+				try {
+					Thread.sleep(random.nextInt(10) * 15000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}		
+		}
+		
 		
 		static int[] getRegion(int x, int y)
 		{

@@ -29,7 +29,10 @@ public class AgentLeader implements Runnable{
 				if (!Agent.getConflictExists())
 				{
 					Agent.Leader(agentId, agentType);
-					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 750);
+					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 400);
+					
+					Agent.LeaderRemoveRandomValues(agentId, agentType);
+					Thread.sleep((random.nextInt(agent.getNumAgentsConnected()) + 1) * 400);
 				}
 				else Thread.sleep(10000);
 				

@@ -64,8 +64,16 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 		int activeY = 0;
 		int index = -1;
 		
-		if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420)
-			index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
+		if (e.getY() > GameController.numberInstantiateY && e.getY() < GameController.numberInstantiateY + deltaY && 
+		    e.getX() > GameController.numberInstantiateX && e.getX() < GameController.numberInstantiateX + deltaX * 8 ) 
+		{
+			index = (int) ((e.getX() - GameController.numberInstantiateX) / deltaX);
+		}
+		else if (e.getY() > GameController.numberInstantiateY + deltaY && e.getY() < GameController.numberInstantiateY + deltaY + deltaY && 
+			     e.getX() > GameController.numberInstantiateX && e.getX() < GameController.numberInstantiateX + deltaX * 8 ) 
+		{
+			index = (int) ((e.getX() - GameController.numberInstantiateX) / deltaX + 8);
+		}
 		else if(e.getX() < gridEndX && e.getX() > GameController.gridXOffset &&  e.getY() < gridEndY && e.getY() > AgentGameController.gridYOffset)
 		{
 			activeX = (int) ((e.getX() - GameController.gridXOffset) / deltaX);
@@ -89,9 +97,10 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 	}
 	
 	@Override
-	public void mouseMoved(MouseEvent e) {
+	public void mouseMoved(MouseEvent e) 		//This tell us where the mouse is pointing at
+	{
 
-		if(e.getX() > GameController.gridXOffset && e.getX() < gridEndX && e.getY() < gridEndY && e.getY() > GameController.gridYOffset)
+		if(e.getX() > GameController.gridXOffset && e.getX() < gridEndX && e.getY() < gridEndY && e.getY() > GameController.gridYOffset)		//MouseOverGrid
 		{
 			int newMouseOverX = (int) ((e.getX() - GameController.gridXOffset) / deltaX);
 			int newMouseOverY = (int) ((e.getY() - GameController.gridYOffset) / deltaY);
@@ -104,10 +113,21 @@ public class SudokuMouseController implements MouseListener, MouseMotionListener
 				lastDomainIndex = -1;
 			}
 		}
-		else if(e.getY() > CellVariable.domainYOffset && e.getY() < CellVariable.domainYOffset + deltaY && e.getX() < 420 && e.getX() > GameController.gridXOffset)
+		else if(GameController.userConnected && (e.getY() > GameController.numberInstantiateY && e.getY() < GameController.numberInstantiateY + deltaY * 2 && (e.getX() < GameController.numberInstantiateX + (int) deltaX * 8) && e.getX() > GameController.numberInstantiateX))
 		{
-			int index = (int)((e.getX() - CellVariable.domainXOffset) / deltaX);
-						
+			int index = -1;
+				
+			if (e.getY() > GameController.numberInstantiateY && e.getY() < GameController.numberInstantiateY + deltaY && 
+				e.getX() > GameController.numberInstantiateX && e.getX() < GameController.numberInstantiateX + deltaX * 8 ) 
+			{
+				index = (int) ((e.getX() - GameController.numberInstantiateX) / deltaX);
+			}
+			else if (e.getY() > GameController.numberInstantiateY + deltaY && e.getY() < GameController.numberInstantiateY + deltaY + deltaY && 
+				     e.getX() > GameController.numberInstantiateX && e.getX() < GameController.numberInstantiateX + deltaX * 8 ) 
+			{
+				index = (int) ((e.getX() - GameController.numberInstantiateX) / deltaX + 8);
+			}
+			
 			if (lastDomainIndex != index)
 			{
 				lastDomainIndex = index;

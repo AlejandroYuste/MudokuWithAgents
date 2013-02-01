@@ -50,78 +50,7 @@ public class CellVariable
 		y = y_;
 	}
 	
-	public void DrawDomainClient(Graphics gr, int mouseOverIndex, int x, int y, ClientGameController.ActualRole actualRole)
-	{
-		float tempDrawX = domainXOffset;
-		int drawX = (int) tempDrawX;
-		
-		if (actualRole == ClientGameController.ActualRole.Contributor)
-		{
-			gr.setColor(ClientGameController.mouseOverColor);
-			
-			for(int i = 0; i<GameController.sudokuSize;i++)
-			{
-				gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
-				gr.drawString(String.valueOf(i+1), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
-				tempDrawX += deltaX;
-				drawX = (int) tempDrawX;
-			}
-			
-			if(mouseOverIndex != -1)
-				gr.drawRect((int)(domainXOffset + mouseOverIndex * deltaX), domainYOffset, (int)deltaX, (int)deltaY);
-		}
-		else // if (actualRole == ClientGameController.ActualRol.Observer || actualRole == ClientGameController.ActualRol.Tester)
-		{
-			int activeDrawX = 0;
-			int activeDrawY = 0;
-			
-			float tempDrawY = 0;
-			int drawY = (int) tempDrawY;
-			
-			for(int i = 0; i<GameController.sudokuSize;i++)
-			{
-				gr.setColor(Color.black);
-				if(i==x)
-					activeDrawX = drawX;
-		
-				gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
-				gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
-				tempDrawX += deltaX;
-				drawX = (int) tempDrawX;
-				
-				if(i==y) 
-					activeDrawY = drawY;
-	
-				gr.drawRect(domainYOffset + 10, 10 + drawY, (int)deltaX, (int)deltaY);
-				gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 5, (int)(drawY + deltaY / 2) + 15);
-				tempDrawY += deltaY;
-				drawY = (int) tempDrawY;
-			}
-			
-			gr.setColor(new Color(220, 20, 60));
-			gr.drawRect(activeDrawX, domainYOffset, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(x), (int)(activeDrawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
-			gr.drawRect(domainYOffset + 10, 10 + activeDrawY, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
-		}
-	}
-	
-	public void DrawClientDomainConflict(Graphics gr, int mouseOverIndex, int conX, int conY, int cellX, int cellY, Color[] agentColors, ClientGameController.ActualRole actualRole)
-	{
-		DrawDomainClient(gr, mouseOverIndex, cellX, cellY, actualRole);
-		
-		gr.setColor(agentColors[7]);
-		gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
-		
-		Stroke stroke = new BasicStroke(2);
-		((Graphics2D) gr).setStroke(stroke);
-		gr.setColor(Color.black);
-		gr.drawRect(conX, conY, (int)deltaX, (int)deltaY);
-		
-		gr.setColor(Color.white);
-	}
-	
-	public void DrawDomainAgent(Graphics gr, int x, int y)
+	public void DrawDomain(Graphics gr, int x, int y)
 	{
 		float tempDrawX = domainXOffset;
 		int drawX = (int) tempDrawX;
@@ -160,9 +89,9 @@ public class CellVariable
 		gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
 	}
 	
-	public void DrawAgentDomainConflict(Graphics gr, int conX, int conY, int cellX, int cellY, Color[] agentColors)
+	public void DrawDomainConflict(Graphics gr, int conX, int conY, int cellX, int cellY, Color[] agentColors)
 	{
-		DrawDomainAgent(gr, cellX, cellY);
+		DrawDomain(gr, cellX, cellY);
 		
 		gr.setColor(agentColors[AgentGameController.votingColor]);
 		gr.fillRect(conX, conY, (int) deltaX, (int) deltaY);
@@ -174,7 +103,6 @@ public class CellVariable
 		((Graphics2D) gr).setStroke(stroke);
 		gr.setColor(Color.black);
 		gr.drawRect(conX, conY, (int)deltaX, (int)deltaY);
-	
 	}
 
 	public int EvaluateClick(int mouseX, int mouseY)

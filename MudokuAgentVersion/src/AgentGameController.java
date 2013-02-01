@@ -128,8 +128,8 @@ public class AgentGameController extends GameController implements ActionListene
 		agentColors[columnAgentColor] = new Color(173, 255, 47);				// 2.  Columns Agent 		--> greenyellow
 		agentColors[squareAgentColor] = new Color(255, 236,	139);				// 3.  Square Agent			--> lightgoldenrod 1
 		agentColors[userColor] = new Color(238, 180, 180);						// 4.  User 				--> rosybrown 2
-		agentColors[agentLeaderColor] = new Color(205, 201,	201);				// 5.  Leader Agent			--> snow 3
-		agentColors[userLeaderColor] = new Color(0, 0, 0);						// 6.  User Leader			--> black
+		agentColors[agentLeaderColor] = new Color(255, 187, 255);				// 5.  Leader Agent			--> plum 1
+		agentColors[userLeaderColor] = new Color(238, 180, 180);				// 6.  User Leader			--> rosybrown 2
 		agentColors[valueContributedColor] = new Color(56, 142, 142);			// 7.  Value Contributed	--> sgi teal
 		agentColors[valueReportedColor] = new Color(255, 255, 255);				// 8.  Value Reported		--> white
 		agentColors[valueCommittedColor] = new Color(220, 20, 60);				// 9.  Value Committed		--> crimson
@@ -835,7 +835,7 @@ public class AgentGameController extends GameController implements ActionListene
 						int conY = (int) (gridYOffset + conflictY * deltaY);
 						
 						setVotingCell(conflictX, conflictY);
-						cells[activeX][activeY].DrawAgentDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
+						cells[activeX][activeY].DrawDomainConflict(gr, conX, conY, conflictX, conflictY, agentColors);
 						gr.setColor(agentColors[votingColor]);
 					}
 				}
@@ -871,7 +871,7 @@ public class AgentGameController extends GameController implements ActionListene
 		switch(networkState)
 		{
 		case idle:
-			cells[activeX][activeY].DrawDomainAgent(gr, activeX, activeY);		
+			cells[activeX][activeY].DrawDomain(gr, activeX, activeY);		
 			break;
 		case waitingConfirm:
 			gr.drawString("Waiting response from server", gridXOffset, gridEndY + 20);
@@ -1148,8 +1148,21 @@ public class AgentGameController extends GameController implements ActionListene
 					SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, committedState);
 					
 					countCommitted++;
+					
 					repaint();
-					break;	
+					break;
+				case "notCommitted":
+					conflictExists = false;
+					voteTimer.stop();
+					
+					vars2 = vars[1].split(",");
+					conflictX = Integer.parseInt(vars2[0]);
+					conflictY = Integer.parseInt(vars2[1]);
+					int notCommittedState = Integer.parseInt(vars2[2]);
+					
+					ClearCell(conflictX, conflictY, notCommittedState);	
+					
+					break;
 				case "accepted":		//networkController.BroadcastMessage("accepted#" + x + "," + y + "," + cells[x][y].current + "," + 7);
 			
 					vars2 = vars[1].split(",");

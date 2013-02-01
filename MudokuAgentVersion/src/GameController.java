@@ -95,6 +95,7 @@ public class GameController extends Applet implements ActionListener {
 	public final static int Y = 4;
 	public final static int VALUE = 5;
 	public final static int RESULT_VOTING = 0;
+	public final static int NEW_TYPE = 5;
 	
 	public final static int CONTRIBUTION = 0;
 	public final static int BUG_REPORTED = 1;
@@ -104,6 +105,7 @@ public class GameController extends Applet implements ActionListener {
 	public final static int ACCEPTED = 5;
 	public final static int REJECTED = 6;
 	public final static int NEW_GAME = 7;
+	public final static int PROMOTION = 8;
 	
 	private static final long serialVersionUID = 1L;
 	static int screenWidth = 765;
@@ -114,6 +116,9 @@ public class GameController extends Applet implements ActionListener {
 	static int gridHeight = 400;
 	static int gridXOffset = 20;
 	static int gridYOffset = 10;
+	
+	static int numberInstantiateX = 510;
+	static int numberInstantiateY = 210;
 
 	static int gridEndX = gridXOffset + gridWidth;
 	static int gridEndY = gridYOffset + gridHeight;
@@ -131,6 +136,8 @@ public class GameController extends Applet implements ActionListener {
 	int mouseOverDomainIndex;
 	boolean mouseOverDomain;
 	boolean mouseOverGrid;
+	
+	static boolean userConnected = false;
 
 	static float deltaX;
 	static float deltaY;
@@ -534,7 +541,6 @@ public class GameController extends Applet implements ActionListener {
 		System.out.println("GameController --> actionPerformed. Accio: " + action.getActionCommand());
 		switch (action.getActionCommand()) {
 		case "sweep":
-			Sweep();
 			repaint();
 			break;
 		}
@@ -549,20 +555,6 @@ public class GameController extends Applet implements ActionListener {
 		
 		SetValueAndState(x, y, cells[x][y].current, cellState);	
 		repaint();
-	}
-	
-	public void Sweep() 
-	{
-		/*for (int i = 0; i < sudokuSize; i++) {
-			for (int k = 0; k < sudokuSize; k++) {
-				if (cells[i][k].current == -1) {
-					if (cpController.GetCPVariable(i, k).getDomainSize() == 1) {
-						TryInstantiate(i, k, cpController.GetCPVariable(i, k)
-								.getDomain().getIterator().next());
-					}
-				}
-			}
-		}*/
 	}
 	
 	public void SetValueAndState(int x, int y, int value, int state) 
@@ -655,4 +647,199 @@ public class GameController extends Applet implements ActionListener {
 		return count;
 	}
 	
+	public int[][] getActualState()
+	{
+		int[][] gridState = new int[sudokuSize][sudokuSize];
+		
+		for (int i = 0; i < sudokuSize; i++) {
+			for (int j = 0; j < sudokuSize; j++) {
+				gridState[i][j] = cells[i][j].valueState;
+			}
+		}
+		
+		return gridState;
+	}
+	
+	public int[][] getActualGrid()
+	{
+		int[][] gridActual = new int[sudokuSize][sudokuSize];
+		
+		for (int i = 0; i < sudokuSize; i++) {
+			for (int j = 0; j < sudokuSize; j++) {
+				gridActual[i][j] = cells[i][j].current;
+			}
+		}
+		
+		return gridActual;
+	}
+	
+	public boolean checkCorrectPosition(int x, int y, int val)
+	{
+		int i, j;
+		
+		int[][] actualGrid = getActualGrid();
+		int[][] actualState = getActualState();
+		
+		ArrayList<Integer> number = new ArrayList<Integer>();
+		
+		for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+		{
+			if((actualState[i][y] != GameController.waitingValue && actualState[i][y] != GameController.reportedByRows && 
+			    actualState[i][y] != GameController.reportedByColumns &&  actualState[i][y] != GameController.reportedBySquares &&
+			    actualState[i][y] != GameController.reportedByUser &&  actualState[i][y] != GameController.rejectedByAgent &&
+			    actualState[i][y] != GameController.rejectedByUser) && x != i)
+			{
+				number.add(actualGrid[i][y]);
+			}
+		}
+			
+		if(number.contains(val))
+		{
+			return false;
+		}
+		
+		number = new ArrayList<Integer>();
+				
+		for(i=0;i<AgentNetworkController.getSudokuSize();i++)
+		{
+			if((actualState[x][i] != GameController.waitingValue && actualState[x][i] != GameController.reportedByRows && 
+			    actualState[x][i] != GameController.reportedByColumns &&  actualState[x][i] != GameController.reportedBySquares &&
+			    actualState[x][i] != GameController.reportedByUser &&  actualState[x][i] != GameController.rejectedByAgent &&
+			    actualState[x][i] != GameController.rejectedByUser) && y != i)
+			{
+				number.add(actualGrid[x][i]);
+			}
+		}
+		
+		if(number.contains(val))
+		{
+			return false;
+		}
+			
+		number = new ArrayList<Integer>();
+		
+		int sizeSquare = (int) Math.sqrt(AgentNetworkController.getSudokuSize());
+		int[] region = getRegionCheckPosition(x, y);
+		
+		for(i=0;i<sizeSquare;i++)
+		{
+			for(j=0;j<sizeSquare;j++)
+			{
+				if((actualState[i + region[0]][j + region[1]] != GameController.waitingValue && actualState[i + region[0]][j + region[1]] != GameController.reportedByRows && 
+				    actualState[i + region[0]][j + region[1]] != GameController.reportedByColumns &&  actualState[i + region[0]][j + region[1]] != GameController.reportedBySquares &&
+				    actualState[i + region[0]][j + region[1]] != GameController.reportedByUser &&  actualState[i + region[0]][j + region[1]] != GameController.rejectedByAgent &&
+				    actualState[i + region[0]][j + region[1]] != GameController.rejectedByUser) && x != (i + region[0]) && y != (j + region[1]))
+				{
+					number.add(actualGrid[i + region[0]][j + region[1]]);
+				}
+			}
+		}
+		
+		if(number.contains(val))
+		{
+			return false;
+		}
+		
+		return true;
+	}
+	
+	static int[] getRegionCheckPosition(int x, int y)
+	{
+		int[] region = new int[2];
+		
+		if(x>=0 && x<4)
+		{
+			if (0<=y && y<4)
+			{
+				region[0] = 0;
+				region[1] = 0;
+			}
+			if (4<=y && y<8)
+			{
+				region[0] = 0;
+				region[1] = 4;
+			}
+			if (8<=y && y<12)
+			{
+				region[0] = 0;
+				region[1] = 8;
+			}
+			if (12<=y && y<16)
+			{
+				region[0] = 0;
+				region[1] = 12;
+			}
+		}
+		else if (x>=4 && x<8)
+		{
+			if (0<=y && y<4)
+			{
+				region[0] = 4;
+				region[1] = 0;
+			}
+			if (4<=y && y<8)
+			{
+				region[0] = 4;
+				region[1] = 4;
+			}
+			if (8<=y && y<12)
+			{
+				region[0] = 4;
+				region[1] = 8;
+			}
+			if (12<=y && y<16)
+			{
+				region[0] = 4;
+				region[1] = 12;
+			}
+		}
+		else if (x>=8 && x<12)
+		{
+			if (0<=y && y<4)
+			{
+				region[0] = 8;
+				region[1] = 0;
+			}
+			if (4<=y && y<8)
+			{
+				region[0] = 8;
+				region[1] = 4;
+			}
+			if (8<=y && y<12)
+			{
+				region[0] = 8;
+				region[1] = 8;
+			}
+			if (12<=y && y<16)
+			{
+				region[0] = 8;
+				region[1] = 12;
+			}
+		}
+		else if (x>=12 && x<16)
+		{
+			if (0<=y && y<4)
+			{
+				region[0] = 12;
+				region[1] = 0;
+			}
+			if (4<=y && y<8)
+			{
+				region[0] = 12;
+				region[1] = 4;
+			}
+			if (8<=y && y<12)
+			{
+				region[0] = 12;
+				region[1] = 8;
+			}
+			if (12<=y && y<16)
+			{
+				region[0] = 12;
+				region[1] = 12;
+			}
+		}
+		
+		return region;
+	}
 }
