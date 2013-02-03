@@ -423,114 +423,9 @@ public class GameController extends Applet implements ActionListener {
 
 	@Override
 	public void paint(Graphics gr) {
-		//initDraw(gr);
-		//DrawGrid(gr);
 	}
 
 	public void DrawGrid(Graphics gr) {
-		gr.setColor(Color.black);
-		Stroke stroke = new BasicStroke(1);
-		((Graphics2D) gr).setStroke(stroke);
-		int lineX = gridXOffset;
-		float tempLineX = lineX;
-		int lineY = gridYOffset;
-		float tempLineY = lineY;
-
-		// Draw Vertical Lines
-		for (int i = 0; i <= sudokuSize; i++) {
-			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
-			tempLineX += deltaX;
-			lineX = (int) tempLineX;
-		}
-
-		lineX = gridXOffset;
-		lineY = gridYOffset;
-		// Draw Horizontal Lines
-		for (int i = 0; i <= sudokuSize; i++) {
-			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
-			tempLineY += deltaY;
-			lineY = (int) tempLineY;
-		}
-
-		// Draw Thick Lines
-		stroke = new BasicStroke(3);
-		((Graphics2D) gr).setStroke(stroke);
-
-		lineY = gridYOffset;
-		lineX = gridXOffset;
-		tempLineX = lineX;
-		int rootsize = (int) Math.pow(sudokuSize, 0.5);
-		for (int i = 0; i <= rootsize; i++) {
-			gr.drawLine(lineX, lineY, lineX, lineY + gridHeight);
-			tempLineX += deltaX * rootsize;
-			lineX = (int) tempLineX;
-		}
-
-		lineX = gridXOffset;
-		lineY = gridYOffset;
-		tempLineY = lineY;
-		for (int i = 0; i <= rootsize; i++) {
-			gr.drawLine(lineX, lineY, lineX + gridWidth, lineY);
-			tempLineY += deltaY * rootsize;
-			lineY = (int) tempLineY;
-		}
-
-		stroke = new BasicStroke(1);
-		((Graphics2D) gr).setStroke(stroke);
-		lineX = gridXOffset;
-		lineY = gridYOffset;
-		tempLineY = lineY;
-		tempLineX = lineX;
-		// Draw Values
-		for (int y = 0; y < sudokuSize; y++) {
-			for (int x = 0; x < sudokuSize; x++) {
-				if (cells[x][y].valueState == waitingValue) {
-					if (cpController.GetCPVariable(x, y).getDomainSize() == 1) {
-						gr.drawString("*", (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
-					}
-					tempLineX += deltaX;
-					lineX = (int) tempLineX;
-					continue;
-				}
-				else if(cells[x][y].contradicting)
-				{
-					gr.setColor(Color.red);
-				}
-				else
-				{
-					gr.setColor(Color.black);
-				}
-				
-				gr.drawString(String.valueOf(cpController.GetCPVariable(x, y)
-						.getVal()), (int) (lineX + deltaX / 2) - 5,
-						(int) (lineY + deltaY) - 10);
-				tempLineX += deltaX;
-				lineX = (int) tempLineX;
-			}
-			tempLineY += deltaY;
-			lineY = (int) tempLineY;
-			lineX = gridXOffset;
-			tempLineX = lineX;
-		}
-
-		stroke = new BasicStroke(2);
-		((Graphics2D) gr).setStroke(stroke);
-
-		//cells[activeX][activeY].DrawDomainA(gr, mouseOverDomainIndex, activeX, activeY);
-
-		if (mouseOverGrid) {
-			gr.setColor(mouseOverColor);
-			gr.drawRect((int) (gridXOffset + mouseOverX * deltaX),
-					(int) (gridYOffset + mouseOverY * deltaY), (int) deltaX,
-					(int) deltaY);
-		}
-
-		gr.setColor(activeCellColor);
-		int activeRectX = (int) (gridXOffset + activeX * deltaX);
-		int activeRectY = (int) (gridYOffset + activeY * deltaY);
-
-		// DrawActive
-		gr.drawRect(activeRectX, activeRectY, (int) deltaX, (int) deltaY);
 
 	}
 
@@ -592,34 +487,10 @@ public class GameController extends Applet implements ActionListener {
 		repaint();
 	}
 
-	public void DomainClick(int index) 		
-	{
-		/*IntDomain idom = cpController.GetCPVariable(activeX, activeY) .getDomain();
-		DisposableIntIterator iter = idom.getIterator();
-		int val = 1;
-		for (; index >= 0 && iter.hasNext(); index--) {
-			val = iter.next();
-		}
-
-		if(!TryInstantiate(activeX, activeY, val))
-		{
-			System.out.println("domain click failed");
-		}
-		
-		repaint();*/
+	public void DomainClick(int index) {
 	}
 
-	public void DomainWipeOut() 
-	{
-		for (int i = 0; i < sudokuSize; i++) {
-			for (int k = 0; k < sudokuSize; k++) {
-				if (cells[i][k].valueState == waitingValue) {
-					if (cpController.GetCPVariable(i, k).getDomainSize() == 0) {
-						System.out.println("domain wipe out at " + i + "," + k);
-					}
-				}
-			}
-		}
+	public void DomainWipeOut() {
 	}
 
 	public void MouseOverEmpty() {

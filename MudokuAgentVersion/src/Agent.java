@@ -1244,8 +1244,8 @@ class Agent
 		
 		//#######################################    LEADER REMOVE RANDOM VALUE   ############################################
 		
-		static void LeaderRemoveRandomValues(int agentId, int agentType){
-			
+		static void LeaderRemoveRandomValues(int agentId, int agentType) 
+		{	
 			int[][] actualState = AgentNetworkController.getActualState();
 			
 			Random random = new Random(System.nanoTime());
@@ -1262,7 +1262,7 @@ class Agent
 				}
 			}
 			
-			if (correctValues > 200)
+			if (correctValues > 205)
 			{
 				x = random.nextInt(GameController.sudokuSize);
 				y = random.nextInt(GameController.sudokuSize);
@@ -1275,7 +1275,7 @@ class Agent
 				SendMessage("rejected#" + agentId + "," + agentType + "," + x + "," + y);
 				
 				try {
-					Thread.sleep(random.nextInt(10) * 15000);
+					Thread.sleep(random.nextInt(15) * 2000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

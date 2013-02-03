@@ -1282,10 +1282,10 @@ public class ClientGameController extends GameController implements ActionListen
 				switch (actualRole)
 				{
 					case Tester:
-						voteRemove.setVisible(false);
+						askForCommiting.setVisible(true);
 						break;
 					case Committer:
-						askForCommiting.setVisible(false);
+						voteRemove.setVisible(false);
 						voteCommiting.setVisible(false);
 						break;
 					default:
@@ -2001,7 +2001,6 @@ public class ClientGameController extends GameController implements ActionListen
 						
 					break;
 					case Tester:
-						
 						askForCommiting.setVisible(true);
 						
 						for (int i=0;i<positionCommittedList.size();i++) {
@@ -2096,6 +2095,8 @@ public class ClientGameController extends GameController implements ActionListen
 						
 					break;
 					case Tester:
+						askForCommiting.setVisible(true);
+						
 						for (int i=0;i<positionCommittedList.size();i++) {
 							if (positionCommittedList.get(i)[0] == conflictX && positionCommittedList.get(i)[1] == conflictY) {
 								positionCommittedList.remove(i);

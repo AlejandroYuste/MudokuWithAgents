@@ -68,7 +68,13 @@ public class CellVariable
 				activeDrawX = drawX;
 	
 			gr.drawRect(drawX, domainYOffset, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+			if(i < 10)  {
+				gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 2, (int)(domainYOffset + deltaY) - 10);
+			}
+			else {
+				gr.drawString(String.valueOf(i), (int)(drawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+			}
+			
 			tempDrawX += deltaX;
 			drawX = (int) tempDrawX;
 			
@@ -77,16 +83,33 @@ public class CellVariable
 				activeDrawY = drawY;
 
 			gr.drawRect(domainYOffset + 10, 10 + drawY, (int)deltaX, (int)deltaY);
-			gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 5, (int)(drawY + deltaY / 2) + 15);
+			if(i < 10)  {
+				gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 5, (int)(drawY + deltaY / 2) + 15);
+			}
+			else {
+				gr.drawString(String.valueOf(i), (int)(deltaX) + domainYOffset - 8, (int)(drawY + deltaY / 2) + 15);
+			}
+			
 			tempDrawY += deltaY;
 			drawY = (int) tempDrawY;
 		}
 		
-		gr.setColor(new Color(220, 20, 60));
+		gr.setColor(new Color(220, 20, 60));		//crimson --> Voting Color
 		gr.drawRect(activeDrawX, domainYOffset, (int)deltaX, (int)deltaY);
-		gr.drawString(String.valueOf(x), (int)(activeDrawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+		if(x < 10)  {
+			gr.drawString(String.valueOf(x), (int)(activeDrawX + deltaX / 2) - 2, (int)(domainYOffset + deltaY) - 10);
+		}
+		else {
+			gr.drawString(String.valueOf(x), (int)(activeDrawX + deltaX / 2) - 5, (int)(domainYOffset + deltaY) - 10);
+		}
+		
 		gr.drawRect(domainYOffset + 10, 10 + activeDrawY, (int)deltaX, (int)deltaY);
-		gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
+		if(x < 10)  {
+			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
+		}
+		else {
+			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 8, (int)(activeDrawY + deltaY / 2) + 15);
+		}
 	}
 	
 	public void DrawDomainConflict(Graphics gr, int conX, int conY, int cellX, int cellY, Color[] agentColors)

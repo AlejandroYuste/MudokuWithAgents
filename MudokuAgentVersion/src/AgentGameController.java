@@ -845,12 +845,10 @@ public class AgentGameController extends GameController implements ActionListene
 				if(cells[x][y].valueState != waitingValue)	
 				{
 					gr.setColor(Color.white);
-					if(cells[x][y].current < 10) 
-					{
+					if(cells[x][y].current < 10)  {
 						gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 2, (int) (lineY + deltaY) - 10);
 					}
-					else
-					{
+					else {
 						gr.drawString(String.valueOf(cells[x][y].current), (int) (lineX + deltaX / 2) - 5, (int) (lineY + deltaY) - 10);
 					}
 				}
