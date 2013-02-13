@@ -2,8 +2,6 @@ Opn Source Community in Mudoku
 ==============================
 
 Documentation
-Alejandro Yuste (alejandro.yuste@tut.fi)
-
 
 1 Introduction
 
