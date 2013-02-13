@@ -134,7 +134,7 @@ public class AgentGameController extends GameController implements ActionListene
 		agentColors[valueReportedColor] = new Color(255, 255, 255);				// 8.  Value Reported		--> white
 		agentColors[valueCommittedColor] = new Color(220, 20, 60);				// 9.  Value Committed		--> crimson
 		agentColors[valueNotCommittedColor] = new Color(255, 255, 255);			// 10. Value NOT Committed	--> white
-		agentColors[valueAcceptedColor] = new Color(255, 193, 37);				// 11. Value Accepted 		--> goldenrod 1
+		agentColors[valueAcceptedColor] = new Color(205, 155, 29);				// 11. Value Accepted 		--> goldenrod 3
 		agentColors[valueRejectedColor] = new Color(255, 255, 255);				// 12. Value Rejected		--> white
 		agentColors[votingColor] = new Color(220, 20, 60);						// 13. Voting Color			--> crimson
 	}

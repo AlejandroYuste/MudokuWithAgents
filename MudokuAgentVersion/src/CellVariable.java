@@ -79,7 +79,7 @@ public class CellVariable
 			drawX = (int) tempDrawX;
 			
 			
-			if(i==y) 
+			if(i==y)                          
 				activeDrawY = drawY;
 
 			gr.drawRect(domainYOffset + 10, 10 + drawY, (int)deltaX, (int)deltaY);
@@ -104,7 +104,7 @@ public class CellVariable
 		}
 		
 		gr.drawRect(domainYOffset + 10, 10 + activeDrawY, (int)deltaX, (int)deltaY);
-		if(x < 10)  {
+		if(y < 10)  {
 			gr.drawString(String.valueOf(y), (int)(deltaX) + domainYOffset - 5, (int)(activeDrawY + deltaY / 2) + 15);
 		}
 		else {

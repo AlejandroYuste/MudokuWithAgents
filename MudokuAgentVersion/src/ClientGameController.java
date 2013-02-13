@@ -16,7 +16,7 @@ public class ClientGameController extends GameController implements ActionListen
 	public enum NetworkState {idle, waitingInit, waitingConfirm}
 	NetworkState networkState;
 	
-	protected enum ActualRole {PreGame, Observer, Contributor, BugReporter, Tester, Committer, Leader}
+	protected enum ActualRole {PreGame, PassiveUser, Contributor, BugReporter, Tester, Committer, Leader}
 	protected ActualRole actualRole;
 
 	//--------------> Elements from here:
@@ -156,6 +156,8 @@ public class ClientGameController extends GameController implements ActionListen
 	ArrayList<int[]> positionVotedPositivelyList = new ArrayList<int[]>();
 	ArrayList<int[]> positionVotedNegativelyList = new ArrayList<int[]>();
 	int numVotedSatisfactory = 0;
+	
+	int numLeaderActionsSatisfactory = 0;
 		
 	boolean observer = false;
 	boolean contributor = false;
@@ -247,7 +249,7 @@ public class ClientGameController extends GameController implements ActionListen
 		clientColors[valueReportedColor] = new Color(255, 255, 255);				// 8.  Value Reported		--> white
 		clientColors[valueCommittedColor] = new Color(220, 20, 60);					// 9.  Value Committed		--> crimson
 		clientColors[valueNotCommittedColor] = new Color(255, 255, 255);			// 10. Value NOT Committed	--> white
-		clientColors[valueAcceptedColor] = new Color(255, 193, 37);					// 11. Value Accepted 		--> goldenrod 1
+		clientColors[valueAcceptedColor] = new Color(205, 155, 29);					// 11. Value Accepted 		--> goldenrod 3
 		clientColors[valueRejectedColor] = new Color(255, 255, 255);				// 12. Value Rejected		--> white
 		clientColors[votingColor] = new Color(220, 20, 60);							// 13. Voting Color			--> crimson
 		
@@ -769,7 +771,7 @@ public class ClientGameController extends GameController implements ActionListen
 		acceptValueLeader.setSize(80,30);
 		acceptValueLeader.setLocation(520, 240);
 		acceptValueLeader.setActionCommand("acceptLeader");
-		acceptValueLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		acceptValueLeader.addActionListener(this);				
 		acceptValueLeader.setVisible(false);
 		add(acceptValueLeader);
 		
@@ -777,7 +779,7 @@ public class ClientGameController extends GameController implements ActionListen
 		removeValueLeader.setSize(80,30);
 		removeValueLeader.setLocation(620, 240);
 		removeValueLeader.setActionCommand("removeLeader");
-		removeValueLeader.addActionListener(this);				//Afegim el Listener al button "Connect"
+		removeValueLeader.addActionListener(this);				
 		removeValueLeader.setVisible(false);
 		add(removeValueLeader);
 		
@@ -788,7 +790,7 @@ public class ClientGameController extends GameController implements ActionListen
 	@Override
 	public void paint ( Graphics gr )
 	{
-		initDraw(gr);						//Clean the Frame.
+		initDraw(gr);							//Clean the Frame.
 		switch(actualRole)
 		{
 		case PreGame:
@@ -812,7 +814,7 @@ public class ClientGameController extends GameController implements ActionListen
 		Stroke stroke = new BasicStroke(1);
 		((Graphics2D) gr).setStroke(stroke);
 		
-		gr.drawLine(10, 350, 370, 350);		// Connection Settings Box
+		gr.drawLine(10, 350, 370, 350);			// Connection Settings Box
 		gr.drawLine(10, 350, 10, 530);	
 		gr.drawLine(10, 530, 370, 530);	
 		gr.drawLine(370, 350, 370, 530);	
@@ -873,7 +875,7 @@ public class ClientGameController extends GameController implements ActionListen
 		
 				
 		if (conflictExists)
-			gr.setColor(clientColors[votingColor]);		//Voting Box
+			gr.setColor(clientColors[votingColor]);	
 		else
 			gr.setColor(Color.white);
 		
@@ -881,7 +883,7 @@ public class ClientGameController extends GameController implements ActionListen
 		gr.setColor(Color.black);
 		gr.drawRect(497, 415, 35, 15);
 		
-		gr.drawLine(560, 440, 560, 370);			//Box Cell State
+		gr.drawLine(560, 440, 560, 370);				//Box Cell State
 		gr.drawLine(560, 440, 745, 440);			
 		gr.drawLine(745, 440, 745, 370);			
 		gr.drawLine(560, 370, 745, 370);
@@ -1355,6 +1357,20 @@ public class ClientGameController extends GameController implements ActionListen
 							getPromotedTester.setVisible(true);
 						}
 					}
+					else
+					{
+						numBugsReported--;
+						
+						if (numBugsReported < -1) {
+							reporter = false;
+							tester = false;
+							committer = false;
+							leader = false;
+							Print("You have been discharged from Bug Reporter for your bad Results.");
+							numBugsReported = 0;
+							getContributor();
+						}
+					}
 				}
 				else {
 					Print("You can not Report this value.");
@@ -1363,11 +1379,39 @@ public class ClientGameController extends GameController implements ActionListen
 				break;
 			case "acceptLeader":
 				networkController.SendMessage("accepted#" + clientId + "," + clientType + "," + activeX + "," + activeY + "," + userName);
+				
+				if(checkCorrectPosition(activeX, activeY, cells[activeX][activeY].current)) {
+					numLeaderActionsSatisfactory++;
+				} else {
+					numLeaderActionsSatisfactory--;
+					
+					if (numLeaderActionsSatisfactory < -1) {
+						leader = false;
+						numLeaderActionsSatisfactory = 0;
+						Print("You have been discharged from Leader for your bad Results.");
+						getCommitter();
+					}
+				}
+				
 				acceptValueLeader.setVisible(false);
 				removeValueLeader.setVisible(false);
 				break;
 			case "removeLeader":
 				networkController.SendMessage("rejected#" + clientId + "," + clientType + "," + activeX + "," + activeY + "," + userName);
+				
+				if(!checkCorrectPosition(activeX, activeY, cells[activeX][activeY].current)) {
+					numLeaderActionsSatisfactory++;
+				} else {
+					numLeaderActionsSatisfactory--;
+					
+					if (numLeaderActionsSatisfactory < -1) {
+						leader = false;
+						numLeaderActionsSatisfactory = 0;
+						Print("You have been discharged from Leader for your bad Results.");
+						getCommitter();
+					}
+				}
+				
 				acceptValueLeader.setVisible(false);
 				removeValueLeader.setVisible(false);
 				break;
@@ -1420,9 +1464,9 @@ public class ClientGameController extends GameController implements ActionListen
 		if(leader)
 			getLeader.setVisible(true);
 		
-		actualRole = ActualRole.Observer;
-		actualRoleLabel.setLocation(540, 20);
-		actualRoleLabel.setText("Current Role: " + actualRole);
+		actualRole = ActualRole.PassiveUser;
+		actualRoleLabel.setLocation(525, 20);
+		actualRoleLabel.setText("Current Role: Passive User");
 		actualRoleLabel.setVisible(true);
 		
 		gameInfoRow1Label.setText("In this Role you can check what the others");
@@ -1660,7 +1704,7 @@ public class ClientGameController extends GameController implements ActionListen
 		gameInfoRow5Label.setSize(250, 20);
 		gameInfoRow5Label.setVisible(true);
 				
-		gameInfoRow6Label.setText("Number of values committed: 0");
+		gameInfoRow6Label.setText("Number of values committed: " + numCommittedSatisfactory);
 		gameInfoRow6Label.setLocation(522, 280);
 		gameInfoRow6Label.setSize(200, 20);
 		gameInfoRow6Label.setVisible(true);
@@ -1732,7 +1776,7 @@ public class ClientGameController extends GameController implements ActionListen
 			gameInfoRow5Label.setVisible(true);
 		}
 		
-		gameInfoRow6Label.setText("Number of votes corrects: 0");
+		gameInfoRow6Label.setText("Number of votes corrects: " + numVotedSatisfactory);
 		gameInfoRow6Label.setLocation(530, 280);
 		gameInfoRow6Label.setSize(200, 20);
 		gameInfoRow6Label.setVisible(true);
@@ -2092,6 +2136,17 @@ public class ClientGameController extends GameController implements ActionListen
 						gameInfoRow7Label.setLocation(505, 270);
 						gameInfoRow7Label.setSize(225, 20);
 						gameInfoRow7Label.setVisible(true);	
+	
+						if (numContributionsCommited < -1) {
+							contributor = false;
+							reporter = false;
+							tester = false;
+							committer = false;
+							leader = false;
+							Print("You have been discharged from Contributor for your bad Results.");
+							numContributionsCommited = 0;
+							getObserver();
+						}
 						
 					break;
 					case Tester:
@@ -2110,6 +2165,15 @@ public class ClientGameController extends GameController implements ActionListen
 						gameInfoRow6Label.setLocation(522, 280);
 						gameInfoRow6Label.setSize(200, 20);
 						gameInfoRow6Label.setVisible(true);
+						
+						if (numCommittedSatisfactory < -1) {
+							tester = false;
+							committer = false;
+							leader = false;
+							numCommittedSatisfactory = 0;
+							Print("You have been discharged from Tester for your bad Results.");
+							getReporter();
+						}
 						
 						break;
 					case Committer:
@@ -2143,7 +2207,15 @@ public class ClientGameController extends GameController implements ActionListen
 						
 						if (!foundPositively && !foundNegatively) {
 							Print("The value at the position [" + conflictX + "][" + conflictY + "] has not been committed by Votation.");
-						}	
+						}
+						
+						if (numVotedSatisfactory < -1) {
+							committer = false;
+							leader = false;
+							numVotedSatisfactory = 0;
+							Print("You have been discharged from Committer for your bad Results.");
+							getTester();
+						}
 			
 					break;
 					default:

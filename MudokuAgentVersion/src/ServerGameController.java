@@ -1115,12 +1115,14 @@ public class ServerGameController extends GameController implements ActionListen
 		if(EvaluateVote()) {
 			lastAction[ACTION] = NOT_COMMITTED;
 			networkController.BroadcastMessage("notCommitted#" + conflictX + "," + conflictY + "," + lastVoting);
+			Print("Server: The committers have decided to remove the value by votation.");
 			ClearCell(conflictX, conflictY, notCommitted);
 			valuesNotCommited++;
 		}
 		else {
 			lastAction[ACTION] = COMMITTED;
 			networkController.BroadcastMessage("committed#" + conflictX + "," + conflictY + "," + lastVoting);
+			Print("Server: The committers have decided to keep the value by votation.");
 			SetValueAndState(conflictX, conflictY, cells[conflictX][conflictY].current, lastVoting);
 			valuesCommitted++;
 		}
@@ -1646,12 +1648,6 @@ public class ServerGameController extends GameController implements ActionListen
 		}
 		
 		boolean resultVotation = sum > 0;
-		
-		if (resultVotation)
-			Print("Server: The committers have decided to remove the value by votation.");
-		else
-			Print("Server: The committers have decided to keep the value by votation.");
-		
 		return resultVotation;
 	}
 	

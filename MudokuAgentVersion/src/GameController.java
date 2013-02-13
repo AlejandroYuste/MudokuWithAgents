@@ -443,8 +443,7 @@ public class GameController extends Applet implements ActionListener {
 	
 	public void ClearCell(int x, int y, int cellState)
 	{
-		if(cells[x][y].IsConstant())
-		{
+		if(cells[x][y].IsConstant()) {
 			return;
 		}
 		
