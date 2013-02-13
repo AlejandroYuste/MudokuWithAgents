@@ -1,11 +1,11 @@
 MudokuWithAgents
 ================
 
-Mudoku with Agents - Documentation
-Alejandro Yuste
-Tampere University of Technology
-alejandro.yuste@tut.fi
-February 6, 2013
+Opn Source Community in Mudoku - Documentation
+
+Alejandro Yuste (alejandro.yuste@tut.fi)
+
+
 
 1 Introduction
 
