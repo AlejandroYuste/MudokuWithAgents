@@ -8,6 +8,7 @@ alejandro.yuste@tut.fi
 February 6, 2013
 
 1 Introduction
+
 The main aim of this tool is to simulate how an Open Source Community
 (OSC) works. The development was based on the Mudoku tool, created to
 solve a Sudoku problem by multiple users in a server-client model. This
