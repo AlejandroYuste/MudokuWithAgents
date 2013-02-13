@@ -1,10 +1,8 @@
-MudokuWithAgents
-================
+Opn Source Community in Mudoku
+==============================
 
-Opn Source Community in Mudoku - Documentation
-
+Documentation
 Alejandro Yuste (alejandro.yuste@tut.fi)
-
 
 
 1 Introduction
