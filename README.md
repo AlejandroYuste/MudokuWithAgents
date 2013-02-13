@@ -158,7 +158,9 @@ value only by rows, with a few possibilities to wrong the vote.
  Project Leader: An agent of this type knows all the rules, so its work
 is accept or reject that values that have been committed and they have
 a high possibility to be accepted.
+
 4.3 Educational Purpose
+
 The client's framework was thought with an educational purpose. In this
 way, it is a kind of game in the whole game. An user will start as a Passive
 User and its goal will be get promotions until it reaches the Project Leader
@@ -180,6 +182,7 @@ Once an user has reached one level it can come back to this level any times
 as it wants.
 
 5 How to run the Tool
+
 As the Mudoku tool, Mudoku with Agents is using java Applets, it has been
 developed with Eclipse and tested only in a Windows 7 operating System
 (the working of the applets depend on the version of java used, probably in
