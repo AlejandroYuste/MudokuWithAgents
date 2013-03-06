@@ -1,4 +1,4 @@
-Opn Source Community in Mudoku
+Open Source Community in Mudoku
 ==============================
 
 Documentation
